@@ -6,9 +6,9 @@
 #
 # 1 input argument: name of configuration 
 # Existing predefined configurations are:
-#   ref   (ERA5 reanalysis forcings)
-#   GFDL  (GFDL climate outputs forcings)
-#   IPSL  (IPSL-CM5A2 climate outputs forcings)
+#   ref   (IPSL-CM5A2 96x96 pre-industrial climate outputs forcings)
+#   ERA5  (ERA5 reanalysis forcings)
+#   GFDL  (GFDL pre-industrial climate outputs forcings)
 
 
 cd config/
