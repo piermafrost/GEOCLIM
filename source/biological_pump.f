@@ -5,39 +5,56 @@
     include 'combine_foam.inc'
 
 
-    do j=1,nbasin
+    ! Compute fluxes
+    ! --------------
 
-        ! Impose fraction of calcifying primary producter
-        carb_ratio(j) = 0.3
+    ! initialization
+    fbioP(:)      = 0
+    fbioC(:)      = 0
+    reff(:)       = 0
+    rC_Corg(:)    = 0
+    carb_ratio(:) = 0
+    finorgC(:)    = 0
+    finorgP(:)    = 0
 
+    ! -> add continental inputs to biological P uptake flux (only in "app_cont = 1" basins)
+    do j0=1,nappcont
+        j = jbox_appcont(j0)
+        fbioP(j) = fbioP(j) + fpw(j)
+    end do
+
+    ! -> rest of fluxes computation (in surface basins only)
+    do j0=1,nsurface
+        j = jbox_surface(j0)
+
+        ! add ocean basins exchanges to biological P uptake flux
+        do k = 1,nbasin-1
+            fbioP(j) = fbioP(j) + F(k,j)*var_diss(3,k)
+        end do
+
+        ! Efficiency of biological P uptake (i.e., fraction of maximum potential P flux that is actually used)
+        !                vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv   => CO2 limitation at very low pCO2
         reff(j)=max(0d0, (pco2_dissous(j)-0.2)/(pco2_dissous(j)-0.1))
 
-    end do
+        ! Fraction of calcifying primary producter (imposed)
+        carb_ratio(j) = 0.15
 
-    ! Reduce productivity in polar basins
-    do j0=1,npolar
-        j = jbox_polar(j0)
-        reff(j) = reff(j)/2.
-        carb_ratio(j) = carb_ratio(j)/2
-    end do
+        ! Reduce bioproductivity in polar basins (=> light limitation) 
+        reff(j)       = (1 - 0.75*indice_polar(j))*reff(j)
 
-    ! Compute fluxes
-    do j=1,nbasin
+        ! Reduce carbonate:org C productivity ratio in epicontinental basins
+        carb_ratio(j) = (1 - 0.9*indice_epicont(j))*carb_ratio(j)
 
-        fbioP(j)=0.
-        do k=1,nbasin
-            fbioP(j) = fbioP(j) + reff(j)*F(k,j)*var_diss(3,k)
-        enddo
+        ! -- Biological fluxes -- !
+        fbioP(j) = reff(j)*fbioP(j) ! => only the "reff" fraction of P can be used by organisms
+        fbioC(j) = fbioP(j)*cpred
+        ! ----------------------- !
 
-        xkill=1.  !mass extinction, obsolete
-
-        fbioP(j)=(fbioP(j) + fpw*app_cont(j))*indice_surface(j)*xkill
-        fbioC(j)=fbioP(j)*cpred
-
-        if (omega(j).lt.1.0) then  !checking the saturation state of the ocean with respect to carbonates
+        ! -------- Biological inorganic fluxes (i.e., shells) -------- !
+        if (omega_0(j).lt.1.0) then  !checking the saturation state of the ocean with respect to carbonates
             rC_Corg(j)=0.
         else
-            rC_Corg(j)=carb_ratio(j)*(omega(j)-1)/(0.4+(omega(j)-1))
+            rC_Corg(j)=carb_ratio(j)*(omega_0(j)-1)/(0.4+(omega_0(j)-1))
         endif
 
         ! Shelf-flag: calcifying organisms exist or not
@@ -47,6 +64,7 @@
 
         finorgC(j)=fbioC(j)*rC_Corg(j)*shells*shelfal
         finorgP(j)=0 ! => pas de P ds les coquilles ! !finorgC(j)/1000.
+        ! ------------------------------------------------------------ !
 
     end do
 

@@ -4,7 +4,7 @@
     include 'path.inc' ! => get the variable 'geoclim_path'
     character(len=100)    :: run_name, check_run_name, killing_file
     character(len=500)    :: output_directory
-    character(len=30)     :: cont_input_mode
+    character(len=30)     :: COMB_init_mode, cont_input_mode
     integer, dimension(5) :: ERROR_HANDLING_OPTION
 
     include 'coupler.inc' ! coupling parameters: 'coupling_dynsoil' and 'coupling_ecogeo' plus 'CO2_interpolation' 
@@ -31,11 +31,11 @@
 !   Variables:
 !   ==================================================================
     logical decide,check
-    integer i,j,j0,k,kl,icount,n,ishelfal,k1,k2,ncount,kbasin
+    integer i,j,j0,k,k0,kl,icount,n,ishelfal,k1,k2,ncount,kbasin
     integer clock
     integer ipeak
     logical:: convert2ascii
-    integer ijump_cont_weath,icount_cont_weath, ijump_geogprint,icount_geogprint
+    integer ijump_climate,icount_climate, ijump_geogprint,icount_geogprint
     integer, dimension(:), allocatable :: seed
     integer, dimension(8):: computer_time
 
@@ -44,18 +44,17 @@
     double precision DOA(1:nbasin),cp_burial(1:nbasin),t
     double precision fCO2atm_ocean(1:nbasin),po2,fC13atm_ocean(1:nbasin), &
                      fC13ocean_atm(1:nbasin)
-    double precision oce_surf(1:nbasin), oce_surf_tot, temp_box(1:nbasin), press_box(1:nbasin), surf_sedi(1:nbasin), &
-                     sedim_fract(nbasin), sedim_capacity(nbasin)
+    double precision oce_surf(nbasin), oce_surf_tot, temp_box(nbasin), depth_box(nbasin), depth_top_box(nbasin), box_thick(nbasin),&
+                     press_box(nbasin), surf_sedi(nbasin), sedbastype_fract(nbasin),accumul_capacity(nbasin)
     integer, dimension(nbasin) :: indice_deep, indice_sedi, app_cont,indice_thermo, indice_surface, indice_epicont, indice_polar
+    double precision, dimension(nbasin) :: appcont_fract
     integer :: ndeep, nnodeep, nsedi, nnosedi, nthermo, nnothermo, nsurface, nnosurface, &
-               nepicont, nnoepicont, npolar, nnopolar, nappcont, nnoappcont, nsediepicontsurf, &
-               nsediepicontnosurf, nsedinoepicont, nsurfappcont, nsurfnoappcont, nnosurfappcont, &
-               nnosurfnoappcont, nnosurfbelappcont, nnosurfnobelappcont
+               nepicont, nnoepicont, npolar, nnopolar, nappcont, nnoappcont, nsediepicsurf, &
+               nsediepicnosurf, nsediintermed, nsedideep, nsurfnoappcont, nnosurfnoappcont
     integer, dimension(nbasin) :: jbox_deep, jbox_nodeep, jbox_sedi, jbox_nosedi, jbox_thermo, jbox_nothermo, &
                                   jbox_surface, jbox_nosurface, jbox_epicont, jbox_noepicont, jbox_polar, jbox_nopolar, &
-                                  jbox_appcont, jbox_noappcont, jbox_sediepicontsurf, jbox_sediepicontnosurf, &
-                                  jbox_sedinoepicont, jbox_surfappcont, jbox_surfnoappcont, jbox_nosurfappcont, &
-                                  jbox_nosurfnoappcont, jbox_nosurfbelappcont, jbox_nosurfnobelappcont
+                                  jbox_appcont, jbox_noappcont, jbox_sediepicsurf, jbox_sediepicnosurf, &
+                                  jbox_sediintermed, jbox_sedideep, jbox_surfnoappcont, jbox_nosurfnoappcont
     double precision carb_ratio(1:nbasin),fbioP(1:nbasin),fbioC(1:nbasin),finorgC(1:nbasin), &
                      finorgP(1:nbasin)
     double precision fdownt,fdowntP
@@ -84,9 +83,12 @@
                      ,fog,ak1soil,ak2soil,akspsoil,betasoil
     double precision freef(1:nbasin),fodc(1:nbasin),fodp(1:nbasin) &
                      ,freefP(1:nbasin),f_diss_c(1:nbasin),f_diss_a(1:nbasin) &
-                     ,fdepa(1:nbasin),fdepc(1:nbasin),fcarbP_dep(1:nbasin),fcarb_dep(1:nbasin) &
+                     ,fcarbP_dep(1:nbasin) &
                      ,fdissol_carb(1:nbasin),fdissol_carbP(1:nbasin) &
-                     ,ws(nbasin),fin_sed(nbasin),Corg_BE(nbasin)
+                     ,ws(nbasin),frain_sed(nbasin),frain_POC(nbasin),frain_PIC(nbasin),frain_POP(nbasin) &
+                     ,fin_sed(nbasin),fin_POC(nbasin),fin_POP(nbasin), &
+                     Xsed(nbasin,nbasin),fexch_sed(nbasin,nbasin),Corg_BE(nbasin)
+    logical sed_routing_flag
     double precision F_seafloor_cdiss(1:nbasin)
     double precision tend  
     !double precision deephyp(13),shyp(13) ! obsolete
@@ -97,38 +99,37 @@
     double precision pco2soil,Hsoil,Pmax
     double precision rC_Corg(1:nbasin),reff(1:nbasin)
     double precision roxyd(1:nbasin),ranoxyd(1:nbasin)
-    double precision runclim(1:npixel), discharge
-    double precision tss
-    double precision rsw
+    double precision runclim(1:npixel), discharge(nbasin)
+    double precision tss(nbasin)
     double precision Tclim(1:npixel)
     double precision salin(1:nbasin)
-    double precision omega(1:nbasin),omega_ara(1:nbasin)
+    double precision omega_0(1:nbasin),omega_ara_0(1:nbasin)
     double precision St,S
     double precision h2co3(1:nbasin),hco3(1:nbasin),co3(1:nbasin), &
                      ch(1:nbasin),ak1(1:nbasin),ak2(1:nbasin), &
-                     akb(1:nbasin),akc(1:nbasin),bco2(1:nbasin),ph(1:nbasin) &
+                     akb(1:nbasin),akc_0(1:nbasin),bco2(1:nbasin),ph(1:nbasin) &
                      ,pco2_dissous(1:nbasin)
     double precision ts,tsta,tfi,ifog
     integer :: ijump_print
     double precision rSrdep(1:nbasin)
-    double precision fsink(1:nbasin),fsink_inorg(1:nbasin)
     double precision SO4_conc(1:npixel),SO4soil
     double precision fodt,ept
     double precision tdata_deg(1:ndegas),data_deg(1:ndegas)
     double precision fracveg
     double precision box_vol(1:nbasin), vol(1:nvb)
-    double precision fsilw,fcarbw,fkerw,fpw,fbasw,fpyrw,ftrapw,fcarbsulfw,fsilsulfw,fH2SO4sulfw,faddsulfw ! add carbonate and silicate weathering by sulphuric acid
+    double precision, dimension(nbasin) :: fsilw,fcarbw,fkerw,fpw,fbasw,fcarbsulfw,fsilsulfw,fH2SO4sulfw ! add carbonate and silicate weathering by sulphuric acid
     ! Sulfate Reduction:
     double precision:: fodc_noSR_m2, fSulfRed_m2, fO2_odc_m2
     double precision, dimension(nbasin):: fSulfRed, fO2_odc
-    double precision total_cont_POC_export,reg_eros_galy_unit
-    double precision F(1:nbasin,1:nbasin), F_exch_clim(nbasin**2, nclimber, len_p1, len_p2, len_p3, len_p4, len_p5)
+    double precision total_cont_POC_export(nbasin), eros_galy_unit
+    double precision F(1:nbasin,1:nbasin), Fxch_clim(nbasin**2, nclimber, len_p1, len_p2, len_p3, len_p4, len_p5)
+    logical:: variable_watxch
     double precision R_diss(nvar_diss,nbasin), R_part(nvar_part,nbasin), R_isot(nvar_isot,nbasin)
     double precision ATe(1:npixel),BTe(1:npixel)
     double precision ARu(1:npixel),BRu(1:npixel)
     double precision litho_frac(1:nlitho,1:npixel)
     logical uniform_lithology
-    double precision weighted_rsw
+    double precision weighted_rsw(nbasin)
     double precision ref_x_axis(nlon), ref_y_axis(nlat)
 
     ! Climatic parameters
@@ -139,13 +140,12 @@
 
     double precision y(nvb),y_0(nvb),dydx(nvb),yout(nvb)
     double precision Corg_hml(1:nbasin),Corg_hsr(1:nbasin), &
-                     fodcm2(1:nbasin),fin(1:nbasin),fin0,fsedim,fexport
+                     fodcm2
     double precision area_cal(1:nbasin),area_ara(1:nbasin)
-    double precision fsil(1:npixel),fcarb(1:npixel),fker(1:npixel)
-    double precision wth_allsil(1:npixel),wth_litho_wgh(1:nlitho,1:npixel),wth_litho(1:nlitho,1:npixel)
+    double precision fsilj,fbasj,fcarbj,fker(1:npixel)
+    double precision wth_allsil(1:npixel),wth_litho_wgh(1:nlitho,1:npixel),wth_litho(1:nlitho,1:npixel),pyr_wth(1:npixel)
     double precision POC_export_rate(1:npixel)
     double precision fp(1:npixel),fcarbw_pla(1:npixel)
-    double precision areagra(1:npixel),fbas(1:npixel)
     double precision Runinterd(1:nclimber),Tinterd(1:nclimber)
     double precision edb(1:nbasin),ebc(1:nbasin)
     double precision beta(1:nbasin), diff_diss(nvar_diss,nbasin), diff_part(nvar_part,nbasin), diff_isot(nvar_isot,nbasin), &
@@ -157,28 +157,29 @@
 
     double precision p,totarea,pco2,fco2,fe
     double precision facgra,facbas,facker,carb_weath_conc
-    double precision closed,x,xnum,xden,somme,xlogK,dum,RT0
+    double precision x,xnum,xden,somme,xlogK,dum,RT0
     double precision pco2pal,fco2v,fev,fco2nv,fenv,time,pmin,prmax,aco2
     double precision htot,areal,dummy,eps,stept,tbegin,htry!,compteur
     double precision salsoil,prsoil,akbsoil,akcsoil,aksp,xo,fsoil,dfsoil
     double precision pr,fph,xv,dfph
-    double precision xPOPexport,totalCO2_exch,freef_tot,fodc_tot,fdep_tot,fco2atm_ocean_tot,F_seafloor_cdiss_tot,&
+    double precision xPOPexport,totalCO2_exch,freef_tot,fodc_tot,fcarbdep_tot,fco2atm_ocean_tot,F_seafloor_cdiss_tot,&
                      fSulfRed_tot,fO2_odc_tot
     double precision vartot_diss(nvar_diss), vartot_part(nvar_part), vartot_isot(nvar_isot), ph_tot,vol_tot,temp_tot,salin_tot,&
-                     O2_atm_level,CO2_atm_level,O2_atm_conc,CO2_atm_conc
+                     pO2_atm,pCO2_atm,O2_atm_conc,CO2_atm_conc
 
     double precision tka
     double precision ftrap1a,ftrap1b,ftrap2,ftrap3,ftrap4
 
     ! Lithium cycle
-    double precision FrivLi,dLiriv,Li_dep
-    double precision FhydLi(1:nbasin)
+    double precision, dimension(nbasin) :: FrivLi, dLiriv
+    double precision, dimension(nbasin) :: FhydLi
 
     character(len=500) :: COMB_ofile_name, GEOG_ofile_name
     character(len=100) :: COMB_time_dimname, GEOG_time_dimname
 
     ! continental variables
-    integer, dimension(npixel):: list_cont_pixel
+    logical:: uniform_routing
+    integer, dimension(npixel):: list_cont_pixel, cont_basin_map
     integer:: ncontpxl
 
     ! dynsoil module variables:
@@ -220,25 +221,24 @@
 !   Global variables:
 !   ==================================================================    
 
-    common /IOcond/ run_name, output_directory, killing_file, cont_input_mode
+    common /IOcond/ run_name, output_directory, killing_file, COMB_init_mode, cont_input_mode
     common /error/ ERROR_HANDLING_OPTION
     common /convert/ convert2ascii
-    common /jump/ ijump_cont_weath,icount_cont_weath, ijump_geogprint,icount_geogprint
+    common /jump/ ijump_climate,icount_climate, ijump_geogprint,icount_geogprint
     common /anoxia/ DOA,cp_burial
     common /axis/ ref_x_axis, ref_y_axis
     common /atmosphere/ fCO2atm_ocean,po2,fC13atm_ocean,fC13ocean_atm
-    common /basin_parameter/ oce_surf, indice_deep,indice_sedi, surf_sedi, sedim_fract, sedim_capacity, &
-                             temp_box, press_box,app_cont,indice_thermo, &
-                             indice_surface,indice_epicont, &
-                             indice_polar,oce_surf_tot
+    common /basin_parameter/  oce_surf, oce_surf_tot, temp_box, depth_box, depth_top_box, box_thick, press_box, &
+                              surf_sedi, sedbastype_fract, accumul_capacity, indice_deep, indice_sedi, app_cont, &
+                              indice_thermo, indice_surface, indice_epicont, indice_polar
+    common /basin_paramdble/ appcont_fract
     common /basin_ndex/ ndeep, nnodeep, nsedi, nnosedi, nthermo, nnothermo, nsurface, nnosurface, &
-                        nepicont, nnoepicont, npolar, nnopolar, nappcont, nnoappcont, nsediepicontsurf, &
-                        nsediepicontnosurf, nsedinoepicont, nsurfappcont, nsurfnoappcont, nnosurfappcont, &
-                        nnosurfnoappcont, nnosurfbelappcont, nnosurfnobelappcont
+                        nepicont, nnoepicont, npolar, nnopolar, nappcont, nnoappcont, nsediepicsurf, &
+                        nsediepicnosurf, nsediintermed, nsedideep, nsurfnoappcont, nnosurfnoappcont
     common /basin_jbox/ jbox_deep, jbox_nodeep, jbox_sedi, jbox_nosedi, jbox_thermo, jbox_nothermo, &
                         jbox_surface, jbox_nosurface, jbox_epicont, jbox_noepicont, jbox_polar, jbox_nopolar, &
-                        jbox_appcont, jbox_noappcont, jbox_sediepicontsurf, jbox_sediepicontnosurf, jbox_sedinoepicont, &
-                        jbox_surfappcont, jbox_surfnoappcont, jbox_nosurfbelappcont, jbox_nosurfnobelappcont
+                        jbox_appcont, jbox_noappcont, jbox_sediepicsurf, jbox_sediepicnosurf, jbox_sediintermed, &
+                        jbox_sedideep, jbox_surfnoappcont
     common /biopump/ carb_ratio,fbioP,fbioC,finorgC,finorgP
     common /calcite_diss_therm/ fdownt,fdowntP
     common /carb13/ dco3,dhco3,dh2co3 &
@@ -263,8 +263,9 @@
                   ,fog,ak1soil,ak2soil,akspsoil,betasoil
     common /deposition/ freef,fodc,fodp &
                         ,freefP,f_diss_c,f_diss_a &
-                        ,fdepa,fdepc,fcarbP_dep,fcarb_dep &
-                        ,fdissol_carb,fdissol_carbP,ws,fin_sed,Corg_BE
+                        ,fcarbP_dep,fdissol_carb,fdissol_carbP,ws,frain_sed,frain_POC,frain_PIC,frain_POP,fin_sed,fin_POC,fin_POP &
+                        ,Xsed,fexch_sed,Corg_BE
+    common /depos_bool/ sed_routing_flag
     common /dissolution/ F_seafloor_cdiss
     common /final_t/ tend  
     !common /hypsometry/ deephyp,shyp ! obsolete
@@ -281,41 +282,41 @@
     common /recycling/ roxyd,ranoxyd
     common /runoffCLIMBER/ runclim,discharge
     common /erosion/ tss
-    common /r8786/ rsw
     common /temperatureCLIMBER/ Tclim
     common /saline/ salin
-    common /saturation/ omega,omega_ara
+    common /saturation/ omega_0,omega_ara_0
     common /sedirate/ St,S
     common /species/ h2co3,hco3,co3, &
                      ch,ak1,ak2, &
-                     akb,akc,bco2,ph &
+                     akb,akc_0,bco2,ph &
                      ,pco2_dissous
     common /solver_condi/ ts,tsta,tfi,ifog
     common /solver_condi_int/ ijump_print
     common /str_no_cste/ rSrdep,weighted_rsw
-    common /sinking/ fsink,fsink_inorg
     common /sulfate/ SO4_conc,SO4soil
     common /terorg/ fodt,ept
     common /trap/ tdata_deg,data_deg
     common /vegetal_frac/ fracveg
     common /volumes/ box_vol, vol
     common /weathfl/ fsilw,fcarbw,fkerw,fpw,fbasw,fcarbsulfw,fsilsulfw,fH2SO4sulfw ! add carbonate and silicate weathering by sulphuric acid
-    common /weathrt/ fsil, fbas, wth_allsil, wth_litho_wgh, wth_litho, fker, fp
+    common /weathrt/ wth_allsil, wth_litho_wgh, wth_litho, pyr_wth, fker, fp
     common /sulfred/ fSulfRed, fO2_odc ! variables for sulfate reduction
-    common /water/ F, F_exch_clim
+    common /water/ F, Fxch_clim
+    common /water_bool/ variable_watxch
     common /creation/ R_diss, R_part, R_isot
     common /shellsbug/ ishelfal
     common /outputs1/ COMB_ofile_name, GEOG_ofile_name
     common /outputs2/ COMB_time_dimname, GEOG_time_dimname
-    common /contpxl/ list_cont_pixel, ncontpxl
+    common /contpxl/ list_cont_pixel, cont_basin_map, ncontpxl
+    common /routing/ uniform_routing
     common /dynsoil_intg0D/   ijump_DS_integration, ijump_DS_print, icount_DS_int, icount_DS_pri
     common /dynsoil_dim/      DS_timestep, xlevs
     common /dynsoil_dble2D_1/ reg_thick,reg_x_surf,reg_tau_surf,reg_P_vol,reg_mean_age,reg_x_mean
     common /dynsoil_dble2D_2/ reg_prod,reg_eros,reg_P_diss,reg_P_eros,reg_x_surf_eros
     common /dynsoil_dble2D_3/ reg_Li_Friv, reg_Li_Fsp, reg_Li_driv
-    common /dynsoil_dble3D/   reg_z_prof,reg_tau_prof,reg_eros_galy_unit
+    common /dynsoil_dble3D/   reg_z_prof,reg_tau_prof
     common /dynsoil_dble1D/   slope
-    common /dynsoil_logi1D/   DS_missingpoints
+    common /dynsoil_bool1D/   DS_missingpoints
     common /dynsoil_intg2D/   reg_ktop
     common /dynsoil_charvar1/ DYNS_ofile_name
     common /dynsoil_charvar2/ DYNS_time_dimname, DYNS_restart_dim, DYNS_restart_var

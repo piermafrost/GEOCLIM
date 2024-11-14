@@ -1,45 +1,94 @@
-    subroutine creades(x)
-!   *********************
+  subroutine creades(x)
+! *********************
 
     use omp_lib
     use constante
+    use multidimensional_interpolation, only: climate_interpolation
+    use seafloor_sedimentation, only: org_dep
+    use water_chemistry, only: salinity, ocean_atm_flu, atmospheric_pco2, sea_omega, dc13_speciation 
 
     implicit none
     include 'combine_foam.inc'
+    double precision:: loc_sum_flx
 
 
-    call oceanic_T(x)
-    call biological_pump(x)
-    call recycle(x)
-    call salinity
-    call ocean_atm_flu(x)
-    call pco2_atm
-    call diss_oxygen
-    call sea_omega
-    call carb_dep(x)
-    call dc13_speciation
-    call bio_frac
-    call anoxic
     ! asynchronous coupling:
-    if (icount_cont_weath==ijump_cont_weath) then
-        icount_cont_weath = 0
+    if (icount_climate==ijump_climate) then
+        icount_climate = 0
+
+        ! climate interpolation (from look-up table): oceanic temperature, oceanic circulation, land temperature and runoff
+        ! -----------------------------------------------------------------------------------------------------------------
+
+        p=var_diss(7,nbasin)/PI_n_CO2_atm ! atmospheric CO2 level (in PAL) 
+        !
+        if (variable_watxch) then
+            call climate_interpolation(co2climber, clim_param_1, clim_param_2, clim_param_3, clim_param_4, clim_param_5,        &
+                                       p, cpvec, list_cont_pixel=list_cont_pixel, ncontpxl=ncontpxl,                            &
+                                       boxtemp_array=Toceclimber, interp_boxtemp=temp_box, Fxch_array=Fxch_clim, interp_Fxch=F, &
+                                       temp_array=Tairclimber, runf_array=Runclimber, interp_temp=Tclim, interp_runf=runclim    )
+        else
+            call climate_interpolation(co2climber, clim_param_1, clim_param_2, clim_param_3, clim_param_4, clim_param_5,    &
+                                       p, cpvec, list_cont_pixel=list_cont_pixel, ncontpxl=ncontpxl,                        &
+                                       boxtemp_array=Toceclimber, interp_boxtemp=temp_box,                                  &
+                                       temp_array=Tairclimber, runf_array=Runclimber, interp_temp=Tclim, interp_runf=runclim)
+        end if
+
         call cont_weath(x)
+
     else
-        icount_cont_weath = icount_cont_weath + 1
+        icount_climate = icount_climate + 1
     end if
-    call org_dep(x)
+    !
+    call salinity(salin)
+    call ocean_atm_flu()
+    call atmospheric_pco2()
+    call diss_oxygen()
+    call sea_omega()
+    call biological_pump(x)
+    call carb_dep()
+    call dc13_speciation()
+    call bio_frac()
+    call recycle(x)
+    call anoxic()
+    call org_dep()
     call degassing(x)
     call Phydrotherm(x)
     call phosphorite(x)
     call strontium_ratio(x)
 
+
+    ! + + + + + + + + + + + !
+    ! Lock elemental cycles !
+    ! + + + + + + + + + + + !
+    !
+    if (lock_sulfur_cycle) then
+        ! => keep sil. sulf. wth (because it eventually consumes CO2), set H2SO4 release to 0 and
+        !    use carb. sulf. wth as adjustment variable to balance sulfate-reduction
+        loc_sum_flx = sum(fSulfRed(1:nbasin-1))
+        do j0=1,nappcont
+            j = jbox_appcont(j0)
+            fH2SO4sulfw(j) = 0
+            fcarbsulfw(j) = appcont_fract(j)*loc_sum_flx - fsilsulfw(j)
+        end do
+    end if
+    !
+    if (lock_oxygen_cycle) then
+        loc_sum_flx = sum(fO2_odc(1:nbasin-1))
+        do j0=1,nappcont
+            j = jbox_appcont(j0)
+            fkerw(j) = appcont_fract(j)*loc_sum_flx - (15d0/8d0)*(fcarbsulfw(j) + fsilsulfw(j) + fH2SO4sulfw(j))
+        end do
+    end if
+
+
+
+    ! Initialization of reaction rates
+    ! --------------------------------
+    !##########!
     R_diss = 0.
     R_part = 0.
     R_isot = 0.
-
-! WARNING: in order not to do the calculation in the atmospheric box, '-1' are
-! added on some loop definition. It directly depends on indice_* files. Be
-! carefull if you modified them. 
+    !##########!
 
 
 
@@ -56,39 +105,19 @@
     i=1 ! DIC
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
-    do j0=1,nnoappcont
-        j = jbox_noappcont(j0)
 
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_diss(i,j)=fCO2atm_ocean(j) - fbioC(j) &
+    do j=1,nbasin-1
+        R_diss(i,j) = fCO2atm_ocean(j) - fbioC(j) &
                     - finorgC(j)+fdissol_carb(j)*var_part(5,j)*box_vol(j) &
-                    +roxyd(j)*box_vol(j)*var_part(4,j) &
-                    + fsink_inorg(j)*var_part(5,j)*(1.-closed)*box_vol(j) &
-                    + fsink(j)*(box_vol(j))*var_part(4,j) &
-                    *(1.-closed) &
-                    +(fsink(j)*box_vol(j)*var_part(4,j)*indice_sedi(j)-fodc(j)) &
-                    *clo &
-                    + fmor(j) + fCO2_crust(j)
-
+                    + roxyd(j)*box_vol(j)*var_part(4,j) &
+                    + (1-clo) * frain_PIC(j) &
+                    + (fin_POC(j) - clo*fodc(j)) & ! reoxydated org. C from sediment
+                    + fmor(j) + fCO2_crust(j) - freef(j)
     end do
-    do j0=1,nappcont-1!<- SKIP ATMOSPHERE BOX!
+    ! Add continental inputs
+    do j0=1,nappcont
         j = jbox_appcont(j0)
-
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_diss(i,j)=fCO2atm_ocean(j) - fbioC(j) &
-                    - finorgC(j)+fdissol_carb(j)*var_part(5,j)*box_vol(j) &
-                    +roxyd(j)*box_vol(j)*var_part(4,j) &
-                    + gotoshelf*fsink_inorg(j)*var_part(5,j) &
-                    *(1.-closed)*box_vol(j) &
-                    + gotoshelf*fsink(j)*(box_vol(j))*var_part(4,j) &
-                    *(1.-closed) &
-                    +(gotoshelf*fsink(j)*(box_vol(j))*var_part(4,j)-fodc(j)) &
-                    *clo &
-                    +2.*fsilw+2.*fbasw+2.*fcarbw-freef(j) &
-                    +fkerw + fCO2_crust(j) + fcarbsulfw ! add Carbonate weathering by sulphuric acid
-
+        R_diss(i,j) = R_diss(i,j)  +  2*fsilw(j) + 2*fbasw(j) + 2*fcarbw(j) + fkerw(j) + fcarbsulfw(j)
     end do
 
 
@@ -97,33 +126,17 @@
     i=2 ! ALK
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
-    do j0=1,nnoappcont
-        j = jbox_noappcont(j0)
 
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_diss(i,j)=-2.*finorgC(j) &
-                    +2.*fdissol_carb(j)*var_part(5,j)*box_vol(j) &
-                    + 2.*fsink_inorg(j)*var_part(5,j) &
-                    *(1.-closed)*(box_vol(j))-2.*fSO4_basin(j)-2.*fSO4_crust(j)
-
+    do j=1,nbasin-1
+        R_diss(i,j) = -2*finorgC(j) &
+                      + 2*fdissol_carb(j)*var_part(5,j)*box_vol(j) &
+                      + (1-clo) * 2*frain_PIC(j) &
+                      - 2*freef(j) - 2*fSO4_basin(j) - 2*fSO4_crust(j) + 2*fSulfRed(j)
     end do
-    do j0=1,nappcont-1!<- SKIP ATMOSPHERE BOX!
+    ! Add continental inputs
+    do j0=1,nappcont
         j = jbox_appcont(j0)
-
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_diss(i,j)=-2.*finorgC(j) &
-                    +2.*fdissol_carb(j)*var_part(5,j)*box_vol(j) &
-                    + 2.*gotoshelf*fsink_inorg(j)*var_part(5,j) &
-                    *(1.-closed)*(box_vol(j)) &
-                    +2.*fsilw+2.*fcarbw+2.*fbasw-2.*freef(j)-2.*fSO4_basin(j)-2.*fSO4_crust(j)-2.*fH2SO4sulfw
-                                                                                            ! add H2SO4 from Pyrite weathering
-    end do
-    ! add Alkalinity produced by sulfate reduction in early diagenesis (2 alk for 1 S):
-    do j0=1,nsedi
-        j = jbox_sedi(j0)
-        R_diss(i,j) = R_diss(i,j) + 2.*fSulfRed(j)
+        R_diss(i,j) = R_diss(i,j)  +  2*fsilw(j) + 2*fbasw(j) + 2*fcarbw(j) - 2*fH2SO4sulfw(j)
     end do
 
 
@@ -132,31 +145,17 @@
     i=3 ! PO4
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
-    do j0=1,nnoappcont
-        j = jbox_noappcont(j0)
 
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_diss(i,j)=-fbioP(j)-finorgP(j)+fdissol_carb(j) &
-                    *var_part(3,j)*box_vol(j) &
-                    +roxyd(j)*var_part(2,j)*box_vol(j) &
-                    +fsink(j)*(box_vol(j))*var_part(2,j)*(1.-closed) &
-                    +(fsink(j)*(box_vol(j))*var_part(2,j)*indice_sedi(j) &
-                    -fodp(j))*clo &
-                    -fhydP(j)-fphos(j)
-
+    do j=1,nbasin-1
+        R_diss(i,j) = -fbioP(j) - finorgP(j) + fdissol_carb(j)*var_part(3,j)*box_vol(j) &
+                      + roxyd(j)*var_part(2,j)*box_vol(j) &
+                      + (fin_POP(j) - clo*fodp(j)) & ! P from reoxydation of org. matter in sediment
+                      - fhydP(j) - fphos(j)
     end do
-    do j0=1,nappcont-1!<- SKIP ATMOSPHERE BOX!
+    ! Add continental inputs
+    do j0=1,nappcont
         j = jbox_appcont(j0)
-
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_diss(i,j)=-fbioP(j)-finorgP(j)+fdissol_carb(j) &
-                    *var_part(3,j)*box_vol(j) &
-                    +roxyd(j)*var_part(2,j)*box_vol(j) &
-                    +gotoshelf*fsink(j)*(box_vol(j))*var_part(2,j)*(1.-closed) &
-                    +(gotoshelf*fsink(j)*(box_vol(j))*var_part(2,j)-fodp(j)) &
-                    *clo+fpw
+        R_diss(i,j) = R_diss(i,j)  +  fpw(j)
     end do
 
 
@@ -165,27 +164,16 @@
     i=4 ! Ca
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
-    do j0=1,nnoappcont
-        j = jbox_noappcont(j0)
 
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_diss(i,j)=-finorgC(j)+fdissol_carb(j) &
-                    *var_part(5,j)*box_vol(j) &
-                    + fsink_inorg(j)*var_part(5,j)*(1.-closed)*(box_vol(j))
-
+    do j=1,nbasin-1
+        R_diss(i,j) = -finorgC(j) + fdissol_carb(j)*var_part(5,j)*box_vol(j) &
+                      + (1-clo) * frain_PIC(j) &
+                      - freef(j)
     end do
-    do j0=1,nappcont-1!<- SKIP ATMOSPHERE BOX!
+    ! Add continental inputs
+    do j0=1,nappcont
         j = jbox_appcont(j0)
-
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_diss(i,j)=-finorgC(j)+fdissol_carb(j) &
-                    *var_part(5,j)*box_vol(j) &
-                    + gotoshelf*fsink_inorg(j)*var_part(5,j) &
-                    *(1.-closed)*(box_vol(j)) &
-                    +fsilw+fbasw+fcarbw-freef(j) &
-                    +fcarbsulfw+fsilsulfw ! add carbonate and silicate weathering by sulphuric acid
+        R_diss(i,j) = R_diss(i,j)  +  fsilw(j) + fbasw(j) + fcarbw(j) + fcarbsulfw(j) + fsilsulfw(j)
     end do
 
 
@@ -194,68 +182,47 @@
     i=5 ! Sr
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
-    do j0=1,nnoappcont
-        j = jbox_noappcont(j0)
 
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_diss(i,j)=-finorgC(j)*rSrdep(j)+fdissol_carb(j) &
-                    *var_part(1,j)*box_vol(j) &
-                    + fsink_inorg(j)*(box_vol(j))*var_part(1,j)*(1.-closed)
-
+    do j=1,nbasin-1
+        R_diss(i,j) = -finorgC(j)*rSrdep(j) + fdissol_carb(j)*var_part(1,j)*box_vol(j) &
+                      + (1-clo) * sink_veloc*var_part(1,j)*surf_sedi(j) &
+                      - freef(j)*rSrdep(j)
     end do
-    do j0=1,nappcont-1!<- SKIP ATMOSPHERE BOX!
+    ! Add continental inputs
+    do j0=1,nappcont
         j = jbox_appcont(j0)
-
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_diss(i,j)=-finorgC(j)*rSrdep(j)+fdissol_carb(j) &
-                    *var_part(1,j)*box_vol(j) &
-                    + gotoshelf*fsink_inorg(j)*(box_vol(j))*var_part(1,j) &
-                    *(1.-closed) &
-                    +(fsilw+fbasw+fsilsulfw)*rSrsil+(fcarbw+fcarbsulfw)*rSrCar &! add carbonate and silicate weathering by sulphuric acid
-                    -freef(j)*rSrdep(j)
+        R_diss(i,j) = R_diss(i,j)  +  (fsilw(j)+fbasw(j)+fsilsulfw(j))*rSrsil + (fcarbw(j)+fcarbsulfw(j))*rSrCar
     end do
 
 
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
-    i=6 ! Oxy
+    i=6 ! Oxygen
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
 
-!    bassins profonds
-
-    do j0=1,nsurface
-        j = jbox_surface(j0)
-            R_diss(i,j)= 0.
-    end do
-    do j0=1,nnosurface-1!<- SKIP ATMOSPHERE BOX! 
+!   non-superficial basins
+    do j0=1,nnosurface
         j = jbox_nosurface(j0)
-
-        closed = clo*indice_sedi((j)) + 1*(1-indice_sedi((j)))
-
-        R_diss(i,j)=-rO2C*roxyd(j)*box_vol(j) &
-                    *var_part(4,j)-fsink(j)*box_vol(j) &
-                    *var_part(4,j)*rO2C*(1.-closed) &
-                    -(fsink(j)*box_vol(j)*indice_sedi(j) &
-                    *var_part(4,j)*rO2C-fO2_odc(j))* &
-                    clo
+        R_diss(i,j) = -rO2C*roxyd(j)*box_vol(j)*var_part(4,j) &
+                      - (fin_POC(j)*rO2C - clo*fO2_odc(j)) ! reoxydation of org. C in sediment 
     end do
 
-!    Atmosphere + ocean de surface a l equilibre
+!   atmosphere
+    R_diss(i,nbasin) = sum(total_cont_POC_export)*rO2C - sum(fkerw) - (15d0/8d0)*sum(fcarbsulfw+fsilsulfw+fH2SO4sulfw)
 
-    do k=1,nbasin-1
-        R_diss(i,nbasin)=R_diss(i,nbasin)+ rO2C*fbioC(k) &
-                         -gotoshelf*fsink(k)*var_part(4,k)*box_vol(k)*rO2C &
-                         *(1.-closed)*app_cont(k) &
-                         -(gotoshelf*fsink(k)*var_part(4,k)*box_vol(k)*rO2C &
-                         -fO2_odc(k))*clo*app_cont(k)-fkerw*app_cont(k)  &
-                         +total_cont_POC_export*rO2C*app_cont(k) &
-                         -(15./8.)*(fcarbsulfw+fsilsulfw+fH2SO4sulfw)*app_cont(k) ! add pyrite oxidation flux
+!   !##>> Impose equilibrium between atmosphere and superficial basins <<##!
+    !
+    !  => keep R_diss=0 in superficial basins
+    !
+    !  => add to the atmospheric box the net fluxes that should be in superficial basins
+    !
+    do k0=1,nsurface ! -> add to atmosphere net "reaction" O2 flux of surface basins
+        k = jbox_surface(k0)
+        R_diss(i,nbasin) = R_diss(i,nbasin) + rO2C*fbioC(k) & ! note: roxyd=0 in surface basins
+                           - (fin_POC(k)*rO2C - clo*fO2_odc(k)) ! reoxydation of org. C in sediment 
     end do
-
-    do k=1,nbasin-1
+    do k=1,nbasin-1 ! -> add to atmosphere net advection O2 flux of surface basins
         do j0=1,nsurface
             j = jbox_surface(j0)
             R_diss(i,nbasin) = R_diss(i,nbasin) + F(k,j)*var_diss(i,k) - F(j,k)*var_diss(i,j)
@@ -266,18 +233,16 @@
 
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
-    i=7 ! PCO2
+    i=7 ! atmospheric PCO2
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
 
-    if (nclimber==1) then ! fixed atm CO2 run
-        R_diss(i,nbasin) = 0
-    else
-        do k=1,nbasin
-            R_diss(i,nbasin)=R_diss(i,nbasin)-fCO2atm_ocean(k)
+    if (nclimber/=1) then ! keep null "R_diss" for in case of fixed-CO2 run (nclimber==1)
+        do k=1,nbasin-1
+            R_diss(i,nbasin) = R_diss(i,nbasin) - fCO2atm_ocean(k)
         end do
-        R_diss(i,nbasin)=R_diss(i,nbasin)-2.*fsilw+fvol-fcarbw-2.*fbasw+ftrap+fanthros &
-                         -total_cont_POC_export
+        R_diss(i,nbasin) = R_diss(i,nbasin) + fvol + ftrap + fanthros - 2*sum(fsilw) - 2*sum(fbasw) - sum(fcarbw) &
+                           - sum(total_cont_POC_export)
     end if
 
 
@@ -287,10 +252,10 @@
 !ccccccccccccccccccccccccccccccccc
 !ccccccccccccccccccccccccccccccccc        
 
-    ! Epicontinental box:
-    do j0=1,nappcont-1!<- SKIP ATMOSPHERE BOX!
+    ! Epicontinental box(es):
+    do j0=1,nappcont
         j = jbox_appcont(j0)
-        R_diss(i,j) = fcarbsulfw + fsilsulfw + fH2SO4sulfw ! pyrite oxidation S flux
+        R_diss(i,j) = fcarbsulfw(j) + fsilsulfw(j) + fH2SO4sulfw(j)
     end do
 
     ! Sedimentary boxes
@@ -314,26 +279,16 @@
     i=1 ! SrPIC
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
-    do j0=1,nnosurfnobelappcont-1!<- SKIP ATMOSPHERE BOX!
-        j = jbox_nosurfnobelappcont(j0)
-        R_part(i,j)= finorgC(j)*rSrdep(j)  &
-                    - fdissol_carb(j)*var_part(1,j)*box_vol(j) &
-                    + fsink_inorg(j-1)*(box_vol(j-1))*var_part(1,j-1) &
-                    - fsink_inorg(j)*(box_vol(j))*var_part(1,j)
+
+    do j=1,nbasin-1
+        R_part(i,j) = finorgC(j)*rSrdep(j)  &
+                      - fdissol_carb(j)*var_part(i,j)*box_vol(j) &
+                      - sink_veloc*var_part(i,j)*oce_surf(j)
     end do
-    do j0=1,nnosurfbelappcont !we are below the epicontinental surface reservoir
-        j = jbox_nosurfbelappcont(j0)
-        R_part(i,j)= finorgC(j)*rSrdep(j)  &
-                    - fdissol_carb(j)*var_part(1,j)*box_vol(j) &
-                    + (1.-gotoshelf)*fsink_inorg(j-1) &
-                    *(box_vol(j-1))*var_part(1,j-1) &
-                    - fsink_inorg(j)*(box_vol(j))*var_part(1,j)
-    end do
-    do j0=1,nsurface
-        j = jbox_surface(j0)
-        R_part(i,j)= finorgC(j)*rSrdep(j)  &
-                    - fdissol_carb(j)*var_part(1,j)*box_vol(j) &
-                    - fsink_inorg(j)*(box_vol(j))*var_part(1,j)
+    ! add sinking particules from the upper box (if there is one)
+    do j0=1,nnosurface
+        j = jbox_nosurface(j0)
+        R_part(i,j) = R_part(i,j) + sink_veloc*var_part(i,j-1)*(oce_surf(j-1)-surf_sedi(j-1))
     end do
 
 
@@ -343,25 +298,19 @@
 !cccccccccccccccccccccccccccccccc
 !ccccccccccccccccccccccccccccccc
 
-    do j0=1,nnosurfnobelappcont-1!<- SKIP ATMOSPHERE BOX!
-        j = jbox_nosurfnobelappcont(j0)
-        R_part(i,j)= fbioP(j) - roxyd(j)*box_vol(j)*var_part(2,j) &
-                    +fsink(j-1)*(box_vol(j-1))*var_part(2,j-1) &
-                    -fsink(j)*(box_vol(j))*var_part(2,j)
+    do j=1,nbasin-1
+        R_part(i,j) = fbioP(j) - roxyd(j)*box_vol(j)*var_part(i,j) - sink_veloc*var_part(i,j)*oce_surf(j)
     end do
-    do j0=1,nnosurfbelappcont !we are below the epicontinental surface reservoir
-        j = jbox_nosurfbelappcont(j0)
-        R_part(i,j)= fbioP(j) - roxyd(j)*box_vol(j)*var_part(2,j) &
-                    +(1.-gotoshelf)*fsink(j-1)*(box_vol(j-1))*var_part(2,j-1) &
-                    -fsink(j)*(box_vol(j))*var_part(2,j)
+    ! add continental inputs (in affected boxes)
+    do j0=1,nappcont
+        j = jbox_appcont(j0)
+        R_part(i,j) = R_part(i,j) + total_cont_POC_export(j)/cp_cont
     end do
-    do j0=1,nsurface
-        j = jbox_surface(j0)
-        R_part(i,j)= fbioP(j) - roxyd(j)*box_vol(j)*var_part(2,j) &
-                    -fsink(j)*(box_vol(j))*var_part(2,j) + total_cont_POC_export*app_cont(j)/cp_cont
+    ! add sinking particules from the upper box (if there is one)
+    do j0=1,nnosurface
+        j = jbox_nosurface(j0)
+        R_part(i,j) = R_part(i,j) + sink_veloc*var_part(i,j-1)*(oce_surf(j-1)-surf_sedi(j-1))
     end do
-
-
 
 
 !cccccccccccccccccccccccccccccccc
@@ -370,22 +319,13 @@
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
 
-    do j0=1,nnosurfnobelappcont-1!<- SKIP ATMOSPHERE BOX! 
-        j = jbox_nosurfnobelappcont(j0)
-        R_part(i,j)= finorgP(j) - fdissol_carb(j)*var_part(3,j)*box_vol(j) &
-                    +fsink_inorg(j-1)*(box_vol(j-1))*var_part(3,j-1) &
-                    -fsink_inorg(j)*(box_vol(j))*var_part(3,j)
+    do j=1,nbasin-1
+        R_part(i,j) = finorgP(j) - fdissol_carb(j)*var_part(i,j)*box_vol(j) - sink_veloc*var_part(i,j)*oce_surf(j)
     end do
-    do j0=1,nnosurfbelappcont !we are below the epicontinental surface reservoir
-        j = jbox_nosurfbelappcont(j0)
-        R_part(i,j)= finorgP(j) - fdissol_carb(j)*var_part(3,j)*box_vol(j) &
-                    +(1.-gotoshelf)*fsink_inorg(j-1)*(box_vol(j-1))*var_part(3,j-1) &
-                    -fsink_inorg(j)*(box_vol(j))*var_part(3,j)
-    end do
-    do j0=1,nsurface
-        j = jbox_surface(j0)
-        R_part(i,j)= finorgP(j) - fdissol_carb(j)*var_part(3,j)*box_vol(j) &
-                    -fsink_inorg(j)*(box_vol(j))*var_part(3,j)
+    ! add sinking particules from the upper box (if there is one)
+    do j0=1,nnosurface
+        j = jbox_nosurface(j0)
+        R_part(i,j) = R_part(i,j) + sink_veloc*var_part(i,j-1)*(oce_surf(j-1)-surf_sedi(j-1))
     end do
 
 
@@ -395,22 +335,18 @@
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
 
-    do j0=1,nnosurfnobelappcont-1!<- SKIP ATMOSPHERE BOX! these are the deep reservoirs
-        j = jbox_nosurfnobelappcont(j0)
-        R_part(i,j)= fbioC(j) - roxyd(j)*box_vol(j)*var_part(4,j) &
-                    + fsink(j-1)*(box_vol(j-1))*var_part(4,j-1) &
-                    - fsink(j)*(box_vol(j))*var_part(4,j)
+    do j=1,nbasin-1
+        R_part(i,j) = fbioC(j) - roxyd(j)*box_vol(j)*var_part(i,j) - sink_veloc*var_part(i,j)*oce_surf(j)
     end do
-    do j0=1,nnosurfbelappcont !we are below the epicontinental surface reservoir (reservoir 7)
-        j = jbox_nosurfbelappcont(j0)
-        R_part(i,j)= fbioC(j) - roxyd(j)*box_vol(j)*var_part(4,j) &
-                    + (1.-gotoshelf)*fsink(j-1)*(box_vol(j-1))*var_part(4,j-1) &
-                    - fsink(j)*(box_vol(j))*var_part(4,j)
+    ! add continental inputs (in affected boxes)
+    do j0=1,nappcont
+        j = jbox_appcont(j0)
+        R_part(i,j) = R_part(i,j) + total_cont_POC_export(j)
     end do
-    do j0=1,nsurface
-        j = jbox_surface(j0)
-        R_part(i,j)= fbioC(j) - roxyd(j)*box_vol(j)*var_part(4,j) &
-                    - fsink(j)*(box_vol(j))*var_part(4,j)+total_cont_POC_export*app_cont(j)
+    ! add sinking particules from the upper box (if there is one)
+    do j0=1,nnosurface
+        j = jbox_nosurface(j0)
+        R_part(i,j) = R_part(i,j) + sink_veloc*var_part(i,j-1)*(oce_surf(j-1)-surf_sedi(j-1))
     end do
 
 
@@ -419,22 +355,14 @@
     i=5 ! PIC
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
-    do j0=1,nnosurfnobelappcont-1!<- SKIP ATMOSPHERE BOX!
-        j = jbox_nosurfnobelappcont(j0)
-        R_part(i,j)= finorgC(j) - fdissol_carb(j)*var_part(5,j)*box_vol(j) &
-                    + fsink_inorg(j-1)*var_part(5,j-1)*(box_vol(j-1)) &
-                    - fsink_inorg(j)*var_part(5,j)*(box_vol(j))
+
+    do j=1,nbasin-1
+        R_part(i,j) = finorgC(j) - fdissol_carb(j)*var_part(i,j)*box_vol(j) - sink_veloc*var_part(i,j)*oce_surf(j)
     end do
-    do j0=1,nnosurfbelappcont !we are below the epicontinental surface reservoir
-        j = jbox_nosurfbelappcont(j0)
-        R_part(i,j)= finorgC(j) - fdissol_carb(j)*var_part(5,j)*box_vol(j) &
-                    + (1.-gotoshelf)*fsink_inorg(j-1)*var_part(5,j-1)*(box_vol(j-1)) &
-                    - fsink_inorg(j)*var_part(5,j)*(box_vol(j))
-    end do
-    do j0=1,nsurface
-        j = jbox_surface(j0)
-        R_part(i,j)= finorgC(j) - fdissol_carb(j)*var_part(5,j)*box_vol(j) &
-                    - fsink_inorg(j)*var_part(5,j)*(box_vol(j))
+    ! add sinking particules from the upper box (if there is one)
+    do j0=1,nnosurface
+        j = jbox_nosurface(j0)
+        R_part(i,j) = R_part(i,j) + sink_veloc*var_part(i,j-1)*(oce_surf(j-1)-surf_sedi(j-1))
     end do
 
 
@@ -453,56 +381,33 @@
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
 
-    do j0=1,nnoappcont
-        j = jbox_noappcont(j0)
-
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_isot(i,j)=(fc13ocean_atm(j) &
-                    -fbioC(j)*(dh2co3(j)-epsiC(j)-var_isot(i,j)) &
-                    -finorgC(j)*(dco3(j)-var_isot(i,j)) &
-                    +fdissol_carb(j)*var_part(5,j)*box_vol(j)*(var_isot(i+1,j)-var_isot(i,j)) &
-                    +roxyd(j)*box_vol(j)*var_part(4,j)*(var_isot(i+2,j)-var_isot(i,j)) &
-                    + fsink_inorg(j)*box_vol(j)*var_part(5,j)*(var_isot(i+1,j)-var_isot(i,j)) &
-                    *(1.-closed) &
-                    + fsink(j)*box_vol(j)*var_part(4,j)*(var_isot(i+2,j)-var_isot(i,j)) &
-                    *(1.-closed)+ &
-                    (fsink(j)*box_vol(j)*var_part(4,j)*indice_sedi(j)-fodc(j)) &
-                    *clo &
-                    *(var_isot(i+2,j)-var_isot(i,j))+fmor(j)*(dcmor-var_isot(i,j))) &
-                    /(var_diss(1,j)*box_vol(j))
-    end do
-    do j0=1,nappcont-1!<- SKIP ATMOSPHERE BOX!
-        j = jbox_appcont(j0)
-
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_isot(i,j)=(fc13ocean_atm(j) &
-                    -fbioC(j)*(dh2co3(j)-epsiC(j)-var_isot(i,j)) &
-                    -finorgC(j)*(dco3(j)-var_isot(i,j)) &
-                    +fdissol_carb(j)*var_part(5,j)*box_vol(j)*(var_isot(i+1,j)-var_isot(i,j)) &
-                    +roxyd(j)*box_vol(j)*var_part(4,j)*(var_isot(i+2,j)-var_isot(i,j)) &
-                    + gotoshelf*fsink_inorg(j)*box_vol(j)*var_part(5,j) &
-                    *(var_isot(i+1,j)-var_isot(i,j)) &
-                    *(1.-closed) &
-                    + gotoshelf* &
-                    fsink(j)*box_vol(j)*var_part(4,j)*(var_isot(i+2,j)-var_isot(i,j)) &
-                    *(1.-closed) &
-                    +(gotoshelf*fsink(j)*box_vol(j)*var_part(4,j)-fodc(j)) &
-                    *(var_isot(i+2,j)-var_isot(i,j))*clo &
-                    +2.*fsilw*(var_isot(4,nbasin)-var_isot(i,j)) &
-                    +2.*fbasw*(var_isot(4,nbasin)-var_isot(i,j)) &
-                    +fcarbw*(var_isot(4,nbasin)-var_isot(i,j)) &
-                    +(fcarbw+fcarbsulfw)*(dccarbw-var_isot(i,j)) & ! add Carbonate weathering by sulphuric acid
-                    +fkerw*(dckerw-var_isot(i,j)) &
-                    -freef(j)*(dco3(j)-var_isot(i,j))) &
-                    /(var_diss(1,j)*box_vol(j))
-    end do
-
     do j=1,nbasin-1
-        do k=1,nbasin-1
-            R_isot(i,j) = R_isot(i,j)  +  F(k,j)*var_diss(1,k)*(var_isot(i,k) - var_isot(i,j))/(var_diss(1,j)*box_vol(j))
+        R_isot(i,j) = fc13ocean_atm(j) &
+                      - fbioC(j) * (dh2co3(j) - epsiC(j) - var_isot(i,j)) &
+                      - finorgC(j) * (dco3(j) - var_isot(i,j)) &
+                      + fdissol_carb(j)*var_part(5,j)*box_vol(j) * (var_isot(i+1,j) - var_isot(i,j)) &
+                      + roxyd(j)*box_vol(j)*var_part(4,j) * (var_isot(i+2,j) - var_isot(i,j)) &
+                      + (1-clo) * frain_PIC(j) * (var_isot(i+1,j) - var_isot(i,j)) &
+                      + (fin_POC(j) - clo*fodc(j)) * (var_isot(i+2,j) - var_isot(i,j)) & ! d13C flux from reoxydated org. C from sediment
+                      + fmor(j)*(dcmor - var_isot(i,j)) &
+                      - freef(j)*(dco3(j) - var_isot(i,j))
+    end do
+
+    ! add continental inputs (in affected boxes)
+    do j0=1,nappcont
+        j = jbox_appcont(j0)
+        R_isot(i,j) = R_isot(i,j) &
+                      + (2*fsilw(j) + 2*fbasw(j) + fcarbw(j)) * (var_isot(4,nbasin) - var_isot(i,j)) &
+                      + (fcarbw(j) + fcarbsulfw(j)) * (dccarbw - var_isot(i,j)) &
+                      + fkerw(j) * (dckerw - var_isot(i,j))
+    end do
+
+    ! Put advection part in "R" term (because of specificity of isotopic equation) and divide by "main" variable
+    do j=1,nbasin-1
+        do k=1,nbasin-1 ! advection terms
+            R_isot(i,j) = R_isot(i,j)  +  F(k,j)*var_diss(1,k)*(var_isot(i,k) - var_isot(i,j))
         end do
+        R_isot(i,j) = R_isot(i,j) / (var_diss(1,j)*box_vol(j)) ! divide by "main" variable
     end do
 
 
@@ -511,77 +416,59 @@
     i=2 ! PIC dc13
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
-    do j0=1,nnosurfnobelappcont-1!<- SKIP ATMOSPHERE BOX!
-        j = jbox_nosurfnobelappcont(j0)
-        if (var_part(5,j).gt.1.e-6) then
-            R_isot(i,j)= (finorgC(j)*(dco3(j)-var_isot(i,j)) &
-                        +fsink_inorg(j-1)*(box_vol(j-1))*var_part(5,j-1) &
-                        *(var_isot(i,j-1)-var_isot(i,j)))/(var_part(5,j)*box_vol(j))
-        else
-            R_isot(i,j)=0.
-        endif
+
+    do j=1,nbasin-1
+        R_isot(i,j) = finorgC(j)*(dco3(j) - var_isot(i,j))
     end do
-    do j0=1,nnosurfbelappcont
-        j = jbox_nosurfbelappcont(j0)
-        if (var_part(5,j).gt.1.e-6) then
-            R_isot(i,j)= (finorgC(j)*(dco3(j)-var_isot(i,j)) &
-                        +fsink_inorg(j-1)*(1.-gotoshelf) &
-                        *(box_vol(j-1))*var_part(5,j-1) &
-                        *(var_isot(i,j-1)-var_isot(i,j)))/(var_part(5,j)*box_vol(j))
-        else
-            R_isot(i,j)=0.
-        endif
+    ! add sinking particules from the upper box (if there is one)
+    do j0=1,nnosurface
+        j = jbox_nosurface(j0)
+        R_isot(i,j) = R_isot(i,j) &
+                      + sink_veloc*var_part(5,j-1)*(oce_surf(j-1)-surf_sedi(j-1)) * (var_isot(i,j-1) - var_isot(i,j))
     end do
-    do j0=1,nsurface
-        j = jbox_surface(j0)
-        if (var_part(5,j).gt.1.e-6) then
-            R_isot(i,j)= (finorgC(j)*(dco3(j)-var_isot(i,j))) &
-                        /(var_part(5,j)*box_vol(j))
-        else
-            R_isot(i,j)=0.
-        endif
+    ! divide by "main" variable
+    do j=1,nbasin-1
+        !if (var_part(5,j).gt.1.e-6) then
+            R_isot(i,j) = R_isot(i,j) / (var_part(5,j)*box_vol(j))
+        !else
+        !    R_isot(i,j) = 0
+        !end if
     end do
 
+    ! Note: no advection of particules
 
-!    write(*,*)fkerw/1.d+12,(fodc(j)/1.d+12,j=1,10)
-!    write(*,*)'*****************************'
+
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
     i=3 ! POC dc13
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
 
-    do j0=1,nnosurfnobelappcont-1!<- SKIP ATMOSPHERE BOX!
-        j = jbox_nosurfnobelappcont(j0)
-        if (var_part(4,j).gt.1.e-6) then
-            R_isot(i,j)= (fbioC(j)*(dh2co3(j)-epsiC(j)-var_isot(i,j)) &
-                        +fsink(j-1)*box_vol(j-1)*var_part(4,j-1)*(var_isot(i,j-1)-var_isot(i,j)))/ &
-                        (var_part(4,j)*box_vol(j))
-        else
-            R_isot(i,j)=0.
-        endif
+    do j=1,nbasin-1
+        R_isot(i,j) = fbioC(j)*(dh2co3(j) - epsiC(j) - var_isot(i,j)) 
     end do
-    do j0=1,nnosurfbelappcont
-        j = jbox_nosurfbelappcont(j0)
-        if (var_part(4,j).gt.1.e-6) then
-            R_isot(i,j)= (fbioC(j)*(dh2co3(j)-epsiC(j)-var_isot(i,j)) &
-                        +(1.-gotoshelf)*fsink(j-1)*box_vol(j-1)*var_part(4,j-1) &
-                        *(var_isot(i,j-1)-var_isot(i,j)))/ &
-                     (var_part(4,j)*box_vol(j))
-        else
-            R_isot(i,j)=0.
-        endif
+    ! add continental inputs (in affected boxes)
+    do j0=1,nappcont
+        j = jbox_appcont(j0)
+        R_isot(i,j) = R_isot(i,j) &
+                      + total_cont_POC_export(j) * (var_isot(4,nbasin) - epsiCont - var_isot(i,j))
     end do
-    do j0=1,nsurface
-        j = jbox_surface(j0)
-        if (var_part(4,j).gt.1.e-6) then
-            R_isot(i,j)= (fbioC(j)*(dh2co3(j)-epsiC(j)-var_isot(i,j))  &
-                        +total_cont_POC_export*app_cont(j)*(var_isot(4,nbasin)-epsiCont-var_isot(i,j)))/ &
-                     (var_part(4,j)*box_vol(j))
-        else
-            R_isot(i,j)=0.
-        endif
+    ! add sinking particules from the upper box (if there is one)
+    do j0=1,nnosurface
+        j = jbox_nosurface(j0)
+        R_isot(i,j) = R_isot(i,j) &
+                      + sink_veloc*var_part(4,j-1)*(oce_surf(j-1)-surf_sedi(j-1)) * (var_isot(i,j-1) - var_isot(i,j))
     end do
+    ! divide by "main" variable
+    do j=1,nbasin-1
+        !if (var_part(4,j).gt.1.e-6) then
+            R_isot(i,j) = R_isot(i,j) / (var_part(4,j)*box_vol(j))
+        !else
+        !    R_isot(i,j) = 0
+        !end if
+    end do
+
+    ! Note: no advection of particules
 
 
 !cccccccccccccccccccccccccccccccc
@@ -590,17 +477,11 @@
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
 
-    do k=1,nbasin
-        R_isot(i,nbasin)=R_isot(i,nbasin)-fC13atm_ocean(k) &
-                                     /var_diss(7,nbasin)
-    end do
-
-    R_isot(i,nbasin)=R_isot(i,nbasin)+(fvol*(dcvol-var_isot(i,nbasin))+ &
-                     ftrap*(dctrap-var_isot(i,nbasin))- &
-                     total_cont_POC_export*(-epsiCont)) &
-                     /var_diss(7,nbasin)
-
-
+    R_isot(i,nbasin) = ( -sum(fC13atm_ocean(1:nbasin-1)) &
+                         + fvol*(dcvol - var_isot(i,nbasin)) &
+                         + ftrap*(dctrap - var_isot(i,nbasin)) &
+                         + epsiCont*sum(total_cont_POC_export) &
+                       ) /var_diss(7,nbasin)
 
 
 !cccccccccccccccccccccccccccccccc
@@ -609,45 +490,30 @@
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
 
-    do j0=1,nnoappcont
-        j = jbox_noappcont(j0)
-
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-        R_isot(i,j)=(fdissol_carb(j)*var_part(1,j)*box_vol(j) &
-                    *(var_isot(i+1,j)-var_isot(i,j))/(9.43+var_isot(i+1,j)) &
-                    + fsink_inorg(j)*box_vol(j)*var_part(1,j)*(var_isot(i+1,j)-var_isot(i,j)) &
-                    /(9.43+var_isot(i+1,j)) &
-                    *(1.-closed)+fmor(j)*rSrmor*(rmor-var_isot(i,j)) &
-                    /(9.43+rmor)) &
-                    *(9.43+var_isot(i,j))/(var_diss(5,j)*box_vol(j))
-    end do
-    do j0=1,nappcont-1!<- SKIP ATMOSPHERE BOX!
-        j = jbox_appcont(j0)
-
-        closed = clo*indice_sedi(j) + 1*(1-indice_sedi(j))
-
-        R_isot(i,j)=(fdissol_carb(j)*var_part(1,j)*box_vol(j)*(var_isot(i+1,j)-var_isot(i,j)) &
-                    /(9.43+var_isot(i+1,j)) &
-                    +gotoshelf*fsink_inorg(j)*(box_vol(j))*var_part(1,j) &
-                    *(var_isot(i+1,j)-var_isot(i,j))/(9.43+var_isot(i+1,j)) &
-                    *(1.-closed) &
-                    +fsilw*rSrSil*(rsw-var_isot(i,j))/(9.43+rsw) &
-                    +fbasw*rSrSil*(rbas-var_isot(i,j))/(9.43+rbas) &
-                    +fcarbw*rSrCar*(rcw-var_isot(i,j))/(9.43+rcw) &
-                    +fcarbsulfw*rSrCar*(rcw-var_isot(i,j))/(9.43+rcw) & ! add carbonate weathering by sulphuric acid
-                    +fsilsulfw*rSrSil*(rsw-var_isot(i,j))/(9.43+rsw)) & ! add silicate weathering by sulphuric acid
-                    *(9.43+var_isot(i,j))/(var_diss(5,j)*box_vol(j))
-    end do
-    
     do j=1,nbasin-1
-        do k=1,nbasin-1
-            R_isot(i,j)=R_isot(i,j)+(F(k,j)*var_diss(5,k)* &
-                        (var_isot(i,k)-var_isot(i,j))/(9.43+var_isot(i,k))) &
-                        *(9.43+var_isot(i,j))/(var_diss(5,j)*box_vol(j))
-        end do
+        R_isot(i,j) = fdissol_carb(j)*var_part(1,j)*box_vol(j) * (var_isot(i+1,j) - var_isot(i,j)) / (9.43 + var_isot(i+1,j)) &
+                      + (1-clo) * sink_veloc*var_part(1,j)*surf_sedi(j) * (var_isot(i+1,j) - var_isot(i,j)) &
+                                                                                                   / (9.43 + var_isot(i+1,j)) &
+                      + fmor(j)*rSrmor * (rmor - var_isot(i,j)) / (9.43 + rmor)
+                    
     end do
 
+    ! add continental inputs (in affected boxes)
+    do j0=1,nappcont
+        j = jbox_appcont(j0)
+        R_isot(i,j) = R_isot(i,j) &
+                      + (fsilw(j) + fsilsulfw(j))*rSrSil * (weighted_rsw(j) - var_isot(i,j)) / (9.43 + weighted_rsw(j)) &
+                      + fbasw(j)*rSrSil * (rbas - var_isot(i,j)) / (9.43 + rbas) &
+                      + (fcarbw(j) + fcarbsulfw(j))*rSrCar * (rcw - var_isot(i,j)) / (9.43 + rcw)
+    end do
 
+    ! Put advection part in "R" term (because of specificity of isotopic equation) and divide by "main" variable
+    do j=1,nbasin-1
+        do k=1,nbasin-1 ! advection terms
+            R_isot(i,j) = R_isot(i,j)  +  F(k,j) * var_diss(5,k) * (var_isot(i,k) - var_isot(i,j))/(9.43 + var_isot(i,k))
+        end do
+        R_isot(i,j) = R_isot(i,j) * (9.43 + var_isot(i,j)) / (var_diss(5,j)*box_vol(j)) ! divide by "main" variable
+    end do
 
 
 !cccccccccccccccccccccccccccccccc
@@ -655,44 +521,29 @@
         i=6 ! PIC 87Sr/86Sr
 !cccccccccccccccccccccccccccccccc
 !cccccccccccccccccccccccccccccccc
-    do j0=1,nnosurfnobelappcont-1!<- SKIP ATMOSPHERE BOX!
-            j = jbox_nosurfnobelappcont(j0)
-            if (var_part(1,j).gt.1.e-6) then
-                    R_isot(i,j)= (finorgC(j)*rSrdep(j)*(var_isot(i-1,j)-var_isot(i,j)) &
-                                /(9.43+var_isot(i-1,j)) &
-                                +fsink_inorg(j-1)*(box_vol(j-1))*var_part(1,j-1)*(var_isot(i,j-1)-var_isot(i,j)) &
-                                /(9.43+var_isot(i,j-1))) &
-                                *(9.43+var_isot(i,j))/(var_part(1,j)*box_vol(j))
-            else
-                    R_isot(i,j)=0.
-            endif
+
+    do j=1,nbasin-1
+        R_isot(i,j) = finorgC(j)*rSrdep(j) * (var_isot(i-1,j) - var_isot(i,j)) / (9.43 + var_isot(i-1,j))
     end do
-    do j0=1,nnosurfbelappcont
-            j = jbox_nosurfbelappcont(j0)
-            if (var_part(1,j).gt.1.e-6) then
-                    R_isot(i,j)= (finorgC(j)*rSrdep(j)*(var_isot(i-1,j)-var_isot(i,j)) &
-                                /(9.43+var_isot(i-1,j)) &
-                                +(1.-gotoshelf)*fsink_inorg(j-1)*(box_vol(j-1)) &
-                                *var_part(1,j-1)*(var_isot(i,j-1)-var_isot(i,j)) &
-                                /(9.43+var_isot(i,j-1))) &
-                                *(9.43+var_isot(i,j))/(var_part(1,j)*box_vol(j))
-            else
-                    R_isot(i,j)=0.
-            endif
+    ! add sinking particules from the upper box (if there is one)
+    do j0=1,nnosurface
+        j = jbox_nosurface(j0)
+        R_isot(i,j) = R_isot(i,j) &
+                     + sink_veloc*var_part(1,j-1)*(oce_surf(j-1)-surf_sedi(j-1)) * &
+                                             (var_isot(i,j-1) - var_isot(i,j)) / (9.43 + var_isot(i,j-1))
     end do
-    do j0=1,nsurface
-            j = jbox_surface(j0)
-            if (var_part(1,j).gt.1.e-6) then
-                    R_isot(i,j)= (finorgC(j)*rSrdep(j)*(var_isot(i-1,j)-var_isot(i,j)) &
-                                /(9.43+var_isot(i-1,j))) &
-                                *(9.43+var_isot(i,j))/(var_part(1,j)*box_vol(j))
-            else
-                    R_isot(i,j)=0.
-            endif
+    ! divide by "main" variable
+    do j=1,nbasin-1
+        !if (var_part(1,j).gt.1.e-6) then
+            R_isot(i,j) = R_isot(i,j) * (9.43 + var_isot(i,j)) / (var_part(1,j)*box_vol(j))
+        !else
+        !    R_isot(i,j) = 0
+        !end if
     end do
 
+    ! Note: no advection of particules
 
 
 
-    return
-    end
+
+  end subroutine
