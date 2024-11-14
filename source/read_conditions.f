@@ -13,7 +13,7 @@ subroutine read_conditions
                         coupling_veget, &
                         solver, ts, tsta, tfi, &
                         oxy_acc_fact, sulf_acc_fact, &
-                        ijump_cont_weath, ijump_DS_integration, ijump_climparam, ijump_veget, &
+                        ijump_climate, ijump_DS_integration, ijump_climparam, ijump_veget, &
                         ijump_print, ijump_geogprint, ijump_DS_print, ageYprint, convert2ascii
 
     ! Default values of namelist variables
@@ -40,7 +40,7 @@ subroutine read_conditions
     tfi                  = UNDEFINED_VALUE_DBLE
     oxy_acc_fact         = UNDEFINED_VALUE_DBLE
     sulf_acc_fact        = UNDEFINED_VALUE_DBLE
-    ijump_cont_weath     = UNDEFINED_VALUE_INT
+    ijump_climate        = UNDEFINED_VALUE_INT
     ijump_DS_integration = UNDEFINED_VALUE_INT
     ijump_climparam      = UNDEFINED_VALUE_INT
     ijump_veget          = UNDEFINED_VALUE_INT
@@ -154,8 +154,8 @@ subroutine read_conditions
     call check_namelist_def('Error - in read_conditions.f: variable "sulf_acc_fact" was not given in physical conditions'// &
                             ' config file', dble_var=sulf_acc_fact)
     !
-    call check_namelist_def('Error - in read_conditions.f: variable "ijump_cont_weath" was not given in physical conditions'// &
-                            ' config file', int_var=ijump_cont_weath)
+    call check_namelist_def('Error - in read_conditions.f: variable "ijump_climate" was not given in physical conditions'// &
+                            ' config file', int_var=ijump_climate)
     !
     call check_namelist_def('Error - in read_conditions.f: variable "ijump_DS_integration" was not given in physical conditions'// &
                             ' config file', int_var=ijump_DS_integration)
