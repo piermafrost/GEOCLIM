@@ -260,7 +260,7 @@ case $case_name in
 	other_options=""
 	#
 	# executable name (as will be defined by 'build_GEOCLIM')
-	exec_name='geoclim_1x720x360x6-1x1x1x1x1_DS-10lev.exe'
+	exec_name='geoclim_B-10_R-1x720x360x6_DS-10lev.exe'
         ;;
 
     "GFDL")
@@ -287,7 +287,7 @@ case $case_name in
 	other_options=""
 	#
 	# executable name (as will be defined by 'build_GEOCLIM')
-	exec_name='geoclim_3x720x360x6-1x1x1x1x1_DS-10lev.exe'
+	exec_name='geoclim_B-10_R-3x720x360x6_DS-10lev.exe'
         ;;
 
     "CESM")
@@ -314,7 +314,7 @@ case $case_name in
 	other_options="--lock OS"
 	#
 	# executable name (as will be defined by 'build_GEOCLIM')
-	exec_name='geoclim_2x288x192x6-1x1x1x1x1_DS-10lev.exe'
+	exec_name='geoclim_B-10_R-2x288x192x6_DS-10lev_LCK-OS.exe'
         ;;
 
     "paleo")
@@ -341,7 +341,7 @@ case $case_name in
 	other_options=""
 	#
 	# executable name (as will be defined by 'build_GEOCLIM')
-	exec_name='geoclim_11x128x128x6-1x1x1x1x1_DS-SS.exe'
+	exec_name='geoclim_B-10_R-11x128x128x6_DS-SS.exe'
         ;;
 
     "ascii")
@@ -365,7 +365,7 @@ case $case_name in
 	other_options=""
 	#
 	# executable name (as will be defined by 'build_GEOCLIM')
-	exec_name='geoclim_6x48x40x6-1x1x1x1x1.exe'
+	exec_name='geoclim_B-10_R-6x48x40x6.exe'
         ;;
 
     "orbit")
@@ -392,7 +392,7 @@ case $case_name in
 	other_options="--clim-param 3,2,4 --clim-param-periods ,,360. --param-ending stoprun"
 	#
 	# executable name (as will be defined by 'build_GEOCLIM')
-	exec_name='geoclim_1x3x2x6-3x2x5x1x1_DS-SS.exe'
+	exec_name='geoclim_B-10_R-1x3x2x6-3x2x5x1x1_DS-SS.exe'
         ;;
 
     *)
