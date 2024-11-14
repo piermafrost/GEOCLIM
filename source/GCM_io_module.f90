@@ -11,6 +11,11 @@ module GCM_io_module
     contains
 
 
+
+    ! ###################################################################################### !
+    ! Main subroutine of module: read all GCM input and put them in GEOCLIM common variables !
+    ! ###################################################################################### !
+
     subroutine load_climatology(fID)
 
         use netcdf
@@ -121,6 +126,20 @@ module GCM_io_module
         call read_oceanic_temperature(32, Toceclimber, co2_axis=co2climber, order=paramspace_filling_order, ndata=red_pspace_size)
         !                                 ^^^^^^^^^^^
 
+        ! Get water exchange fluxes between basins (from ascii file #42)
+        ! --------------------------------------------------------------
+        !                                                                                    ,,,,,,,,,
+        call load_oce_ascii_variable(42, red_pspace_size, paramspace_filling_order, varout8D=Fxch_clim, singleclim=variable_watxch)
+        !                                                                                    ^^^^^^^^^
+        variable_watxch = (.not. variable_watxch) ! single-clim => NOT variable water exchanges
+        !
+        if (.not. variable_watxch) then
+            ! In case of unmutable oceanic circulation (water exchanges between basins) the common "Fxch_clim" is ignored,
+            ! the common variable "F" is drectly used
+            F = reshape(Fxch_clim(:,1,1,1,1,1,1), (/nbasin,nbasin/)) ! basin-to-basin ravelling
+            F = 31.536d12*F ! conversion Sv => m3/yr
+        end if
+
 
         ! Reference axis (GEOCLIM global variables)
         ! =========================================
@@ -137,31 +156,40 @@ module GCM_io_module
             Runclimber( :,:,len_p1,:,:,:,:) = Runclimber( :,:,1,:,:,:,:)
             Toceclimber(:,:,len_p1,:,:,:,:) = Toceclimber(:,:,1,:,:,:,:)
             if (glob_temp_varname/=UNDEFINED_VALUE_CHAR) glob_temperature(:,:,len_p1,:,:,:,:) = glob_temperature(:,:,1,:,:,:,:)
+            if (variable_watxch)                                Fxch_clim(:,:,len_p1,:,:,:,:) =        Fxch_clim(:,:,1,:,:,:,:)
         end if
         if (p2_period /= 0d0) then
             Tairclimber(:,:,:,len_p2,:,:,:) = Tairclimber(:,:,:,1,:,:,:)
             Runclimber( :,:,:,len_p2,:,:,:) = Runclimber( :,:,:,1,:,:,:)
             Toceclimber(:,:,:,len_p2,:,:,:) = Toceclimber(:,:,:,1,:,:,:)
             if (glob_temp_varname/=UNDEFINED_VALUE_CHAR) glob_temperature(:,:,:,len_p2,:,:,:) = glob_temperature(:,:,:,1,:,:,:)
+            if (variable_watxch)                                Fxch_clim(:,:,:,len_p2,:,:,:) =        Fxch_clim(:,:,:,1,:,:,:)
         end if
         if (p3_period /= 0d0) then
             Tairclimber(:,:,:,:,len_p3,:,:) = Tairclimber(:,:,:,:,1,:,:)
             Runclimber( :,:,:,:,len_p3,:,:) = Runclimber( :,:,:,:,1,:,:)
             Toceclimber(:,:,:,:,len_p3,:,:) = Toceclimber(:,:,:,:,1,:,:)
             if (glob_temp_varname/=UNDEFINED_VALUE_CHAR) glob_temperature(:,:,:,:,len_p3,:,:) = glob_temperature(:,:,:,:,1,:,:)
+            if (variable_watxch)                                Fxch_clim(:,:,:,:,len_p3,:,:) =        Fxch_clim(:,:,:,:,1,:,:)
         end if
         if (p4_period /= 0d0) then
             Tairclimber(:,:,:,:,:,len_p4,:) = Tairclimber(:,:,:,:,:,1,:)
             Runclimber( :,:,:,:,:,len_p4,:) = Runclimber( :,:,:,:,:,1,:)
             Toceclimber(:,:,:,:,:,len_p4,:) = Toceclimber(:,:,:,:,:,1,:)
             if (glob_temp_varname/=UNDEFINED_VALUE_CHAR) glob_temperature(:,:,:,:,:,len_p4,:) = glob_temperature(:,:,:,:,:,1,:)
+            if (variable_watxch)                                Fxch_clim(:,:,:,:,:,len_p4,:) =        Fxch_clim(:,:,:,:,:,1,:)
         end if
         if (p5_period /= 0d0) then
             Tairclimber(:,:,:,:,:,:,len_p5) = Tairclimber(:,:,:,:,:,:,1)
             Runclimber( :,:,:,:,:,:,len_p5) = Runclimber( :,:,:,:,:,:,1)
             Toceclimber(:,:,:,:,:,:,len_p5) = Toceclimber(:,:,:,:,:,:,1)
             if (glob_temp_varname/=UNDEFINED_VALUE_CHAR) glob_temperature(:,:,:,:,:,:,len_p5) = glob_temperature(:,:,:,:,:,:,1)
+            if (variable_watxch)                                Fxch_clim(:,:,:,:,:,:,len_p5) =        Fxch_clim(:,:,:,:,:,:,1)
         end if
+
+
+        ! conversion of water exchange fluxes
+        if (variable_watxch)  Fxch_clim = 31.536d12*Fxch_clim ! Sv => m3/yr
 
 
         ! Compute GMST (GEOCLIM global variable)
@@ -194,7 +222,11 @@ module GCM_io_module
     end subroutine
 
 
+
+
     !======================================================================!
+
+
 
 
     subroutine read_GCM_condition(fID, &
@@ -278,7 +310,7 @@ module GCM_io_module
             print *, 'Error: not enough values of CO2 and climatic parameters were given in namelist "CLIM_PARAMS"'
             print *, 'in GCM configuration file'
             print *, n_undef, ' entries of CO2/climatic parameters are missing out of ', red_pspace_size
-            stop
+            stop 89
         end if
 
         ! Check that parameter space is filled
@@ -288,7 +320,7 @@ module GCM_io_module
             print *, 'ERROR: underfilled parameter space (ie, CO2 and climatic parameters)'
             print *, 'The expected number of parameter combinations was loaded, which means there are duplicated combinations'
             print *, 'Filled parameter combinations: ', n_def, '/', red_pspace_size
-            stop
+            stop 89
         end if
 
 
@@ -338,7 +370,7 @@ module GCM_io_module
             print *, 'Error: not enough file names were given in "LAND_CLIM_INFO" namelist (variable "land_list_file") of GCM'// &
                      'input config file'
             print *, n_undef, ' entries missing out of ', red_pspace_size
-            stop
+            stop 89
         end if
         do k = 1, red_pspace_size
             call add_path(land_list_file(k))
@@ -365,7 +397,7 @@ module GCM_io_module
                     print *, 'Error: not enough file names were given in "GLOB_CLIM_INFO" namelist (variable "GLOB_list_file")'// &
                              ' of GCM input config file'
                     print *, n_undef, ' entries missing out of ', red_pspace_size
-                    stop
+                    stop 89
                 end if
                 do k = 1,red_pspace_size
                     call add_path(glob_list_file(k))
@@ -448,25 +480,25 @@ module GCM_io_module
                     print *
                     print *, 'INTERNAL ERROR: size of "xvec" variable passed to subroutine "load_variable" in module'
                     print *, '"GMC_io_module" is inconsistent with number of input file ("multiple_input_file")'
-                    stop
+                    stop 421
                 end if
                 if (size(yvec,1) /= n_input) then
                     print *
                     print *, 'INTERNAL ERROR: size of "yvec" variable passed to subroutine "load_variable" in module'
                     print *, '"GMC_io_module" is inconsistent with number of input file ("multiple_input_file")'
-                    stop
+                    stop 421
                 end if
                 if (size(xvec,2) /= nlon) then
                     print *
                     print *, 'INTERNAL ERROR: length of 2nd dimension of "xvec" variable passed to subroutine "load_variable"'
                     print *, 'in module "GMC_io_module" inconsistent with length of x axis'
-                    stop
+                    stop 421
                 end if
                 if (size(yvec,2) /= nlat) then
                     print *
                     print *, 'INTERNAL ERROR: length of 2nd dimension of "yvec" variable passed to subroutine "load_variable"'
                     print *, 'in module "GMC_io_module" inconsistent with length of y axis'
-                    stop
+                    stop 421
                 end if
             else
                 axis_is_present = .false.
@@ -476,7 +508,7 @@ module GCM_io_module
             print *
             print *, 'INTERNAL ERROR: inconsistent set of optional variable passed to the subroutine'
             print *, '"load_variable", in module "GCM_io_module"'
-            stop
+            stop 421
         end if
 
 
@@ -704,7 +736,7 @@ module GCM_io_module
         if (ndim > ndim_max) then
             print *, 'ERROR: too may dimensions in variable "'//trim(varname)//'" of file "'//trim(fname)//'"'
             print *, 'Maximum supported number of dimensions is: ', ndim_max
-            stop
+            stop 17
         end if
 
         ! Get variable dimension IDs
@@ -722,7 +754,7 @@ module GCM_io_module
             print *
             print *, 'Error: variable "'//trim(varname)//'" of file "'//trim(fname)// &
                      '" must have exactly 2 non-degenerated (ie, size-1) dimensions'
-            stop
+            stop 17
         else
             k = 1
             do while (shp(k)==1)
@@ -748,7 +780,7 @@ module GCM_io_module
             print *
             print *, 'Error: variable "'//trim(varname)//'" of file "'//trim(fname)// &
             '" is not defined on the given dimensions "'//trim(x_varname)//'" and "'//trim(y_varname)//'"'
-            stop
+            stop 17
         end if
 
         ! load variable
@@ -919,7 +951,7 @@ module GCM_io_module
                 print *
                 print *, 'INTERNAL ERROR in function "check_units" of module "GCM_io_module": unkown variable case "' &
                                                                                             //trim(which_variable)//'"'
-                stop
+                stop 421
 
         end select
 
@@ -958,21 +990,21 @@ module GCM_io_module
                         print *, '    2: ignore the issue and continue the execution'
                         read *, answer
                         select case (answer)
-                            case (0); stop
+                            case (0); stop 2
                             case (2) ! do nothing
                             case default; loop=.true.
                         end select
                     end do
 
                 case (0) ! abort the program
-                    stop
+                    stop 2
 
                 case (2) ! do nothing
 
                 case default
                     print *
                     print *, 'INTERNAL ERROR: illegal error handling option:', error_handling
-                    stop
+                    stop 421
             end select
         end if
 
@@ -997,7 +1029,7 @@ module GCM_io_module
                 print *
                 print *, 'INTERNAL ERROR: total area not passed to the function "check_units" in module "GCM_io_module".'
                 print *, 'You have the right to be mad at the developer.'
-                stop
+                stop 421
             end if
         end if
 
@@ -1050,7 +1082,7 @@ module GCM_io_module
                         print *, '    2: ignore the issue and continue the execution'
                         read *, answer
                         select case (answer)
-                            case (0); stop
+                            case (0); stop 2
                             case (1); where (errormask) landarea=0
                             case (2) ! do nothing
                             case default; loop=.true.
@@ -1058,7 +1090,7 @@ module GCM_io_module
                     end do
 
                 case (0) ! abort the program
-                    stop
+                    stop 2
 
                 case (1) ! automatic correction
                     print *
@@ -1070,7 +1102,7 @@ module GCM_io_module
                 case default
                     print *
                     print *, 'INTERNAL ERROR: illegal error handling option:', error_handling
-                    stop
+                    stop 421
 
             end select
 
@@ -1138,6 +1170,96 @@ module GCM_io_module
 
     end subroutine
 
+
+    !======================================================================!
+
+
+    subroutine load_oce_ascii_variable(id, red_pspace_size, paramspace_filling_order, varout7D, varout8D, singleclim)
+
+        include 'shape.inc'
+        integer, parameter:: npixel = nlon*nlat
+        integer, parameter:: paramspace_size = nclimber*len_p1*len_p2*len_p3*len_p4*len_p5
+
+        integer, intent(in):: id, red_pspace_size
+        integer, dimension(paramspace_size, 6), intent(in):: paramspace_filling_order
+        double precision, dimension(nbasin, nclimber, len_p1, len_p2, len_p3, len_p4, len_p5), intent(out), optional:: varout7D
+        double precision, dimension(nbasin**2, nclimber, len_p1, len_p2, len_p3, len_p4, len_p5), intent(out), optional:: varout8D
+        logical, intent(out), optional:: singleclim
+
+        character(len=fmaxlen):: loc_input_file
+        double precision, dimension(nbasin**2):: dummyvar
+        integer:: i1, i2, i3, i4, i5, i6, k, npts, ierr
+
+        if (present(varout7D)) then
+            npts = nbasin
+        elseif (present(varout8D)) then
+            npts = nbasin**2
+        else
+            print *
+            print *, 'INTERNAL ERROR: in subroutine "load_oce_ascii_variable" of "GCM_io_module":'
+            print *, 'either "varout7D" or "varout8D" output arguments must be present.'
+            stop 421
+        end if
+
+        ! first reading (single climatic parameter)
+        read(unit=id, fmt=*) dummyvar(1:npts)
+
+        if (red_pspace_size > 1) then
+            ! second reading (to determine if unique or multiple climatic paraters values are in file)
+            read(unit=id, fmt=*, iostat=ierr) dummyvar(1:npts)
+        else
+            ierr = -1
+        end if
+
+        if (ierr<0) then ! end-of-file error => single value
+
+            ! rewind file to load first (unique) value
+            rewind(unit=id)
+            if (present(varout7D)) then
+                read(unit=id, fmt=*) varout7D(:,1,1,1,1,1,1)
+            else
+                read(unit=id, fmt=*) varout8D(:,1,1,1,1,1,1)
+            end if
+
+            if (present(singleclim)) singleclim = .true.
+
+            print *
+            print *
+            print *, 'Loaded constant oceanic circulation'
+
+        else
+
+            rewind(unit=id)
+
+            ! load entire file (if ierr was >0, the error will be displayed)
+            do k = 1,red_pspace_size
+
+                read(unit=id, fmt=*) dummyvar(1:npts)
+
+                i1 = paramspace_filling_order(k,1)
+                i2 = paramspace_filling_order(k,2)
+                i3 = paramspace_filling_order(k,3)
+                i4 = paramspace_filling_order(k,4)
+                i5 = paramspace_filling_order(k,5)
+                i6 = paramspace_filling_order(k,6)
+
+                if (present(varout7D)) then
+                    varout7D(:, i1, i2, i3, i4, i5, i6) = dummyvar(1:npts)
+                else
+                    varout8D(:, i1, i2, i3, i4, i5, i6) = dummyvar(1:npts)
+                end if
+
+            end do
+
+            if (present(singleclim)) singleclim = .false.
+
+            print *
+            print *
+            print *, 'Loaded climate-variable oceanic circulation'
+
+        end if
+
+    end subroutine
 
 
 end module
