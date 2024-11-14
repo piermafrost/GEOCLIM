@@ -88,7 +88,7 @@ contains
     print *
     print *, 'Error while loading variable'//varname
     print *, 'Two dimension at least are expected'
-    stop
+    stop 17
   end if
 
   allocate(dimids(n))
@@ -131,7 +131,7 @@ contains
       ' Inconsistent shape, get: ',dimlen(1),'x',dimlen(2),' = ',dimlen(1)*dimlen(2)
     write(*,'(A,I0)') &
       ' while expected:          ',size(VAR)
-    stop
+    stop 13
   else
     do i=1,dimlen(2) ! loop on second dimension
       stt(2) = i
@@ -269,7 +269,7 @@ contains
     print *
     print *, 'Error while loading variable '//varname
     print *, 'Three dimension at least are expected'
-    stop
+    stop 17
   end if
 
   allocate(dimids(n))
@@ -312,7 +312,7 @@ contains
       ' Inconsistent shape, get: ',dimlen(1),'x',dimlen(2),'x',dimlen(3),' => ',dimlen(1)*dimlen(2),'x',dimlen(3)
     write(*,'(A,I0,A,I0)') &
       ' while expected:          ',size(VAR,2),'x',size(VAR,1)
-    stop
+    stop 13
   else
     do i=1,dimlen(2)
       do j=1,dimlen(3)
@@ -424,7 +424,7 @@ contains
     print *
     print *, 'Error while loading variable '//varname
     print *, 'Four dimension at least are expected'
-    stop
+    stop 17
   end if
 
   allocate(dimids(n))
@@ -469,7 +469,7 @@ contains
       ' => ',dimlen(1)*dimlen(2),'x',dimlen(3),'x',dimlen(4)
     write(*,'(A,I0,A,I0,A,I0)') &
       ' while expected:          ',size(VAR,3),'x',size(VAR,2),'x',size(VAR,1)
-    stop
+    stop 13
   else
     do i=1,dimlen(2)
       do j=1,dimlen(3)
@@ -661,7 +661,7 @@ subroutine check_landcells_generic(message, erratic_points, landarea, error_hand
                     print *, '    2: ignore the issue and continue the execution'
                     read *, answer
                     select case (answer)
-                        case (0); stop
+                        case (0); stop 2
                         case (1); where (errormask) landarea=0
                         case (2) ! do nothing
                         case default; loop=.true.
@@ -669,7 +669,7 @@ subroutine check_landcells_generic(message, erratic_points, landarea, error_hand
                 end do
 
             case (0) ! abort the program
-                stop
+                stop 2
 
             case (1) ! automatic correction
                 print *
@@ -681,7 +681,7 @@ subroutine check_landcells_generic(message, erratic_points, landarea, error_hand
             case default
                 print *
                 print *, 'INTERNAL ERROR: illegal error handling option:', error_handling
-                stop
+                stop 421
 
         end select
 
@@ -750,7 +750,7 @@ subroutine check_invalid(which_var, landarea, error_handling, var1D, var2D, var7
         print *
         print *, 'INTERNAL ERROR in subroutine "check_invalid" of module "io_module".'
         print *, 'No variable to check was given to the subroutine.'
-        stop
+        stop 421
     end if
 
     ! Default value for non-pixel axis (CO2 levels, lithology, ...)
@@ -798,7 +798,7 @@ subroutine check_invalid(which_var, landarea, error_handling, var1D, var2D, var7
                 print *
                 print *, 'INTERNAL ERROR in subroutine "check_invalid" of module "io_module".'
                 print *, 'Unexpected 1-dimension lithology variable (should be nlitho x npixel)'
-                stop
+                stop 421
             else ! var2D
                 errormask = (landarea>0 .and. abs(sum(var2D, dim=loc_axis) - 1d0)>1d-6)
                 example_invalid = maxval(abs(sum(var2D, dim=loc_axis) - 1d0), mask=errormask)
@@ -808,7 +808,7 @@ subroutine check_invalid(which_var, landarea, error_handling, var1D, var2D, var7
             print *
             print *, 'INTERNAL ERROR in subroutine "check_invalid" of module "io_module".'
             print *, 'Unkown variable case "'//trim(which_var)//'"'
-            stop
+            stop 421
 
         end select
 
@@ -858,7 +858,7 @@ subroutine check_invalid(which_var, landarea, error_handling, var1D, var2D, var7
                     read *, answer
                     select case (answer)
                         case (0)
-                            stop
+                            stop 2
                         case (1)
                             where (errormask) landarea=0
                         case (2)
@@ -896,7 +896,7 @@ subroutine check_invalid(which_var, landarea, error_handling, var1D, var2D, var7
                 end do
 
             case (0) ! abort the program
-                stop
+                stop 2
 
             case (1) ! automatic correction
                 print *
@@ -914,7 +914,7 @@ subroutine check_invalid(which_var, landarea, error_handling, var1D, var2D, var7
                         print *, 'Automatic correction => replace invalid values minimum positive slope'
                     case ('lithology fraction')
                         print *, 'Bad error handling option "3": No replacement value for invalid lithology fractions sum'
-                        stop
+                        stop 59
                 end select
                 if (present(var1D)) then
                     where (errormask) var1D=replacement_value
@@ -928,7 +928,7 @@ subroutine check_invalid(which_var, landarea, error_handling, var1D, var2D, var7
             case default
                 print *
                 print *, 'INTERNAL ERROR: illegal error handling option:', error_handling
-                stop
+                stop 421
 
         end select
 
@@ -975,26 +975,26 @@ subroutine raise_axis_error(which_axis, nerr, axis_len, max_mismatch, error_hand
                 print *, '    2: ignore the issue and continue the execution'
                 read *, answer
                 select case (answer)
-                    case (0); stop
+                    case (0); stop 2
                     case (2) ! do nothing
                     case default; loop=.true.
                 end select
             end do
 
         case (0) ! abort the program
-            stop
+            stop 2
 
         case (1) ! asked for automatic correction
             print *
             print *, 'Bad error handling option "1": cannot remove points with axis mismatch.'
-            stop
+            stop 59
 
         case (2) ! do nothing
 
         case default
             print *
             print *, 'INTERNAL ERROR: illegal error handling option:', error_handling
-            stop
+            stop 421
 
     end select
 
@@ -1136,7 +1136,7 @@ end subroutine
       if (char_var == UNDEFINED_VALUE_CHAR) then
         print *
         print *, message
-        if (loc_kill) stop
+        if (loc_kill) stop 191
       end if
     end if
 
@@ -1144,7 +1144,7 @@ end subroutine
       if (int_var == UNDEFINED_VALUE_INT) then
         print *
         print *, message
-        if (loc_kill) stop
+        if (loc_kill) stop 191
       end if
     end if
 
@@ -1152,7 +1152,7 @@ end subroutine
       if (real_var == UNDEFINED_VALUE_REAL) then
         print *
         print *, message
-        if (loc_kill) stop
+        if (loc_kill) stop 191
       end if
     end if
 
@@ -1160,7 +1160,7 @@ end subroutine
       if (dble_var == UNDEFINED_VALUE_DBLE) then
         print *
         print *, message
-        if (loc_kill) stop
+        if (loc_kill) stop 191
       end if
     end if
 

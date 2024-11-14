@@ -32,7 +32,7 @@ contains
             print *, 'ERROR: too many different values read in GCM configuration file for climatic parameter '//param_name
             print *, 'Length of current climatic parameter axis is ', length
             print *, 'Found ', n, ' different values'
-            stop
+            stop 89
         end if
     end subroutine
 
@@ -53,7 +53,7 @@ contains
         if (size(order)/=list_len) then
             print *, 'INTERNAL ERROR in module "climatic_parameters", subroutine "sort_single_param":'
             print *, 'ouput argument "order" must be of same size than input argument "param_list"'
-            stop
+            stop 421
         end if
 
         if (axis_len==1 .and. param_name/='CO2') then
@@ -241,7 +241,7 @@ contains
 
                         print *, 'error in "get_clim_param" (module "climatic_parameters") while reading climatic parameters file'
                         print *, 'IOstatus:', i_error
-                        stop
+                        stop 97
 
                     end if
 

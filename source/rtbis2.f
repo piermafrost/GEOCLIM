@@ -12,7 +12,7 @@
     if(fph*fmid.ge.0.) then
         write(6,*)x1,fph,x2,fmid
         write(6,*)'root must be bracketed:rtbis'
-        stop
+        stop 77
     endif
     if(fph.lt.0.) then
         out=x1

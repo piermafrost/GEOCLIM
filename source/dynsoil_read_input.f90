@@ -170,7 +170,7 @@ subroutine dynsoil_read_input(IOcondID, &
         print *
         print *, 'ERROR: invalid DynSoil initialization mode "'//trim(init_mode)//'".'
         print *, 'Legal ones are "restart", "startup:null" and "startup:eq".'
-        stop
+        stop 47
 
     end if
 

@@ -137,12 +137,12 @@ contains
     !
     if (size(defdim) > size(alldimid)) then
       print *, 'ERROR - in function "get_dimid" of file "netcdf_io_module.f90": "defdim" cannot have more elements than "alldimid"'
-      stop
+      stop 997
     end if
     !
     if (size(alldimid) > size(defdimid)) then
       print *,'ERROR - in function "get_dimid" of file "netcdf_io_module.f90": "alldimid" cannot have more elements than "defdimid"'
-      stop
+      stop 997
     end if
     !
     ndim = 0
@@ -180,7 +180,7 @@ contains
       nctype = NF90_DOUBLE
     else
       print *, 'Error - in "def_var" in "netcdf_io_module.f90": unknown variable type "'//trim(vartype)//'"'
-      stop
+      stop 997
     end if
 
     ! There are 2 possible cases to interpret "defdim"
@@ -253,7 +253,7 @@ contains
           ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - !
         else
           print *, 'Error - in "put_att" in "netcdf_io_module.f90": unknown variable type "'//trim(convert2type)//'"'
-          stop
+          stop 997
         end if
       else
         ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - !
@@ -382,7 +382,7 @@ contains
       end if
     else
       print *, 'Error - in "get_var" in "netcdf_io_module.f90": no "intent(out)" array were given to the subroutine'
-      stop
+      stop 997
     end if
     call nf90_check(ierr, 'Error while getting variable "'//trim(varname)//'"')
 
@@ -549,7 +549,7 @@ contains
       end if
     else
       print *, 'Error - in "put_var" in "netcdf_io_module.f90": no "intent(in)" array were given to the subroutine'
-      stop
+      stop 997
     end if
 
     write(num,fmt="(I0)") loc_vid
@@ -653,7 +653,7 @@ contains
       print *
       print *, trim(message)
       print *, nf90_strerror(ierr)
-      if (loc_kill) stop
+      if (loc_kill) stop 997
     end if
 
   end subroutine

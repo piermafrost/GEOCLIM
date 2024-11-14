@@ -33,7 +33,7 @@ subroutine read_veget
 
                 print *, 'error in "read_veget.f" while reading vegetation file'
                 print *, 'IOstatus:',i_error
-                stop
+                stop 97
 
             end if
 

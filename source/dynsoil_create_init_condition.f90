@@ -49,7 +49,7 @@ module dynsoil_create_init_condition
                 print *
                 print *, 'ERROR: invalid DynSoil startup case "'//trim(which_initcond)//'"'
                 print *, 'Only "eq" or "null" are allowed.'
-                stop
+                stop 47
 
         end select
 

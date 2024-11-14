@@ -22,12 +22,14 @@ subroutine read_oceanic_temperature(IOunit, Toceclimber, co2_axis, order, ndata)
     if (line == 'parametric') then
 
         if (.not. present(co2_axis)) then
+            print *
             print *, 'INTERNAL ERROR: in subroutine "read_oceanic_temperature",'
             print *, 'argument "co2_axis", needed to compute oceanic temperature ("parametric" mode),'
             print *, 'was not given to the subroutine'
-            stop
+            stop 421
         end if
 
+        print *
         print *
         print *, 'Parametric CO2-dependent oceanic temperature' 
     
@@ -81,6 +83,7 @@ subroutine read_oceanic_temperature(IOunit, Toceclimber, co2_axis, order, ndata)
         if (present(order)) then
 
             print *
+            print *
             write(*, fmt='(A,I0,A)') 'Line ordering in oceanic temperature input file (#',IOunit, &
                                      ') assumed to be the same than for continental climate'
 
@@ -104,6 +107,7 @@ subroutine read_oceanic_temperature(IOunit, Toceclimber, co2_axis, order, ndata)
         else
 
             print *
+            print *
             print *,               'Oceanic temperature assumed to be dependent on CO2 ONLY'
             write(*, fmt='(A,I0)') '  -> expect 1 line per CO2 level, in decreasing order, in input file #',IOunit
 
@@ -120,7 +124,7 @@ subroutine read_oceanic_temperature(IOunit, Toceclimber, co2_axis, order, ndata)
                         print *, 'Error while reading oceanic temperature'
                         print *, 'CO2 mismatch for level #', k
                         write(*, fmt='(A,F10.2,A,F10.2)') 'Got: ', real(co2), ', expect: ', 280*co2_axis(k)
-                        stop
+                        stop 13
                     end if
                 end if
             end do

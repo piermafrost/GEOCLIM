@@ -14,7 +14,7 @@
     if(fsoil*fmid.ge.0.) then
         write(6,*)x1,fsoil,x2,fmid
         write(6,*)'root must be bracketed:rtbis'
-        stop
+        stop 77
     endif
     if(fsoil.lt.0.) then
         out=x1

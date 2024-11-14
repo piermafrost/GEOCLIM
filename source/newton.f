@@ -25,7 +25,7 @@
         write(74,*)'num=',num,' x=',x
         write(74,*)'fx=',fx,' dfx=',dfx
         write(74,*)'program stop'
-        stop
+        stop 77
     endif
     if(fxfx0.gt.0.)go to 1
 
@@ -41,7 +41,7 @@
         write(74,*)'num=',num,' x=',x
         write(74,*)'fx=',fx,' dfx=',dfx
         write(74,*)'program stop'
-        stop
+        stop 77
     endif
     if(err.gt.eror)go to 2
 
