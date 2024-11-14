@@ -6,35 +6,36 @@ subroutine open_ascii_files(ID)
     include 'combine_foam.inc'
 
     ! Local variables
-    character(len=30):: ocean_temp_mode
+    character(len=30):: ocean_temp_mode, sedim_transport_mode
     character(len=100):: var_name, fillval_name ! note : unused, but needed because present in LITHO_INFO namelist
-    character(len=500):: file_name, geoc_var_init_file, grid_area_file, cont_area_file, &
+    character(len=500):: file_name, COMB_var_init_file, grid_area_file, cont_area_file, &
                          temperature_file, runoff_file, interp_T_factor, interp_R_factor, GCM_input_condition_file, &
-                         ocean_temp_file, box_volume_file,box_surf_file, box_surf_sedi_file, deep_box_file, sedim_box_file, &
+                         ocean_temp_file, box_volume_file,box_surf_file, box_surf_sedi_file, deep_box_file, &
                          appcont_box_file, thermocline_file, surface_box_file, epicont_box_file, polar_box_file, box_press_file, &
-                         exchange_file, fsink_inorg_file, fsink_file, COMBINE_restart_file
+                         exchange_file, boundary_length_file, COMBINE_restart_file
     integer:: ierr
     double precision, dimension(nlitho):: singlepixel_lithofrac
 
 
     ! Namelists declaration
     ! ---------------------
-    namelist /INIT_INFO/ geoc_var_init_file
+    namelist /INIT_INFO/ COMB_init_mode, COMB_var_init_file
     namelist /CONT_INFO/ cont_input_mode, grid_area_file, cont_area_file, temperature_file, runoff_file, &
                          interp_T_factor, interp_R_factor, GCM_input_condition_file
     namelist /LITHO_INFO/ file_name, var_name, fillval_name, singlepixel_lithofrac
     namelist /VEGET_INFO/ file_name
     namelist /CLIMPARAM_INFO/ file_name
-    namelist /COMBINE_INFO/ ocean_temp_mode, ocean_temp_file, &
+    namelist /COMBINE_INFO/ ocean_temp_mode, sedim_transport_mode, ocean_temp_file, &
                             box_volume_file, box_surf_file, box_surf_sedi_file, &
-                            deep_box_file, sedim_box_file, appcont_box_file, thermocline_file, surface_box_file, epicont_box_file, &
-                            polar_box_file, box_press_file, exchange_file, fsink_inorg_file, fsink_file
+                            deep_box_file, appcont_box_file, thermocline_file, surface_box_file, epicont_box_file, &
+                            polar_box_file, box_press_file, exchange_file, boundary_length_file
     namelist /RESTART_INFO/ COMBINE_restart_file, DynSoil_restart_file
 
 
     ! Default values of namelist variables
     ! ------------------------------------
-    geoc_var_init_file       = UNDEFINED_VALUE_CHAR
+    COMB_init_mode           = 'restart'
+    COMB_var_init_file       = UNDEFINED_VALUE_CHAR
     cont_input_mode          = UNDEFINED_VALUE_CHAR
     grid_area_file           = UNDEFINED_VALUE_CHAR
     cont_area_file           = UNDEFINED_VALUE_CHAR
@@ -45,12 +46,12 @@ subroutine open_ascii_files(ID)
     GCM_input_condition_file = UNDEFINED_VALUE_CHAR
     singlepixel_lithofrac    = UNDEFINED_VALUE_DBLE
     ocean_temp_mode          = UNDEFINED_VALUE_CHAR
+    sedim_transport_mode     = UNDEFINED_VALUE_CHAR
     ocean_temp_file          = UNDEFINED_VALUE_CHAR
     box_volume_file          = UNDEFINED_VALUE_CHAR
     box_surf_file            = UNDEFINED_VALUE_CHAR
     box_surf_sedi_file       = UNDEFINED_VALUE_CHAR
     deep_box_file            = UNDEFINED_VALUE_CHAR
-    sedim_box_file           = UNDEFINED_VALUE_CHAR
     appcont_box_file         = UNDEFINED_VALUE_CHAR
     thermocline_file         = UNDEFINED_VALUE_CHAR
     surface_box_file         = UNDEFINED_VALUE_CHAR
@@ -58,8 +59,7 @@ subroutine open_ascii_files(ID)
     polar_box_file           = UNDEFINED_VALUE_CHAR
     box_press_file           = UNDEFINED_VALUE_CHAR
     exchange_file            = UNDEFINED_VALUE_CHAR
-    fsink_inorg_file         = UNDEFINED_VALUE_CHAR
-    fsink_file               = UNDEFINED_VALUE_CHAR
+    boundary_length_file     = UNDEFINED_VALUE_CHAR
     COMBINE_restart_file     = UNDEFINED_VALUE_CHAR
     DynSoil_restart_file     = UNDEFINED_VALUE_CHAR
 
@@ -74,11 +74,18 @@ subroutine open_ascii_files(ID)
     read(unit=ID, nml=INIT_INFO)
     ! <><><><><><><><><><><><> !
 
-    call check_namelist_def('Error - in open_ascii_files.f: variable "geoc_var_init_file" was not given in config/IO_CONDITIONS', &
-                            char_var=geoc_var_init_file)
-    call add_path(geoc_var_init_file)
-    open (2  , status='old', action='read', file=geoc_var_init_file)
-    !    ***********************************************************
+    if (COMB_init_mode == "restart") then
+        call check_namelist_def('Error - in open_ascii_files.f: variable "COMB_var_init_file" was not given in'// &
+                                'config/IO_CONDITIONS', char_var=COMB_var_init_file)
+        call add_path(COMB_var_init_file)
+        open (2  , status='old', action='read', file=COMB_var_init_file)
+        !    ***********************************************************
+    elseif (COMB_init_mode /= "coldstart") then
+        print *
+        print *, 'Error: illegal value for "COMB_init_mode" (read in config/IO_CONDITIONS): ', COMB_init_mode
+        print *, 'Expect "restart" or "coldstart"'
+        stop 31
+    end if
 
 
     !--------!
@@ -146,8 +153,10 @@ subroutine open_ascii_files(ID)
 
         case default
 
-            print *, 'ERROR - in open_ascii_files.f: "cont_input_mode" (read in config/IO_CONDITIONS must be "GCM" or "ascii")'
-            stop
+            print *
+            print *, 'Error: illegal value for "cont_input_mode" (read in config/IO_CONDITIONS): ', cont_input_mode
+            print *, 'Expect "GCM" or "ascii"'
+            stop 31
 
     end select
 
@@ -258,10 +267,6 @@ subroutine open_ascii_files(ID)
 
     end if
 
-    !
-    ! unit=4: obsolete file: INPUT/hypso.dat
-    !
-
     !ccccccc +++++++++++++++++++++++++++++++++ 
     !       Earth physical dimensions
 
@@ -293,12 +298,6 @@ subroutine open_ascii_files(ID)
     open (35 , status='old', action='read', file=deep_box_file)
     !    ******************************************************
 
-    call check_namelist_def('Error - in open_ascii_files.f: variable "sedim_box_file" was not given in config/IO_CONDITIONS', &
-                            char_var=sedim_box_file)
-    call add_path(sedim_box_file)
-    open (36 , status='old', action='read', file=sedim_box_file)
-    !    *******************************************************
-
     call check_namelist_def('Error - in open_ascii_files.f: variable "box_press_file" was not given in config/IO_CONDITIONS', &
                             char_var=box_press_file)
     call add_path(box_press_file)
@@ -329,22 +328,6 @@ subroutine open_ascii_files(ID)
     open (42 , status='old', action='read', file=exchange_file)
     !    ******************************************************
 
-    !
-    ! unit=43: obsolete file: INPUT/indice_part.dat
-    !
-
-    call check_namelist_def('Error - in open_ascii_files.f: variable "fsink_inorg_file" was not given in config/IO_CONDITIONS', &
-                            char_var=fsink_inorg_file)
-    call add_path(fsink_inorg_file)
-    open (44 , status='old', action='read', file=fsink_inorg_file)
-    !    *********************************************************
-
-    call check_namelist_def('Error - in open_ascii_files.f: variable "fsink_file" was not given in config/IO_CONDITIONS', &
-                            char_var=fsink_file)
-    call add_path(fsink_file)
-    open (45 , status='old', action='read', file=fsink_file)
-    !    ***************************************************
-
     call check_namelist_def('Error - in open_ascii_files.f: variable "epicont_box_file" was not given in config/IO_CONDITIONS', &
                             char_var=epicont_box_file)
     call add_path(epicont_box_file)
@@ -356,6 +339,37 @@ subroutine open_ascii_files(ID)
     call add_path(polar_box_file)
     open (47 , status='old', action='read', file=polar_box_file)
     !    *******************************************************
+
+
+    !ccccccc+++++++++++++++++++++++++++++++++
+    !       choice of sediment transport scheme
+
+    call check_namelist_def('Error - in open_ascii_files.f: variable "sedim_transport_mode" was not given in config/IO_CONDITIONS',&
+                            char_var=sedim_transport_mode)
+
+    if (sedim_transport_mode == 'uniform') then
+
+        sed_routing_flag = .false.
+
+    elseif (sedim_transport_mode == 'neighbour') then
+
+        call check_namelist_def('Error - in open_ascii_files.f: variable "boundary_length_file" (for the sediment transport '// &
+                                'scheme) was not given in config/IO_CONDITIONS. Consider using `sedim_transport_mode="uniform"`.', &
+                                char_var=boundary_length_file)
+        call add_path(boundary_length_file)
+        open (43 , status='old', action='read', file=boundary_length_file)
+        !    *************************************************************
+
+        sed_routing_flag = .true.
+
+    else
+
+        print *
+        print *, 'Error: illegal value for "sedim_transport_mode" (read in config/IO_CONDITIONS): ', sedim_transport_mode
+        print *, 'Expect "uniform" or "neighbour"'
+        stop 31
+
+    end if
 
 
 
