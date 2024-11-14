@@ -4,6 +4,7 @@
 !   soil PCO2 and carbonate rock. Used to estimate carbonate weathering
 
     !use constante, only: deltah0, xloak25
+    use water_chemistry, only: eqcte
     implicit none
 
     include 'combine_foam.inc'
