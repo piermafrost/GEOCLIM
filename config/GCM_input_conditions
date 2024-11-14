@@ -42,20 +42,20 @@
 # file path                                                                                x_var_name    y_var_name    main_var_name
 #-----------------------------------------------------------------------------------------------------------------------------------
 &AREA_INFO
- area_file       = 'INPUT/ERA5/grid_30minx30min_sphere.nc'
- area_x_dim_name = 'longitude'
- area_y_dim_name = 'latitude'
- area_var_name   = 'area'
+ area_file       = 'INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_atm.nc'
+ area_x_dim_name = 'lon'
+ area_y_dim_name = 'lat'
+ area_var_name   = 'aire'
 /
 
 #    File for land fraction (or land area, will be interpreted according to its units)
 # file path                                                                                x_var_name    y_var_name    main_var_name
 #-----------------------------------------------------------------------------------------------------------------------------------
 &LAND_AREA_INFO
- landarea_file       = 'INPUT/ERA5/landfrac_30minx30min.nc'
- landarea_x_dim_name = 'longitude'
- landarea_y_dim_name = 'latitude'
- landarea_var_name   = 'lsm'
+ landarea_file       = 'INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_sechiba.nc'
+ landarea_x_dim_name = 'lon'
+ landarea_y_dim_name = 'lat'
+ landarea_var_name   = 'Contfrac'
 /
 
 
@@ -68,14 +68,14 @@
 
 &LAND_CLIM_INFO
 
- land_x_dim_name = 'longitude'
- land_y_dim_name = 'latitude'
+ land_x_dim_name = 'lon'
+ land_y_dim_name = 'lat'
 
  land_temp_var_name = 't2m'
- runoff_var_name    = 'ro'
+ runoff_var_name    = 'runoff + drainage'
 
  ! # File paths (MUST BE CONSISTENT WITH ORDER OF UNIQUE CLIMATIC PARAMETER COMBINATIONS),
- land_list_file(1) = 'INPUT/ERA5/ERA5_1981-2018_30minx30min.nc'
+ land_list_file(1) = 'INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_sechiba.nc'
 
 /
 
@@ -90,13 +90,13 @@
 
 &GLOB_CLIM_INFO
 
- !glob_x_dim_name = ''
- !glob_y_dim_name = ''
+ glob_x_dim_name = 'lon'
+ glob_y_dim_name = 'lat'
 
- !glob_temp_var_name = ''
+ glob_temp_var_name = 't2m'
 
  ! # File paths (MUST BE CONSISTENT WITH ORDER OF UNIQUE CLIMATIC PARAMETER COMBINATIONS),
- !glob_list_file = ''
+ glob_list_file(1) = 'INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_atm.nc'
 
 /
 
