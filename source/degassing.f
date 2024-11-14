@@ -1,22 +1,8 @@
     subroutine degassing(t)
 !   ***********************
-    use constante, only: Gt_to_mol, tstart_deg, xhydLiin
+    use constante, only: Gt_to_mol, tstart_deg
     implicit none
     include 'combine_foam.inc'
-    
-    fvol=volin*clo    !*((-0.5/1d7)*t+1)
-
-
-    do j0=1,ndeep
-        j = jbox_deep(j0)
-        fmor(j)=xMORin*clo/float(ndeep)
-        FhydLi(j)=xhydLiin*clo/float(ndeep)
-    end do
-    do j0=1,nnodeep
-        j = jbox_nodeep(j0)
-        fmor(j)=0.
-        FhydLi(j)=0.
-    end do
 
 
     ftrap=0.
@@ -30,9 +16,6 @@
             endif
         end do
     endif
-    
-
-    fanthros=0.
 
 
     return
