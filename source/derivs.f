@@ -53,12 +53,13 @@
     i=6 ! Oxygen (diss var #6)
     do j0=1,nnosurface
         j = jbox_nosurface(j0)
-        do k=1,nbasin
+        do k=1,nbasin-1
             diff_diss(i,j)=diff_diss(i,j)+F(k,j)*var_diss(i,k)*sluggish  &
                                          -F(j,k)*var_diss(i,j)*sluggish
         enddo
         diff_diss(i,j)=diff_diss(i,j) + R_diss(i,j)
     end do
+    diff_diss(i,nbasin)=diff_diss(i,nbasin) + R_diss(i,nbasin) ! atmosphere box
     do j0=1,nsurface !!! oxygN de surf. equilibr (diff_diss(i,j)=0)
         j = jbox_surface(j0)
         diff_diss(i,j)=R_diss(i,j)
