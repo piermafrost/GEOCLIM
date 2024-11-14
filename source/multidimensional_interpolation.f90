@@ -8,7 +8,7 @@ contains
 
 
     subroutine climate_interpolation(co2axis, param1, param2, param3, param4, param5, c, pvec, &
-                                     boxtemp_array, interp_boxtemp, &
+                                     boxtemp_array, interp_boxtemp, Fxch_array, interp_Fxch, &
                                      list_cont_pixel, ncontpxl, temp_array, runf_array, interp_temp, interp_runf)
 
         include 'shape.inc'
@@ -23,6 +23,9 @@ contains
         double precision, intent(in), dimension(nbasin, nclimber, len_p1, len_p2, len_p3, len_p4, len_p5), optional:: boxtemp_array
         double precision, intent(out), dimension(nbasin), optional:: interp_boxtemp
         !
+        double precision, intent(in), dimension(nbasin**2, nclimber, len_p1, len_p2, len_p3, len_p4, len_p5), optional:: Fxch_array
+        double precision, intent(out), dimension(nbasin, nbasin), optional:: interp_Fxch
+        !
         integer, intent(in), dimension(npxl), optional:: list_cont_pixel
         integer, intent(in), optional:: ncontpxl
         double precision, intent(in), dimension(npxl, nclimber, len_p1, len_p2, len_p3, len_p4, len_p5), optional:: temp_array, &
@@ -32,7 +35,7 @@ contains
         integer, dimension(6):: subshp
         integer, dimension(6,2):: intidx
         double precision, dimension(2,2,2,2,2,2):: interp_coeff
-        integer:: j0, j
+        integer:: j0, j, i, k
 
         ! get interpolation coefficients and indices
         ! ------------------------------------------
@@ -50,7 +53,7 @@ contains
                 print *
                 print *, 'ERROR in "source/coupler.inc": illegal interpolation mode "'//CO2_interpolation//'"'
                 print *, 'Expect "linear" or "log"'
-                stop
+                stop 31
         end select
 
         ! compute multinear interpolation
@@ -96,6 +99,21 @@ contains
                     boxtemp_array(j, intidx(1,1):intidx(1,2), intidx(2,1):intidx(2,2), intidx(3,1):intidx(3,2), &
                                      intidx(4,1):intidx(4,2), intidx(5,1):intidx(5,2), intidx(6,1):intidx(6,2)) &
                                        )
+            end do
+        end if
+
+        if (present(Fxch_array) .and. present(interp_Fxch)) then
+            k = 0
+            do j = 1,nbasin
+                do i = 1,nbasin
+                    k = k + 1
+                    interp_Fxch(i, j) = sum( &
+                        interp_coeff(1:subshp(1), 1:subshp(2), 1:subshp(3), 1:subshp(4), 1:subshp(5), 1:subshp(6)) &
+                        * &
+                        Fxch_array(k, intidx(1,1):intidx(1,2), intidx(2,1):intidx(2,2), intidx(3,1):intidx(3,2), &
+                                      intidx(4,1):intidx(4,2), intidx(5,1):intidx(5,2), intidx(6,1):intidx(6,2)) &
+                                           )
+                end do
             end do
         end if
 
