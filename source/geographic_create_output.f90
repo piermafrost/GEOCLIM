@@ -3,8 +3,8 @@ implicit none
 
 contains
 
-subroutine geographic_create_output(ID, output_path, run_name, lon, lat, area, litho_frac, slope, file_name, time_dimname, &
-                                    outvar_info                                                                            )
+subroutine geographic_create_output(ID, output_path, run_name, lon, lat, area, litho_frac, slope, cont_basin_map, &
+                                    file_name, time_dimname, outvar_info                                          )
 
   use io_module, only: netcdf_output_var, set_default_nml_values, set_outvar_info, &
                        check_namelist_def, UNDEFINED_VALUE_INT, UNDEFINED_VALUE_CHAR, DEFAULT_FILLVAL_NAME
@@ -17,8 +17,11 @@ subroutine geographic_create_output(ID, output_path, run_name, lon, lat, area, l
 
   integer, intent(in):: ID
   character(len=*), intent(in):: output_path, run_name
-  double precision, intent(in), dimension(:):: lon, lat, area, slope
-  double precision, intent(in), dimension(:,:):: litho_frac
+  double precision, intent(in), dimension(nlon):: lon
+  double precision, intent(in), dimension(nlat):: lat
+  double precision, intent(in), dimension(nlon*nlat):: area, slope
+  double precision, intent(in), dimension(nlitho,nlon*nlat):: litho_frac
+  integer, intent(inout), dimension(nlon*nlat):: cont_basin_map
   !
   character(len=500), intent(out):: file_name
   character(len=100), intent(out):: time_dimname
@@ -176,11 +179,11 @@ subroutine geographic_create_output(ID, output_path, run_name, lon, lat, area, l
   read(unit=ID, nml=GEO_OUTPUT_VAR)
   !<><><><><><><><><><><><><><><><>!
 
-  !  .   SPECIAL CASE FOR slope VARIABLE (#10): 
-  ! /!\  -> do not write it if DynSoil module is not activated
-  ! ^^^
+  !   .   SPECIAL CASE FOR slope VARIABLE (#11): 
+  !  /!\  -> do not write it if DynSoil module is not activated
+  ! '''''
   ! - ! - ! - ! - ! - ! - ! - ! - ! - ! - ! - ! - ! - !
-  if (.not. coupling_dynsoil) writevar(10) = .false.  !
+  if (.not. coupling_dynsoil) writevar(11) = .false.  !
   ! - ! - ! - ! - ! - ! - ! - ! - ! - ! - ! - ! - ! - !
 
   do i = 1,nGEOGoutvar
@@ -229,11 +232,14 @@ subroutine geographic_create_output(ID, output_path, run_name, lon, lat, area, l
   call put_var(fid, dimvarid(1), var_real1D=real(lon)       )
   call put_var(fid, dimvarid(2), var_real1D=real(lat)       )
   call put_var(fid, dimvarid(3),  var_int1D=(/(i,i=1,nlitho)/))
-  if (outvar_info(1)%writevar)  call put_var(fid, outvar_info(1)%id, var_real2D=real(1e12*reshape(area, shape=(/nlon,nlat/))))
-                                                                                   ! ^^^^ --> convert 1e6km2 => m2
-  if (outvar_info(2)%writevar)  call put_var(fid, outvar_info(2)%id, var_real3D=real(reshape(litho_frac, &
+  if (outvar_info(1)%writevar)  call put_var(fid, outvar_info(1)%id,  var_real2D=real(1e12*reshape(area, shape=(/nlon,nlat/))))
+                                                                                    ! ^^^^ --> convert 1e6km2 => m2
+  if (outvar_info(2)%writevar)  call put_var(fid, outvar_info(2)%id,  var_real3D=real(reshape(litho_frac, &
                                                                                       shape=(/nlon,nlat,nlitho/), order=(/3,1,2/))))
-  if (outvar_info(10)%writevar) call put_var(fid, outvar_info(10)%id, var_real2D=real(reshape(slope, shape=(/nlon,nlat/))))
+  ! put fill-value on "basinmap" before writing it
+  where (area==0d0) cont_basin_map = int(outvar_info(3)%fillval)
+  if (outvar_info(3)%writevar)  call put_var(fid, outvar_info(3)%id,  var_int2D=reshape(cont_basin_map, shape=(/nlon,nlat/)))
+  if (outvar_info(11)%writevar) call put_var(fid, outvar_info(11)%id, var_real2D=real(reshape(slope, shape=(/nlon,nlat/))))
 
 
   ! close output file:

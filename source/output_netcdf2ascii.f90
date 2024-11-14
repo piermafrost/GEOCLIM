@@ -7,8 +7,9 @@ subroutine output_netcdf2ascii(COMB_outvar_info)
 use netcdf
 use netcdf_io_module, only: nf90_check
 use io_module, only: netcdf_output_var, DEFAULT_FILLVAL
-use constante, only: PI_n_CO2_atm
+use constante, only: PI_n_CO2_atm, PI_n_O2_atm, PI_n_rest_of_atm
 
+  double precision, parameter:: PI_atm_moles = PI_n_O2_atm+PI_n_CO2_atm+PI_n_rest_of_atm ! molecular mass of the atmosphere
 ! ********************************************************************************
   include 'combine_foam.inc'
 ! ********************************************************************************
@@ -16,7 +17,7 @@ use constante, only: PI_n_CO2_atm
   integer, dimension(nCOMBoutvar):: varid
   integer:: fid, Bfid
   integer:: ierr, ntime, Bntime, tfid, tvarid, Btvarid
-  double precision:: vector(1)
+  double precision:: vector(1), PIC_snk_flx(nbasin)
   logical:: open_COMB_file, got_var(nCOMBoutvar)
   ! Declare structures for netCDF output info (cannot be declared in combine_foam.inc)
   type(netcdf_output_var), dimension(nCOMBoutvar), intent(in) :: COMB_outvar_info
@@ -74,7 +75,7 @@ use constante, only: PI_n_CO2_atm
     ierr = nf90_inq_varid(fid, COMB_time_dimname, tvarid)
     call nf90_check(ierr, 'Error while getting ID of variable "'//trim(COMB_time_dimname)//'"')
     ! get variables identifier:
-    do k = 4,nCOMBoutvar ! Skip first 3 variables (box volume, surface and sedimentary surface)
+    do k = 14,nCOMBoutvar ! Skip first 13 variables (time-invariant fields)
       if (COMB_outvar_info(k)%writevar) then
         ierr = nf90_inq_varid(fid, COMB_outvar_info(k)%vname, varid(k))
         call nf90_check(ierr, 'Error while getting ID of variable "'//trim(COMB_outvar_info(k)%vname)//'"', kill=.false.)
@@ -103,7 +104,7 @@ use constante, only: PI_n_CO2_atm
   dhco3(:)             = DEFAULT_FILLVAL
   dco3(:)              = DEFAULT_FILLVAL
   ph(:)                = DEFAULT_FILLVAL
-  omega(:)             = DEFAULT_FILLVAL
+  omega_0(:)           = DEFAULT_FILLVAL
   temp_box(:)          = DEFAULT_FILLVAL
   salin(:)             = DEFAULT_FILLVAL
   dplysc(:)            = DEFAULT_FILLVAL
@@ -114,24 +115,24 @@ use constante, only: PI_n_CO2_atm
   ph_tot               = DEFAULT_FILLVAL
   temp_tot             = DEFAULT_FILLVAL
   salin_tot            = DEFAULT_FILLVAL
-  O2_atm_level         = DEFAULT_FILLVAL
-  CO2_atm_level        = DEFAULT_FILLVAL
+  pO2_atm              = DEFAULT_FILLVAL
+  pCO2_atm             = DEFAULT_FILLVAL
   xPOPexport           = DEFAULT_FILLVAL
   fanthros             = DEFAULT_FILLVAL
   fco2atm_ocean(:)     = DEFAULT_FILLVAL
   fco2atm_ocean_tot    = DEFAULT_FILLVAL
   finorgC(:)           = DEFAULT_FILLVAL
   fdissol_carb(:)      = DEFAULT_FILLVAL
-  fsilw                = DEFAULT_FILLVAL
-  fbasw                = DEFAULT_FILLVAL
-  fkerw                = DEFAULT_FILLVAL
+  fsilw(1)             = DEFAULT_FILLVAL
+  fbasw(1)             = DEFAULT_FILLVAL
+  fkerw(1)             = DEFAULT_FILLVAL
   freef(:)             = DEFAULT_FILLVAL
   freef_tot            = DEFAULT_FILLVAL
-  fdep_tot             = DEFAULT_FILLVAL
+  fcarbdep_tot         = DEFAULT_FILLVAL
   fodc(:)              = DEFAULT_FILLVAL
   fodc_tot             = DEFAULT_FILLVAL
-  fsink_inorg(:)       = DEFAULT_FILLVAL
-  fpw                  = DEFAULT_FILLVAL
+  PIC_snk_flx(:)       = DEFAULT_FILLVAL
+  fpw(1)               = DEFAULT_FILLVAL
   fbioC(:)             = DEFAULT_FILLVAL
   F_seafloor_cdiss(:)  = DEFAULT_FILLVAL
   F_seafloor_cdiss_tot = DEFAULT_FILLVAL
@@ -139,8 +140,8 @@ use constante, only: PI_n_CO2_atm
   fCO2_crust(:)        = DEFAULT_FILLVAL
   fSO4_basin(:)        = DEFAULT_FILLVAL
   fSO4_crust(:)        = DEFAULT_FILLVAL
-  FrivLi               = DEFAULT_FILLVAL
-  dLiriv               = DEFAULT_FILLVAL
+  FrivLi(1)            = DEFAULT_FILLVAL
+  dLiriv(1)            = DEFAULT_FILLVAL
 
 
   do k = 1,ntime
@@ -152,219 +153,209 @@ use constante, only: PI_n_CO2_atm
       ierr = nf90_get_var( fid, tvarid , vector , start=(/k/), count=(/1/) )
       t = vector(1)
       !
-      do i = 4,8
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  var_diss(i-3,:)      , start=(/1,k/), count=(/nbasin,1/)  )
+      do i = 20,27
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  var_diss(i-19,:)     , start=(/1,k/), count=(/nbasin,1/)  )
       end do
       !
-      do i = 9,13
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  var_part(i-8,:)      , start=(/1,k/), count=(/nbasin,1/)  )
+      do i = 28,32
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  var_part(i-27,:)     , start=(/1,k/), count=(/nbasin,1/)  )
       end do
       !
-      do i = 14,15
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  var_diss(i-8,:)      , start=(/1,k/), count=(/nbasin,1/)  )
+      do i = 33,38
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  var_isot(i-32,:)     , start=(/1,k/), count=(/nbasin,1/)  )
       end do
       !
-      do i = 16,21
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  var_isot(i-15,:)     , start=(/1,k/), count=(/nbasin,1/)  )
-      end do
-      !
-      i = 23
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  var_diss(8,:)        , start=(/1,k/), count=(/nbasin,1/)  )
-      !
-      i = 24
+      i = 39
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  h2co3(:)             , start=(/1,k/), count=(/nbasin,1/)  )
       !
-      i = 25
+      i = 40
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  hco3(:)              , start=(/1,k/), count=(/nbasin,1/)  )
       !
-      i = 26
+      i = 41
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  co3(:)               , start=(/1,k/), count=(/nbasin,1/)  )
       !
-      i = 27
+      i = 42
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  dh2co3(:)            , start=(/1,k/), count=(/nbasin,1/)  )
       !
-      i = 28
+      i = 43
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  dhco3(:)             , start=(/1,k/), count=(/nbasin,1/)  )
       !
-      i = 29
+      i = 44
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  dco3(:)              , start=(/1,k/), count=(/nbasin,1/)  )
       !
-      i = 30
+      i = 45
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  ph(:)                , start=(/1,k/), count=(/nbasin,1/)  )
       !
-      i = 31
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  omega(:)             , start=(/1,k/), count=(/nbasin,1/)  )
+      i = 46
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  omega_0(:)           , start=(/1,k/), count=(/nbasin,1/)  )
       !
-      i = 32
+      i = 47
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  temp_box(:)          , start=(/1,k/), count=(/nbasin,1/)  )
       !
-      i = 33
+      i = 48
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  salin(:)             , start=(/1,k/), count=(/nbasin,1/)  )
       !
-      i = 34
+      i = 49
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  dplysc(:)            , start=(/1,k/), count=(/nbasin,1/)  )
       !
-      i = 35
+      i = 51
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  dplysa(:)            , start=(/1,k/), count=(/nbasin,1/)  )
       !
-      do i = 36,40
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vartot_diss(i-35:i-39) , start=(/k/), count=(/1/)          )
+      do i = 54,59
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vartot_diss(i-53:i-53) , start=(/k/), count=(/1/)          )
       end do
       !
-      do i = 41,45
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vartot_part(i-40:i-44) , start=(/k/), count=(/1/)          )
+      i = 60
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vartot_diss(8:8) ,      start=(/k/), count=(/1/)  )
+      !
+      do i = 61,65
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vartot_part(i-60:i-60) , start=(/k/), count=(/1/)          )
       end do
       !
-      i = 46
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vartot_diss(6:6) ,      start=(/1,k/), count=(/nbasin,1/)  )
-      !
-      do i = 47,49
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vartot_isot(i-46:i-48) , start=(/k/), count=(/1/)          )
+      do i = 66,68
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vartot_isot(i-65:i-65) , start=(/k/), count=(/1/)          )
       end do
       !
-      do i = 50,51
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vartot_isot(i-45:i-46) , start=(/k/), count=(/1/)          )
+      do i = 69,70
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vartot_isot(i-64:i-64) , start=(/k/), count=(/1/)          )
       end do
       !
-      i = 53
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vartot_diss(8:8) ,      start=(/1,k/), count=(/nbasin,1/)  )
-      !
-      i = 54
+      i = 71
         vector = 0
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
                          ph_tot = vector(1)
       !
-      i = 55
+      i = 72
         vector = 0
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
                          temp_tot = vector(1)
       !
-      i = 56
+      i = 73
         vector = 0
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
                          salin_tot = vector(1)
       !
-      i = 57
-        vector = 0
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         O2_atm_level = vector(1)
-      !
-      i = 58
-        vector = 0
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         CO2_atm_level = vector(1)
-      !
-      i = 61
-        vector = 0
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         xPOPexport = vector(1)
-      !
-      i = 62
-        vector = 0
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         fanthros = vector(1)
-      !
-      i = 63
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fco2atm_ocean(:)     , start=(/1,k/), count=(/nbasin,1/)  )
-      !
-      i = 64
-        vector = 0
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         fco2atm_ocean_tot = vector(1)
-      !
-      i = 65
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  finorgC(:)           , start=(/1,k/), count=(/nbasin,1/)  )
-      !
-      i = 66
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fdissol_carb(3:3)    , start=(/k/), count=(/1/)           )
-      !
-      i = 67
-        vector = 0
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         fsilw = vector(1)
-      !
-      i = 68
-        vector = 0
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         fbasw = vector(1)
-      !
-      i = 69
-        vector = 0
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         fcarbw = vector(1)
-      !
-      i = 70
-        vector = 0
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         fkerw = vector(1)
-      !
-      i = 71
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  freef(:)             , start=(/1,k/), count=(/nbasin,1/)  )
-      !
-      i = 72
-        vector = 0
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         freef_tot = vector(1)
-      !
-      i = 73
-        vector = 0
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         fdep_tot = vector(1)
-      !
-      i = 74
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fodc(:)              , start=(/1,k/), count=(/nbasin,1/)  )
-      !
       i = 75
         vector = 0
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         fodc_tot = vector(1)
-      !
-      i = 76
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fsink_inorg(:)       , start=(/1,k/), count=(/nbasin,1/)  )
+                         pO2_atm = vector(1)
       !
       i = 77
         vector = 0
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         fpw = vector(1)
-      !
-      i = 78
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fbioC(:)             , start=(/1,k/), count=(/nbasin,1/)  )
-      !
-      i = 79
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  F_seafloor_cdiss(:)  , start=(/1,k/), count=(/nbasin,1/)  )
+                         pCO2_atm = vector(1)
       !
       i = 80
         vector = 0
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         F_seafloor_cdiss_tot = vector(1)
+                         xPOPexport = vector(1)
       !
       i = 81
         vector = 0
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         ftrap = vector(1)
-      !
-      i = 82
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fCO2_crust(:)        , start=(/1,k/), count=(/nbasin,1/)  )
-      !
-      i = 83
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fSO4_basin(:)        , start=(/1,k/), count=(/nbasin,1/)  )
+                         fanthros = vector(1)
       !
       i = 84
-        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fSO4_crust(:)        , start=(/1,k/), count=(/nbasin,1/)  )
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fco2atm_ocean(:)     , start=(/1,k/), count=(/nbasin,1/)  )
+      !
+      i = 110
+        vector = 0
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
+                         fco2atm_ocean_tot = vector(1)
       !
       i = 85
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  finorgC(:)           , start=(/1,k/), count=(/nbasin,1/)  )
+      !
+      i = 89
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fdissol_carb(:)      , start=(/1,k/), count=(/nbasin,1/) )
+      !
+      i = 121
         vector = 0
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         FrivLi = vector(1)
+                         fsilw(1) = vector(1)
+      !
+      i = 122
+        vector = 0
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
+                         fbasw(1) = vector(1)
+      !
+      i = 123
+        vector = 0
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
+                         fcarbw(1) = vector(1)
+      !
+      i = 124
+        vector = 0
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
+                         fkerw(1) = vector(1)
+      !
+      i = 100
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  freef(:)             , start=(/1,k/), count=(/nbasin,1/)  )
+      !
+      i = 111
+        vector = 0
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
+                         freef_tot = vector(1)
+      !
+      i = 112
+        vector = 0
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
+                         fcarbdep_tot = vector(1)
+      !
+      i = 102
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fodc(:)              , start=(/1,k/), count=(/nbasin,1/)  )
+      !
+      i = 113
+        vector = 0
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
+                         fodc_tot = vector(1)
+      !
+      i = 87
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  PIC_snk_flx(:)       , start=(/1,k/), count=(/nbasin,1/)  )
+      !
+      i = 128
+        vector = 0
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
+                         fpw(1) = vector(1)
       !
       i = 86
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fbioC(:)             , start=(/1,k/), count=(/nbasin,1/)  )
+      !
+      i = 109
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  F_seafloor_cdiss(:)  , start=(/1,k/), count=(/nbasin,1/)  )
+      !
+      i = 117
         vector = 0
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         dLiriv = vector(1)
-      i = 87
+                         F_seafloor_cdiss_tot = vector(1)
+      !
+      i = 82
         vector = 0
         if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
-                         total_cont_POC_export = vector(1)
+                         ftrap = vector(1)
+      !
+      i = 141
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fCO2_crust(:)        , start=(/1,k/), count=(/nbasin,1/)  )
+      !
+      i = 142
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fSO4_basin(:)        , start=(/1,k/), count=(/nbasin,1/)  )
+      !
+      i = 143
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  fSO4_crust(:)        , start=(/1,k/), count=(/nbasin,1/)  )
+      !
+      i = 145
+        vector = 0
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
+                         FrivLi(1) = vector(1)
+      !
+      i = 144
+        vector = 0
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
+                         dLiriv(1) = vector(1)
+      i = 129
+        vector = 0
+        if (got_var(i))  ierr = nf90_get_var(  fid, varid(i),  vector               , start=(/k/), count=(/1/)           )
+                         total_cont_POC_export(1) = vector(1)
     end if
 
 
@@ -372,7 +363,7 @@ use constante, only: PI_n_CO2_atm
     ! write ascii output:
     !--------------------
 
-    write(7,9)t,O2_atm_level,CO2_atm_level, &
+    write(7,9) t, pO2_atm*PI_atm_moles/PI_n_O2_atm, 1e-6*pCO2_atm*PI_atm_moles/PI_n_CO2_atm, &
                   fanthros,fco2atm_ocean(1),fco2atm_ocean(3), &
                   fco2atm_ocean(6),fco2atm_ocean(8),xPOPexport, &
                   finorgC(3),fdissol_carb(3),dplysa(3)
@@ -381,19 +372,19 @@ use constante, only: PI_n_CO2_atm
       write(10+j,11) t, (var_diss(i,j),i=1,5), (var_part(i,j),i=1,5), (var_diss(i,j),i=6,7), (var_isot(i,j),i=1,6), var_diss(8,j)
     end do
 
-    write(21,12)t,fsilw,fbasw,fcarbw,fkerw,freef_tot, &
-                    fdep_tot,fodc_tot, &
+    write(21,12)t,fsilw(1),fbasw(1),fcarbw(1),fkerw(1),freef_tot, &
+                    fcarbdep_tot,fodc_tot, &
                     (freef(j),j=1,9), &
                     (fodc(j),j=1,9), &
-             (fsink_inorg(j)*var_part(5,j),j=1,9),fpw, &
-             (fbioC(j),j=1,9),total_cont_POC_export
+             (PIC_snk_flx(j),j=1,9),fpw(1), &
+             (fbioC(j),j=1,9),total_cont_POC_export(1)
 
-    write(205,12)t,FrivLi,dLiriv
+    write(205,12)t,FrivLi(1),dLiriv(1)
 
     write(23,10)t,(dplysc(i),i=1,nbasin-1)
 
     write(22,15)t,vartot_diss(1),vartot_diss(2),ph_tot, &
-                    (pH(j),j=1,9),(omega(j),j=1,9)
+                    (pH(j),j=1,9),(omega_0(j),j=1,9)
 
     write(24,12)t,ftrap,(fCO2_crust(j),j=1,9),(fSO4_basin(j),j=1,9),(fSO4_crust(j),j=1,9)
     write(26,15)t,(F_seafloor_cdiss(j),j=1,nbasin-1)

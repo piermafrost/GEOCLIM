@@ -3,7 +3,10 @@ implicit none
 
 contains
 
-subroutine geoclim_create_output(ID, output_path, run_name, vol, surf, surf_sedi, file_name, time_dimname, outvar_info)
+subroutine geoclim_create_output(ID, output_path, run_name, &
+                                 indice_surface, indice_thermo, indice_deep, indice_polar, indice_epicont, app_cont, indice_sedi, &
+                                 vol, surf, surf_sedi, depth_box, depth_top_box, accumul_capacity, &
+                                 file_name, time_dimname, outvar_info)
 
   use io_module, only: netcdf_output_var, set_default_nml_values, set_outvar_info, &
                        check_namelist_def, UNDEFINED_VALUE_INT, UNDEFINED_VALUE_CHAR, DEFAULT_FILLVAL_NAME
@@ -16,13 +19,14 @@ subroutine geoclim_create_output(ID, output_path, run_name, vol, surf, surf_sedi
 
   integer, intent(in):: ID
   character(len=*), intent(in):: output_path, run_name
-  double precision, dimension(nbasin), intent(in):: vol, surf, surf_sedi
+  integer, dimension(nbasin), intent(in):: indice_surface,indice_thermo,indice_deep,indice_polar,indice_epicont,app_cont,indice_sedi
+  double precision, dimension(nbasin), intent(in):: vol, surf, surf_sedi, depth_box, depth_top_box, accumul_capacity
   !
   character(len=500), intent(out):: file_name
   character(len=100), intent(out):: time_dimname
   type(netcdf_output_var), dimension(nCOMBoutvar), intent(out):: outvar_info
 
-  integer, parameter:: ndim=2
+  integer, parameter:: ndim=3
   character(len=30):: vartype(nCOMBoutvar)
   character(len=100):: dname(ndim), vname(nCOMBoutvar), units(nCOMBoutvar)
   character(len=500):: long_name(nCOMBoutvar)
@@ -101,22 +105,28 @@ subroutine geoclim_create_output(ID, output_path, run_name, vol, surf, surf_sedi
   call def_dim(fid, dname(i), nbasin, dimid(i))
   call def_var(fid, dname(i), vartype(i), dimid(i:i), (/.true./), dimvarid(i))
   ! dimension variable attributes:
+  call put_att(fid, dimvarid(i), 'axis',   attribute_text='X')
+  call put_att(fid, dimvarid(i), 'name',   attribute_text=dname(i))
+  call put_att(fid, dimvarid(i), 'units',  attribute_text=units(i))
+
+  ! dim #1: boxes-2
+  i = 2
+  !
+  write(num, fmt="(I0)") i
+  call check_namelist_def('Error: "dname('//trim(num)//')" not defined in "CMB_OUTPUT_DIM" namelist of main config file', &
+                          char_var=dname(i))
+  call check_namelist_def('Error: "units('//trim(num)//')" not defined in "CMB_OUTPUT_DIM" namelist of main config file', &
+                          char_var=units(i))
+  !
+  call def_dim(fid, dname(i), nbasin, dimid(i))
+  call def_var(fid, dname(i), vartype(i), dimid(i:i), (/.true./), dimvarid(i))
+  ! dimension variable attributes:
   call put_att(fid, dimvarid(i), 'axis',   attribute_text='Y')
   call put_att(fid, dimvarid(i), 'name',   attribute_text=dname(i))
   call put_att(fid, dimvarid(i), 'units',  attribute_text=units(i))
-  call put_att(fid, dimvarid(i), 'box_1',  attribute_text='polar N surf')
-  call put_att(fid, dimvarid(i), 'box_2',  attribute_text='polar N deep')
-  call put_att(fid, dimvarid(i), 'box_3',  attribute_text='mid-lat surf')
-  call put_att(fid, dimvarid(i), 'box_4',  attribute_text='thermocline')
-  call put_att(fid, dimvarid(i), 'box_5',  attribute_text='mid-lat deep')
-  call put_att(fid, dimvarid(i), 'box_6',  attribute_text='epicont surf')
-  call put_att(fid, dimvarid(i), 'box_7',  attribute_text='epicont deep')
-  call put_att(fid, dimvarid(i), 'box_8',  attribute_text='polar S surf')
-  call put_att(fid, dimvarid(i), 'box_9',  attribute_text='polar S deep')
-  call put_att(fid, dimvarid(i), 'box_10', attribute_text='atmosphere')
 
-  ! dim #2: time
-  i = 2
+  ! dim #3: time
+  i = 3
   !
   write(num, fmt="(I0)") i
   call check_namelist_def('Error: "dname('//trim(num)//')" not defined in "CMB_OUTPUT_DIM" namelist of main config file', &
@@ -195,9 +205,20 @@ subroutine geoclim_create_output(ID, output_path, run_name, vol, surf, surf_sedi
   !--------------------------------------------------------------------------------
 
   call put_var(fid, dimvarid(1), var_int1D=(/(i,i=1,nbasin)/))
-  if (outvar_info(1)%writevar) call put_var(fid, outvar_info(1)%id, var_real1D=real(vol)      )
-  if (outvar_info(2)%writevar) call put_var(fid, outvar_info(2)%id, var_real1D=real(surf)     )
-  if (outvar_info(3)%writevar) call put_var(fid, outvar_info(3)%id, var_real1D=real(surf_sedi))
+  call put_var(fid, dimvarid(2), var_int1D=(/(i,i=1,nbasin)/))
+  if (outvar_info(1)%writevar)  call put_var(fid, outvar_info(1)%id,  var_int1D=indice_surface)
+  if (outvar_info(2)%writevar)  call put_var(fid, outvar_info(2)%id,  var_int1D=indice_thermo)
+  if (outvar_info(3)%writevar)  call put_var(fid, outvar_info(3)%id,  var_int1D=indice_deep)
+  if (outvar_info(4)%writevar)  call put_var(fid, outvar_info(4)%id,  var_int1D=indice_polar)
+  if (outvar_info(5)%writevar)  call put_var(fid, outvar_info(5)%id,  var_int1D=indice_epicont)
+  if (outvar_info(6)%writevar)  call put_var(fid, outvar_info(6)%id,  var_int1D=app_cont)
+  if (outvar_info(7)%writevar)  call put_var(fid, outvar_info(7)%id,  var_int1D=indice_sedi)
+  if (outvar_info(8)%writevar)  call put_var(fid, outvar_info(8)%id,  var_real1D=real(vol))
+  if (outvar_info(9)%writevar)  call put_var(fid, outvar_info(9)%id,  var_real1D=real(surf))
+  if (outvar_info(10)%writevar) call put_var(fid, outvar_info(10)%id, var_real1D=real(surf_sedi))
+  if (outvar_info(11)%writevar) call put_var(fid, outvar_info(11)%id, var_real1D=real(depth_box))
+  if (outvar_info(12)%writevar) call put_var(fid, outvar_info(12)%id, var_real1D=real(depth_top_box))
+  if (outvar_info(13)%writevar) call put_var(fid, outvar_info(13)%id, var_real1D=real(accumul_capacity))
 
 
   ! close output file:
