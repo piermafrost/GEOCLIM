@@ -36,7 +36,7 @@ subroutine printf(t, icount, y, COMB_outvar_info, GEOG_outvar_info, DYNS_outvar_
     if (icount_geogprint >= ijump_geogprint) then
         icount_geogprint = 0
         call geographic_write_output(GEOG_ofile_name, GEOG_time_dimname, GEOG_outvar_info, t, cpvec, &
-                                     Tclim, runclim, wth_allsil, wth_litho_wgh, wth_litho, fker, POC_export_rate, fp)
+                                     Tclim, runclim, wth_allsil, wth_litho_wgh, wth_litho, fker, POC_export_rate, fp, pyr_wth)
     end if
 
 
@@ -47,12 +47,12 @@ subroutine printf(t, icount, y, COMB_outvar_info, GEOG_outvar_info, DYNS_outvar_
             icount_DS_pri=0
             call dynsoil_offline_computation(xlevs, reg_z_prof, reg_tau_prof, reg_tau_surf, reg_x_surf, reg_thick, reg_eros, &
                                              Tclim, runclim, veget_factor, reg_ktop, reg_P_vol,                              &
-                                             DS_missingpoints, DYNS_outvar_info(9)%fillval, DYNS_outvar_info(10)%fillval,    &
+                                             DS_missingpoints, DYNS_outvar_info(14)%fillval, DYNS_outvar_info(15)%fillval,   &
                                              reg_x_mean, reg_mean_age                                                        )
-            call dynsoil_write_output(DYNS_ofile_name, DYNS_time_dimname, DYNS_outvar_info, t, Tclim, runclim, &
-                                      reg_thick, reg_x_surf, reg_tau_surf, reg_z_prof, reg_tau_prof,           &
-                                      reg_prod, reg_eros, reg_P_diss, reg_P_eros, reg_x_surf_eros,             &
-                                      reg_x_mean, reg_mean_age, reg_Li_Friv, reg_Li_Fsp, reg_Li_driv           )
+            call dynsoil_write_output(DYNS_ofile_name, DYNS_time_dimname, DYNS_outvar_info, t, cpvec, Tclim, runclim, &
+                                      reg_thick, reg_x_surf, reg_tau_surf, reg_z_prof, reg_tau_prof,                  &
+                                      reg_prod, reg_eros, reg_P_diss, reg_P_eros, reg_x_surf_eros,                    &
+                                      reg_x_mean, reg_mean_age, reg_Li_Friv, reg_Li_Fsp, reg_Li_driv                  )
         end if
     end if
 
