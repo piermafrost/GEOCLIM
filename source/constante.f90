@@ -39,7 +39,7 @@ module constante
     double precision, parameter :: rO2C=1.
 
     ! Kinetic constant for carbonate reef formation
-    double precision, parameter :: akcr=0.2  !0.2  !0.41   !0.11
+    double precision, parameter :: akcr= 0.25  !0.075  !0.2  !0.41   !0.11
     ! UNUSED CONSTANT
     double precision, parameter :: akbanks=0.92
     ! Fraction of aragonite in Particulate Inorganic Carbon
@@ -47,13 +47,13 @@ module constante
     !! unused constant
     !double precision, parameter :: O2limit=0.16
     ! Kinetic constant for carbonate dissolution (below lysocline)
-    double precision, parameter :: akdiss=2.9
+    double precision, parameter :: akdiss=0.025 !2.9
 
     ! Organic matter degradation in water column
     !    O2 limitation (~ for lower O2 concentration than KO2)
     double precision, parameter :: KO2 = 8d-3 ! mol/m3 (cf Arndt et al., GMD, 2011, "GEOCLIM reloaded")
     !    oxydation rate (yr^-1)
-    double precision, parameter :: k_oxyd = 3.6
+    double precision, parameter :: k_oxyd = 10 !3.6
     ! Note: functional form: roxyd = k_oxyd * (1 - exp(-O2/KO2))
 
     ! C 13 parameters
@@ -77,8 +77,8 @@ module constante
     double precision, parameter :: rsfw=0.705 ! in seafloor (=> for seafloor weathering. UNUSED)
     ! For Sr isotopic ratio in continental rocks, see "continental parameters"
 
-    ! Partition of sinking particles for epicontinental surface between sediment (shelf) and deep box
-    double precision, parameter :: gotoshelf=0.8
+    ! Water column sedimentation velocity (m/s -vvvv | vvvvvvvvvvvvvvvvv--> converted in m/yr)
+    double precision, parameter :: sink_veloc = 5d-7 * 365.2422*24*60*60
 
     ! Sediment model (early diagenesis):
     !    "molar mass" of sinking particles (kg per mol of C)
@@ -87,20 +87,20 @@ module constante
     !    marine sediment density (kg/m3)
     double precision, parameter :: rho_sed = 2.3d3
     !    sedimentation capacity constant (yr^-1) [=> F_sedim_max(m3/yr) = ksed * area_sedim^(3/2)]
-    double precision, parameter :: ksed = 2d-9
+    double precision, parameter :: ksed = 1d-10
     !    thickness of bioturbated layer (m)
     double precision, parameter :: hml=0.05
     !    thickness of sulfate-reduction layer (m)
     double precision, parameter :: hsr=0.5
     !    Kinetics constants
-    double precision, parameter :: betahml=0.06462 ! for org C oxidation in bioturbated layer 
-    double precision, parameter :: gammahsr=1.629d-5 ! for sulfate-reduction
-    !!    parameterized [SO4^2-] influence on sulfate-reduction => OBSOLETE used in GEOCLIM version without sulfur cycle
-    !!double precision, parameter :: fSO4cste=29.
+    double precision, parameter :: betahml=0.10773 ! for org C oxidation in bioturbated layer 
+    double precision, parameter :: gammahsr=4.6100d-6 ! for sulfate-reduction
     !    Fraction of organic matter NOT lost in form of methan (that will be re-oxidized)
     double precision, parameter :: xmethan=0.64
     ! Kinetic constant for phosphorite deposition in deep basins
-    double precision, parameter :: akphos=1d13 !3.2d+12
+    double precision, parameter :: akphos=1d13 !3.2d+12 !1d13
+    ! Kinetic constant for P precipitation with iron oxydes in deep basins
+    double precision, parameter :: akPhyd=1e12 ! original value: 0.325d10/1.5d-3 (~= 2.17e12)
 
     ! Lithium cycle
     !    Kinetic constant of lithium incorportion in authigenic clay
@@ -134,6 +134,10 @@ module constante
 
     ! density of riverine sediments, and by extension, of regolith (kg/m3)
     double precision, parameter :: TSS_density = 2500.
+
+    ! Proportionality constant of carbonate weathering flux
+    ! (tuned to get a total flux of 12.3 Tmol/yr, Gaillardet et al., 1999)
+    double precision, parameter:: k_carb_wth = 6.022e-2 !3.589d-2 <= old value
 
     !%   Lithology-dependent variables:   %!
     !%                                    %!
@@ -183,18 +187,5 @@ module constante
     !    * Sulfide content of rocks (mole of Sulfides, - 1/2 FeS2, per m3 of rocks)
     double precision, parameter, dimension(6):: Sulf_rock = 0.130147*OC_rock
     !                                             S:C ratio ^^^^^^^^
-
-
-
-
-    !========================================!
-    ! Vertical discretization of ocean model !
-    !========================================!
-
-    ! Depth of ocean boxes (km), i.e., depth of bottom of boxes
-    double precision, parameter :: hsurf=0.1     ! surface boxes
-    double precision, parameter :: hdeepepic=0.2 ! epicontinental deep boxes
-    double precision, parameter :: hthermo=1.    ! "thermocline" (intermediate) boxes
-    double precision, parameter :: hdeep=3.8     ! other deep boxes
 
 end module
