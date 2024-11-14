@@ -1,9 +1,9 @@
 integer, parameter :: nbasin = 10
-integer, parameter :: nclimber = 1 ! NOTE: 1 CO2 level => fixed climate run (for cont. weath.)
-integer, parameter :: nlon = 720
-integer, parameter :: nlat = 360
+integer, parameter :: nclimber = 1
+integer, parameter :: nlon = 96
+integer, parameter :: nlat = 96
 integer, parameter :: nlitho = 6
-integer, parameter :: nDSlev = 10 ! Numer of DynSoil vertical levels
+integer, parameter :: nDSlev = 10 ! Number of DynSoil vertical levels
 
 ! Additional climatic parameters
 integer, parameter :: nclimparam = 0
