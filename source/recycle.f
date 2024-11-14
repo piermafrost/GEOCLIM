@@ -13,7 +13,7 @@
     enddo
 
     ! Deep and intermediate basins
-    do j0=1,nnosurface-1
+    do j0=1,nnosurface
         j = jbox_nosurface(j0)
         roxyd(j) = k_oxyd*(1 - dexp(-var_diss(6,j)/KO2))
     end do
