@@ -94,13 +94,7 @@
 
 &GLOB_CLIM_INFO
 
- !glob_x_dim_name = ''
- !glob_y_dim_name = ''
-
  glob_temp_var_name = 'tmp'
-
- ! # File paths (MUST BE CONSISTENT WITH ORDER OF UNIQUE CLIMATIC PARAMETER COMBINATIONS),
- !glob_list_file = ''
 
 /
 

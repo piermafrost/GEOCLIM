@@ -96,7 +96,7 @@
  !glob_temp_var_name = ''
 
  ! # File paths (MUST BE CONSISTENT WITH ORDER OF UNIQUE CLIMATIC PARAMETER COMBINATIONS),
- !glob_list_file = ''
+ !glob_list_file(1) = ''
 
 /
 

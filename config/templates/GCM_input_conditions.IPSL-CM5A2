@@ -26,7 +26,7 @@
 # as CO2 levels.
 
 &CLIM_PARAMS
- all_climparam(1,:) = 284.7
+ all_climparam(1,:) = 280.
 /
 
 
@@ -42,7 +42,7 @@
 # file path                                                                                x_var_name    y_var_name    main_var_name
 #-----------------------------------------------------------------------------------------------------------------------------------
 &AREA_INFO
- area_file       = 'INPUT/IPSL/CTRL_CM5A2/CTRL-CM5A2_ANNCLIMO_atm.nc'
+ area_file       = 'INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_atm.nc'
  area_x_dim_name = 'lon'
  area_y_dim_name = 'lat'
  area_var_name   = 'aire'
@@ -52,7 +52,7 @@
 # file path                                                                                x_var_name    y_var_name    main_var_name
 #-----------------------------------------------------------------------------------------------------------------------------------
 &LAND_AREA_INFO
- landarea_file       = 'INPUT/IPSL/CTRL_CM5A2/CTRL-CM5A2_ANNCLIMO_lnd.nc'
+ landarea_file       = 'INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_sechiba.nc'
  landarea_x_dim_name = 'lon'
  landarea_y_dim_name = 'lat'
  landarea_var_name   = 'Contfrac'
@@ -75,7 +75,7 @@
  runoff_var_name    = 'runoff + drainage'
 
  ! # File paths (MUST BE CONSISTENT WITH ORDER OF UNIQUE CLIMATIC PARAMETER COMBINATIONS),
- land_list_file(1) = 'INPUT/IPSL/CTRL_CM5A2/CTRL-CM5A2_ANNCLIMO_lnd.nc'
+ land_list_file(1) = 'INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_sechiba.nc'
 
 /
 
@@ -96,7 +96,7 @@
  glob_temp_var_name = 't2m'
 
  ! # File paths (MUST BE CONSISTENT WITH ORDER OF UNIQUE CLIMATIC PARAMETER COMBINATIONS),
- glob_list_file(1) = 'INPUT/IPSL/CTRL_CM5A2/CTRL-CM5A2_ANNCLIMO_atm.nc'
+ glob_list_file(1) = 'INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_atm.nc'
 
 /
 
