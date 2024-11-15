@@ -567,7 +567,8 @@ then
     rm -r -f .case_backup
 fi
 
+test $rm_logs -eq 1 && rm -f GEOCLIM_environment build.log build.error postproc/template_comparison/build.log postproc/template_comparison/build.error
+
 cd source
 make clean > /dev/null
-test $rm_logs -eq 1 && rm -f GEOCLIM_environment build.log build.error postproc/template_comparison/build.log postproc/template_comparison/build.error
 
