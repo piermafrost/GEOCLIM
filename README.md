@@ -78,7 +78,6 @@ Those scripts use the following packages:
 
 
 ## Templates
-**!NOT UP TO DATE!**  
 A couple of template GEOCLIM runs are defined. They consist of a set of input data and corresponding configuration files.
 The script `make_test` does the complete configuration (pre- and post-compilation), compiles and runs the desired template
 (the pre-existing configuration and source files will be restored when the run is complete).
