@@ -10,6 +10,7 @@ case_name=""
 comp_mode="standard"
 keep_config=0
 restore=0
+rm_logs=0
 
 while [ $# -ge 1 ]
 do
@@ -38,8 +39,13 @@ do
 	    shift 1
 	    ;;
 
-	"--restore")
+	"--restore"|'--restore-config')
 	    restore=1
+	    shift 1
+	    ;;
+
+	"--clean")
+	    rm_logs=1
 	    shift 1
 	    ;;
 
@@ -64,13 +70,16 @@ done
 ############################################################################
 
 test $restore -eq 1 -a "$case_name" == ""  &&  case_name="_%STOP%_"
+test $rm_logs -eq 1 -a "$case_name" == ""  &&  case_name="_%STOP%_"
 
 if [ "$case_name" == ""  -o  "$case_name" == "help"  -o  "$case_name" == "--help" ]
 then
     echo ""
     echo "SYNOPSIS"
     echo ""
-    echo "     ./make_test case_name [--ncpath path] [--debug]"
+    echo "     ./make_test case_name [--ncpath path] [--debug] [--keep-config] [--clean]"
+    echo "     ./make_test --restore|--restore-config"
+    echo "     ./make_test --clean"
     echo ""
     echo ""
     echo "DESCRIPTION"
@@ -100,8 +109,12 @@ then
     echo "     original files will be kept in the backup directory \".case_backup/\""
     echo "     WARNING: if you re-run \`make_test\` after, these \"test\" configuration"
     echo "     files will be considered as the original ones, and the true original ones"
-    echo "     will be lost. To avoid that, use the option \"--restore\" to put back the"
-    echo "     eventual files stored in .case_backup/"
+    echo "     will be lost. To avoid that, use the option \"--restore-config\""
+    echo "     (\"--restore\") to put back the eventual files stored in .case_backup/"
+    echo "     This option can be used without running a case (\`./make_test --restore\`)"
+    echo ""
+    echo "     The option \"--clean\" is for deleting the log files, and can also be used"
+    echo "     without running a case (\`./make_test --clean\`)"
     echo ""
     echo ""
     echo "     TEMPLATE CASE NAMES:"
@@ -259,7 +272,11 @@ then
     fi
 fi
 
-test "$case_name" == "_%STOP%_"  && exit 0
+if [ "$case_name" == "_%STOP%_" ]
+then
+    test $rm_logs -eq 1 && rm -f GEOCLIM_environment build.log build.error postproc/template_comparison/build.log postproc/template_comparison/build.error
+    exit 0
+fi
 
 # Backup of files susceptible to be modified:
 rm -r -f .case_backup
@@ -552,3 +569,5 @@ fi
 
 cd source
 make clean > /dev/null
+test $rm_logs -eq 1 && rm -f GEOCLIM_environment build.log build.error postproc/template_comparison/build.log postproc/template_comparison/build.error
+
