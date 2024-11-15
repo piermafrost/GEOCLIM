@@ -348,7 +348,6 @@ Here, one may specify `COMB_init_mode='coldstart'` and `init_mode='startup:eq'` 
 The name of netCDF files, name and definition of variables (dimensions, attributes...) of GEOCLIM ouputs, split in 4 modules:
 * "COMBINE OUTPUTS": main geochemical variables
 * "GEOGRAPHIC OUTPUTS": continental variables (weathering fields)
-* "ECOGEO OUTPUTS": ecological module (not implemented in current version)
 * "DYNSOIL OUTPUTS": continental variables of DynSoil module (erosion, regolith variables...)
 
 This section usually doesn't need to be modified, save for indicating which variable to write in the ouputs, or not to (`writevar(*)=FALSE`)
@@ -736,8 +735,6 @@ Firstly, you need to know the name of the variable *in the Fortran source code*,
 Secondly, depending on the type of the variable, it should be outputted in a different file:
 * COMBINE variables. i.e., oceanic variables, that have a value for each COMBINE box (like salinity), or a single value (for instance,
 atmospheric variable, or continental flux).
-* Ecological network variables. Similar to COMBINE variables, but outputted only if the ecological network module is activated, and can
-be defined on the "species" dimension (specific to the ecological network).
 * Geographic variables. i.e., 2D geographic fields (for instance, runoff), or 3D if lithology-dependent (like weathering fluxes)
 * DynSoil variables. Similar to geographic variables, but outputted only if DynSoil module is activated, and can be defined on lithology
 and/or DynSoil vertical dimension.
@@ -745,26 +742,19 @@ and/or DynSoil vertical dimension.
 The next steps are:
 
 * In 'source/'output\_size.inc, increment by 1 the parameter defining the number of variable *of the corresponding outputfile*
-('nCOMBoutvar' for COMBINE, 'nGEOGoutvar' for geographic, 'nECOoutvar' for econetwork, 'nDYNSoutvar' for DynSoil). 
+('nCOMBoutvar' for COMBINE, 'nGEOGoutvar' for geographic, 'nDYNSoutvar' for DynSoil). 
 * In the main configuration file (config/IO\_CONDITIONS), in the section "OUTPUT CONDITIONS" and corresponding block ("COMBINE OUTPUTS",
-"GEOGRAPHIC OUTPUTS", "ECOGEO OUTPUTS", or "DYNSOIL OUTPUTS"), add a line in the namelist (respectively, "&CMB\_OUTPUT\_VAR",
-"&GEO\_OUTPUT\_VAR", "&ECO\_OUTPUT\_VAR", or "&DYN\_OUTPUT\_VAR") – e.g., copy and paste the last line – stating the name of the variable
-*in the netCDF output file* ("vname(\*)"), its units ("units(\*)"), under which dimension it is defined ("defdim(\*,:)", must be
-consistent with the source code!), its fill-value, and "long\_name" description. "\*" is the output variable number, i.e., the number
-incremented in the previous step.
-* In the corresponding source file "source/...\_write\_output.f90" ("..." being, respectively, "geoclim", "geographic", "econework", or
-"dynsoil"), at the end of the section "write output variables", add a block of lines (e.g., copy and paste the following block) that looks
+"GEOGRAPHIC OUTPUTS", or "DYNSOIL OUTPUTS"), add a line in the namelist (respectively, "&CMB\_OUTPUT\_VAR", "&GEO\_OUTPUT\_VAR",
+or "&DYN\_OUTPUT\_VAR") – e.g., copy and paste the last line – stating the name of the variable *in the netCDF output file* ("vname(\*)"),
+its units ("units(\*)"), under which dimension it is defined ("defdim(\*,:)", must be consistent with the source code!), its fill-value,
+and "long\_name" description. "\*" is the output variable number, i.e., the number incremented in the previous step.
+* In the corresponding source file "source/...\_write\_output.f90" ("..." being, respectively, "geoclim", "geographic", or "dynsoil"),
+at the end of the section "write output variables", add a block of lines (e.g., copy and paste the following block) that looks
 like:
 > i = 106  
 >   if (COMB_outvar_info(i)%writevar) &  
 >     call put_var(fid, varname=COMB_outvar_info(i)%vname, var_real0D=real(fO2_odc_tot), &  
 >                  stt=(/nt/), cnt=(/1/))
-> !
-
-> i = 3  
-> if (ECO_outvar_info(i)%writevar) &  
->   call put_var(fid, varname=ECO_outvar_info(i)%vname, var_real2D=real(biota_equilibrium(:,:)\*mol_to_Gt_converter), &  
->                stt=(/1,1,nt/), cnt=(/nequat,nbasin,1/))  
 > !
 
 Or, for multi-dimensional variables (like geographic or DynSoil variable):
