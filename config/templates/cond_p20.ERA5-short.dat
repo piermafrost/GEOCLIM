@@ -33,26 +33,26 @@ Use "!" to comment blocks within the namelist
   solver = 'rk4'
 
   ! Time step, starting and ending times
-  ts   = 0.25	!solver timestep (yrs)  !0.02  0.05
-  tsta = 0.	!Starting time for iteration (yrs)
+  ts   = 0.02 	!solver timestep (yrs)  !-> 0.01 with O2 and SO4 accelerated
+  tsta = 0	!Starting time for iteration (yrs)
   tfi  = 100.	!Ending time for iteration (yrs)
 
   ! Acceleration factors for long elemental cycles
-  oxy_acc_fact  = 1.	!oxygen acceleration factor (1. is for no acceleration) -- 100. is a good value for equilibrium-reaching
-  sulf_acc_fact = 1.	!sulfate acceleration factor (1. is for no acceleration) -- 100. is a good value for equilibrium-reaching
+  oxy_acc_fact  = 1.	!oxygen acceleration factor (1. is for no acceleration) -- 50. is a good value for equilibrium-reaching
+  sulf_acc_fact = 1.	!sulfate acceleration factor (1. is for no acceleration) -- 50. is a good value for equilibrium-reaching
 
   ! Asynchronous coupling of modules
-  ijump_cont_weath     = 100	!integrate continental weathering every ....*timestep (yrs) --- can be raised to 1000 to hasten equilibrium-reaching
-  ijump_DS_integration = 4	!integrate DYNSOIL variables every .... * cont_weath_jump * timestep (yrs)
+  ijump_climate        = 1250	!integrate climate-dependent fields and continental weathering every ....*timestep (yrs)
+  ijump_DS_integration = 4	!integrate DYNSOIL variables every .... * ijump_climate * timestep (yrs)
   ijump_climparam      = 4000	!read climatic parameters every ....*timesehp (yrs) => ignored if no climatic parameters other than CO2
   ijump_veget          = 100000	!read next vegetation map every ....*timestep (yrs) => ignored if vegetation module not activated
 
   ! Printing times
   ! --------------
-  ijump_print     = 4   	!Print combine and biodiv outputs every ....*timestep yrs --- for long runs, 250000 is good
-  ijump_geogprint = 100   	!Print geographically-distributed outputs every ....*timestep yrs --- for long runs, 2500000 is good
-  ijump_DS_print  = 400    	!Print DYNSOIL variables every ....*timestep (yrs)
-  ageYprint       = 1d9 	!Age for generating an initialisation file (null or negative value means "at the end of the run" [default])
+  ijump_print     = 50		!Print combine and biodiv outputs every ....*timestep yrs --- for long runs, 250000 is good
+  ijump_geogprint = 2500000 	!Print geographically-distributed outputs every ....*timestep yrs --- for long runs, 2500000 is good
+  ijump_DS_print  = 100000000	!Print DYNSOIL variables every ....*timestep (yrs)
+  ageYprint       = 1d9		!Age for generating an initialisation file (null or negative value means "at the end of the run" [default])
   convert2ascii   = F           !convert geoclim and biodiv netcdf output to ascii (T or F. Default: F)
 
 /
