@@ -27,9 +27,9 @@ real, parameter:: MAX_ALLOWED_ERROR = 1e-5
 
         ! Print message
         if (compare_var1D) then
-            write(*, fmt='(A4,A40,ES10.3,A1)') '  * ', trim(varname)//': PASSED   (delta = ', delta, ')'
+            write(*, fmt='(A4,A50,ES10.3,A1)') '  * ', trim(varname)//': PASSED   (delta = ', delta, ')'
         else
-            write(*, fmt='(A4,A40,ES10.3)')     '  * ', trim(varname)//': FAILED:   delta = ', delta
+            write(*, fmt='(A4,A50,ES10.3)')     '  * ', trim(varname)//': FAILED:   delta = ', delta
         end if
         write(*, fmt='(A)') '                          ----------'
 
@@ -96,12 +96,12 @@ real, parameter:: MAX_ALLOWED_ERROR = 1e-5
 
         ! Print message
         if (kfail==0) then
-            write(*, fmt='(A4,A40,ES10.3,A1)') '  * ', trim(varname)//': PASSED   (delta = ', maxval(delta(1:jend)), ')'
+            write(*, fmt='(A4,A50,ES10.3,A1)')     '  * ', trim(varname)//': PASSED   (delta = ', maxval(delta(1:jend)), ')'
             compare_var2D = .true.
         else
-            write(*, fmt='(A4,A28,ES10.3)') '  * ', trim(varname)//': FAILED'
+            write(*, fmt='(A4,A41,I0,A8,I0,A1)')   '  * ', trim(varname)//': FAILED  (', kfail, ' out of ', jend, ')'
             do j = 1,kfail
-                write(*, fmt='(A14,I0,A9,ES10.3)') '       basin #', failed(j), 'delta = ', delta_fail(j)
+                write(*, fmt='(A24,I0,A9,ES10.3)') '       basin #', failed(j), 'delta = ', delta_fail(j)
             end do
             compare_var2D = .false.
         end if
