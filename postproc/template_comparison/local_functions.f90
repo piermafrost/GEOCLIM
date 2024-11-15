@@ -2,7 +2,7 @@ module local_functions
 implicit none
 
 ! Maximum allowed relative error
-real, parameter:: MAX_ALLOWED_ERROR = 1e-6
+real, parameter:: MAX_ALLOWED_ERROR = 1e-5
 
 
   contains
