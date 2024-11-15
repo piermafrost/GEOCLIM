@@ -540,7 +540,7 @@ You can put as many run names as you want in the deathnote, one by line. Don't f
 
 
 ### Multiple runs and job submission
-**! THESE SCRIPTS HAVE NOT BEEN UPDATED FROM GEOCLIM5.3 AND ARE CURRENTLY NOT WORKING !**
+**! THESE SCRIPTS HAVE NOT BEEN UPDATED FROM GEOCLIM6.1 AND ARE CURRENTLY NOT WORKING !**
 
 `submit_chain.sh` (in the repertory job/) is a bash script for automatically launching a series of GEOCLIM runs.
 A series of runs are runs that have exactly the same configuration (except for their timesteps, starting and stopping times),
