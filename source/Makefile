@@ -205,7 +205,7 @@ endif
 
 
 # source files:
-sources = anoxic.f basin_geometry.f bio_frac.f biological_pump.f carb_dep.f carbo.f climatic_parameters.f90 constante.f90 cont_weath.f creades.f degassing.f derivs.f diss_oxygen.f DOfA.f dynsoil.f90 dynsoil_create_init_condition.f90 dynsoil_create_output.f90 dynsoil_create_restart.f90 dynsoil_empirical_laws.f90 dynsoil_initialization.f90 dynsoil_lithium.f90 dynsoil_offline_computation.f90 dynsoil_physical_parameters.f90 dynsoil_read_input.f90 dynsoil_steady_state.f90 dynsoil_write_output.f90 facco2.f GCM_io_module.f90 geoclim_create_output.f90 geoclim_mainprog.f geoclim_write_output.f90 geographic_create_output.f90 geographic_io_module.f90 geographic_write_output.f90 get_cont_pixel.f initialize_fluxes.f90 io_module.f90 multidimensional_interpolation.f90 netcdf_io_module.f90 newton.f newton2.f open_ascii_files.f output_netcdf2ascii.f90 phfunc.f phfunc2.f phosphorite.f Phydrotherm.f physical_units.f90 printf.f read_conditions.f read_deathnote.f90 read_main_IO_conditions.f read_oceanic_temperature.f90 read_veget.f recycle.f rk4.f rtbis.f rtbis2.f seafloor_sedimentation.f90 strontium_ratio.f terrestrial_dep.f utils.f90 varset.f water_chemistry.f90
+sources = anoxic.f basin_geometry.f bio_frac.f biological_pump.f carb_dep.f carbo.f climatic_parameters.f90 constante.f90 cont_weath.f cont_weath_noP.f creades.f creades_noP.f creades_noT.f creades_noTWth.f creades_noTX.f creades_noTXP.f creades_noTXWth.f creades_noWth.f creades_noX.f creades_noXWth.f degassing.f derivs.f diss_oxygen.f DOfA.f dynsoil.f90 dynsoil_create_init_condition.f90 dynsoil_create_output.f90 dynsoil_create_restart.f90 dynsoil_empirical_laws.f90 dynsoil_initialization.f90 dynsoil_lithium.f90 dynsoil_offline_computation.f90 dynsoil_physical_parameters.f90 dynsoil_read_input.f90 dynsoil_steady_state.f90 dynsoil_write_output.f90 facco2.f GCM_io_module.f90 geoclim_create_output.f90 geoclim_mainprog.f geoclim_write_output.f90 geographic_create_output.f90 geographic_io_module.f90 geographic_write_output.f90 get_cont_pixel.f initialize_fluxes.f90 io_module.f90 multidimensional_interpolation.f90 netcdf_io_module.f90 newton.f newton2.f open_ascii_files.f output_netcdf2ascii.f90 phfunc.f phfunc2.f phosphorite.f Phydrotherm.f physical_units.f90 printf.f read_conditions.f read_deathnote.f90 read_main_IO_conditions.f read_oceanic_temperature.f90 read_veget.f recycle.f rk4.f rtbis.f rtbis2.f seafloor_sedimentation.f90 strontium_ratio.f terrestrial_dep.f utils.f90 varset.f water_chemistry.f90
 
 
 # Executable file:
@@ -252,6 +252,7 @@ dynsoil_steady_state.o: dynsoil_empirical_laws.o dynsoil_physical_parameters.o
 dynsoil_lithium.o: dynsoil_empirical_laws.o dynsoil_physical_parameters.o
 facco2.o: combine_foam.inc coupler.inc shape.inc $(pathsource)
 cont_weath.o: carbo.o constante.o dynsoil.o dynsoil_lithium.o dynsoil_steady_state.o facco2.o combine_foam.inc coupler.inc shape.inc $(pathsource)
+cont_weath_noP.o: carbo.o constante.o dynsoil.o dynsoil_lithium.o dynsoil_steady_state.o facco2.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 diss_oxygen.o: constante.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 degassing.o: constante.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 multidimensional_interpolation.o: coupler.inc shape.inc
@@ -261,6 +262,15 @@ recycle.o: constante.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 seafloor_sedimentation.o: constante.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 strontium_ratio.o: constante.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 creades.o: anoxic.o biological_pump.o bio_frac.o carb_dep.o constante.o cont_weath.o degassing.o diss_oxygen.o multidimensional_interpolation.o phosphorite.o Phydrotherm.o recycle.o seafloor_sedimentation.o strontium_ratio.o water_chemistry.o combine_foam.inc coupler.inc shape.inc $(pathsource)
+creades_noP.o: anoxic.o biological_pump.o bio_frac.o carb_dep.o constante.o cont_weath_noP.o degassing.o diss_oxygen.o multidimensional_interpolation.o phosphorite.o Phydrotherm.o recycle.o seafloor_sedimentation.o strontium_ratio.o water_chemistry.o combine_foam.inc coupler.inc shape.inc $(pathsource)
+creades_noWth.o: anoxic.o biological_pump.o bio_frac.o carb_dep.o constante.o degassing.o diss_oxygen.o multidimensional_interpolation.o phosphorite.o Phydrotherm.o recycle.o seafloor_sedimentation.o strontium_ratio.o water_chemistry.o combine_foam.inc coupler.inc shape.inc $(pathsource)
+creades_noT.o: anoxic.o biological_pump.o bio_frac.o carb_dep.o constante.o cont_weath.o degassing.o diss_oxygen.o multidimensional_interpolation.o phosphorite.o Phydrotherm.o recycle.o seafloor_sedimentation.o strontium_ratio.o water_chemistry.o combine_foam.inc coupler.inc shape.inc $(pathsource)
+creades_noX.o: anoxic.o biological_pump.o bio_frac.o carb_dep.o constante.o cont_weath.o degassing.o diss_oxygen.o multidimensional_interpolation.o phosphorite.o Phydrotherm.o recycle.o seafloor_sedimentation.o strontium_ratio.o water_chemistry.o combine_foam.inc coupler.inc shape.inc $(pathsource)
+creades_noTX.o: anoxic.o biological_pump.o bio_frac.o carb_dep.o constante.o cont_weath.o degassing.o diss_oxygen.o multidimensional_interpolation.o phosphorite.o Phydrotherm.o recycle.o seafloor_sedimentation.o strontium_ratio.o water_chemistry.o combine_foam.inc coupler.inc shape.inc $(pathsource)
+creades_noXWth.o: anoxic.o biological_pump.o bio_frac.o carb_dep.o constante.o degassing.o diss_oxygen.o multidimensional_interpolation.o phosphorite.o Phydrotherm.o recycle.o seafloor_sedimentation.o strontium_ratio.o water_chemistry.o combine_foam.inc coupler.inc shape.inc $(pathsource)
+creades_noTWth.o: anoxic.o biological_pump.o bio_frac.o carb_dep.o constante.o degassing.o diss_oxygen.o multidimensional_interpolation.o phosphorite.o Phydrotherm.o recycle.o seafloor_sedimentation.o strontium_ratio.o water_chemistry.o combine_foam.inc coupler.inc shape.inc $(pathsource)
+creades_noTXP.o: anoxic.o biological_pump.o bio_frac.o carb_dep.o constante.o cont_weath_noP.o degassing.o diss_oxygen.o multidimensional_interpolation.o phosphorite.o Phydrotherm.o recycle.o seafloor_sedimentation.o strontium_ratio.o water_chemistry.o combine_foam.inc coupler.inc shape.inc $(pathsource)
+creades_noTXWth.o: anoxic.o biological_pump.o bio_frac.o carb_dep.o constante.o degassing.o diss_oxygen.o phosphorite.o Phydrotherm.o recycle.o seafloor_sedimentation.o strontium_ratio.o water_chemistry.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 varset.o: combine_foam.inc coupler.inc shape.inc $(pathsource)
 derivs.o: varset.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 get_cont_pixel.o: combine_foam.inc coupler.inc shape.inc $(pathsource)
@@ -291,7 +301,7 @@ read_veget.o: combine_foam.inc coupler.inc shape.inc $(pathsource)
 rk4.o: derivs.o
 rtbis2.o: phfunc2.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 terrestrial_dep.o: combine_foam.inc coupler.inc shape.inc $(pathsource)
-geoclim_mainprog.o: basin_geometry.o climatic_parameters.o constante.o creades.o dynsoil_create_output.o dynsoil_initialization.o dynsoil_read_input.o GCM_io_module.o geoclim_create_output.o geographic_create_output.o geographic_io_module.o get_cont_pixel.o initialize_fluxes.o io_module.o open_ascii_files.o output_netcdf2ascii.o printf.o read_conditions.o read_main_IO_conditions.o read_oceanic_temperature.o read_veget.o rk4.o utils.o varset.o combine_foam.inc coupler.inc shape.inc $(pathsource)
+geoclim_mainprog.o: basin_geometry.o climatic_parameters.o constante.o creades.o creades_noP.o creades_noT.o creades_noTWth.o creades_noTX.o creades_noTXP.o creades_noTXWth.o creades_noWth.o creades_noX.o creades_noXWth.o dynsoil_create_output.o dynsoil_initialization.o dynsoil_read_input.o GCM_io_module.o geoclim_create_output.o geographic_create_output.o geographic_io_module.o get_cont_pixel.o initialize_fluxes.o io_module.o open_ascii_files.o output_netcdf2ascii.o printf.o read_conditions.o read_main_IO_conditions.o read_oceanic_temperature.o read_veget.o rk4.o utils.o varset.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 
 
 
