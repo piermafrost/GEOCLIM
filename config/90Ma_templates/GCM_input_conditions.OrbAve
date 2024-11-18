@@ -1,0 +1,105 @@
+###################################################################################################
+# Contains information to read the inputs directly from GCM annual climatology output (CO2 axis,  #
+# files paths, variables names...)                                                                #
+# Note: File path are interpreted relative to GEOCLIM main directory, unless an absolute path is  #
+# given (starting by '/').                                                                        #
+###################################################################################################
+
+
+####  Climatic parameters  ####
+####  ===================  ####
+#
+# Syntax for each line:
+#   all_climparam(k,:) = 287.6, -9e99, -3e33, ...
+#
+# On each line, write the parameter value one by one, per column, separated by commas, semicolons, blanks or tabs.
+# The first parameter value must be CO2 level (in ppmv), and is mandatory. Others are "offline" climatic parameters,
+# and are optional. The number of columns must be consistent with the number of climatic parameters stated at compilation
+# (see `build_GEOCLIM` command, or "source/shape.inc" file).
+# There can be up to 5 "extra" climatic parameters (ie, other than CO2).
+#
+# Each line corresponds to a unique climatic parameters combination ("k" in the example being the "k-th" parameter combination),
+# that will be used to build the parameter space lookup table.
+# Line ordering is up to the user, as long as it is same than the order of the climate field netCDF files (next paragraph)
+#
+# Typically, is CO2 is the only considered parameter, each line has 1 parameter value (1 CO2 level), and there are as many line
+# as CO2 levels.
+
+&CLIM_PARAMS
+ all_climparam(1,:) = 560.
+ all_climparam(2,:) = 1120.
+/
+
+
+
+####  CONTINENTAL ANNUAL CLIMATOLOGY (netCDF FORMAT)    ####
+####  ==============================================    ####
+#
+# * file dimension (nx,ny) must be consistent with compilation (`build_GEOCLIM` command, or "source/shape.inc" file)
+# * It is possible to specifiy a sum or difference of variables with + or 0. (eg, for land_frac: 'frac_ter-frac_lice').
+# * Do not use space or / without putting the whole string between quotes (=> Fortran input format `fmt=*`).
+
+#    File for total grid cell areas (on the entire earth)
+# file path                                                                                x_var_name    y_var_name    main_var_name
+#-----------------------------------------------------------------------------------------------------------------------------------
+&AREA_INFO
+ area_file       = 'INPUT/IPSL/90Ma_Laugie/2X/Orb7/CPL-90Ma-ORB7-2X_SE_7250_7349_1Y_atm.nc'
+ area_x_dim_name = 'lon'
+ area_y_dim_name = 'lat'
+ area_var_name   = 'aire'
+/
+
+#    File for land fraction (or land area, will be interpreted according to its units)
+# file path                                                                                x_var_name    y_var_name    main_var_name
+#-----------------------------------------------------------------------------------------------------------------------------------
+&LAND_AREA_INFO
+ landarea_file       = 'INPUT/IPSL/90Ma_Laugie/2X/Orb7/CPL-90Ma-ORB7-2X_SE_7250_7349_1Y_sechiba.nc'
+ landarea_x_dim_name = 'lon'
+ landarea_y_dim_name = 'lat'
+ landarea_var_name   = 'Contfrac'
+/
+
+
+# Land climate fields (temperature, runoff)
+# -----------------------------------------
+# Expect 1 file per unique climatic parameters combination, in THE SAME ORDER than provided above.
+# x axis, y axis, temperature and runoff variables MUST be present in every file (under the same name)
+# It is possible specify a sum or difference of several variables with + or -
+# (eg, for runoff: 'RUNOFF + DRAINAGE' or 'PRECIP - EVAP')
+
+&LAND_CLIM_INFO
+
+ land_x_dim_name = 'lon'
+ land_y_dim_name = 'lat'
+
+ land_temp_var_name = 't2m'
+ runoff_var_name    = 'runoff + drainage'
+
+ ! # File paths (MUST BE CONSISTENT WITH ORDER OF UNIQUE CLIMATIC PARAMETER COMBINATIONS),
+ land_list_file(1) = 'INPUT/IPSL/90Ma_Laugie/2X/Ave-Orb_sechiba.nc'
+ land_list_file(2) = 'INPUT/IPSL/90Ma_Laugie/4X/Ave-Orb_sechiba.nc'
+
+/
+
+
+# Global temperature field
+# ------------------------
+# Same expectations as previous GCM outputs.
+# Global temperature is not mandatory. Write '' or comment (!) fields is no data available for global temperature.
+# (if "glob_temp_varname" is '' or commented, all the other entries will be ignored).
+# The global temperature must be defined ON THE SAME GRID than mandatory climatology, but can be stored in different files.
+# If no GCM output file are specified, the same as above will be considered, and "x" and "y" variable name will be ignored.
+
+&GLOB_CLIM_INFO
+
+ glob_x_dim_name = 'lon'
+ glob_y_dim_name = 'lat'
+
+ glob_temp_var_name = 't2m'
+
+ ! # File paths (MUST BE CONSISTENT WITH ORDER OF UNIQUE CLIMATIC PARAMETER COMBINATIONS),
+ glob_list_file(1) = 'INPUT/IPSL/90Ma_Laugie/2X/Ave-Orb_atm.nc'
+ glob_list_file(2) = 'INPUT/IPSL/90Ma_Laugie/4X/Ave-Orb_atm.nc'
+
+/
+

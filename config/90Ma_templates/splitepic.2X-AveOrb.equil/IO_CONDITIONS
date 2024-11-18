@@ -1,0 +1,593 @@
+############################################################################################################################################
+############################################################################################################################################
+####                                                                                                                                    ####
+####                                                                                                                                    ####
+####                                             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                                            ####
+####                                             %%  GEOCLIM INPUT-OUTPUT INTERFACE FILE  %%                                            ####
+####                                             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                                            ####
+####                                                                                                                                    ####
+####                                                                                                                                    ####
+####    States the run name, the paths of the configuration files, directories, restart files, input files and output files.            ####
+####    For netCDF files, states also the variable names, dimensions, units...                                                          ####
+####                                                                                                                                    ####
+####    All the data present here is passed to Fortran code using NAMELISTS. A Fortran namelist starts by "&..." ("..." being the       ####
+####    name of the namelist) and ends by "/". Namelists contain Fortran variable affectation statements ("variable = ..."),            ####
+####    using the "actual" variable names of the Fortran code.                                                                          ####
+####    Example of namelist (Fortran-commented, to avoid any interference):                                                             ####
+####        ! &NAMELIST_EXAMPLE                                                                                                         ####
+####        !  fortran_variable_1 = 'test'                                                                                              ####
+####        !  fortran_variable_2 = 1d0                                                                                                 ####
+####        ! /                                                                                                                         ####
+####    These namelist names, as well as the "actual" Fortran variable name  must not be modified (unless the code is modified too      ####
+####    Comments inside namelists start with "!".                                                                                       ####
+####    The order in which the namelists are put, as well as the order of the variables written within the namelist has no importance.  ####
+####    Any line of this file outside namelists are ignored by the code.                                                                ####
+####                                                                                                                                    ####
+####                                                                                                                                    ####
+####    All given file paths are considered relative to the GEOCLIM MAIN DIRECTORY (and NOT any subdirectory, such as executables/),    ####
+####    REGARDLESS of the directory the executable will be launched in. This unless the file path starts with '/', in that case,        ####
+####    it is interpreted as an absolute path.                                                                                          ####
+####    The GEOCLIM main directory is stated in source/path.inc, automatically generated at compilation with Makefile (or with          ####
+####    build_GEOCLIM).                                                                                                                 ####
+####                                                                                                                                    ####
+####    The present file is the only one whose name is stated within the code of GEOCLIM (first line of geoclim_mainprog.f), and        ####
+####    cannot be changed (unless changing the source code). All other files names are defined here.                                    ####
+####                                                                                                                                    ####
+####                                                                                                                                    ####
+############################################################################################################################################
+############################################################################################################################################
+
+
+
+
+############################################################################################################################################
+##                                                                                                                                        ##
+##                                                           MAIN IO CONDITIONS:                                                          ##
+##                                                                                                                                        ##
+############################################################################################################################################
+
+
+#<------->
+&MAIN_INFO
+ run_name         = '.90Ma-splitepic-AveOrb.equil'
+ output_directory = 'OUTPUT/'
+ phys_cond_file   = 'config/cond_p20.dat' ! unit 3
+ ! #                 |=> contains most of the run configuration, such as solver time steps, printing time steps,
+ ! #                     model components to use, and volcanic degassing rate
+ killing_file     = 'deathnote.txt' ! unit 666
+/
+#<------->
+
+
+
+
+############################################################################################################################################
+##                                                                                                                                        ##
+##                                                  INITIALIZATION FILES (ie, restarts):                                                  ##
+##                                                                                                                                        ##
+############################################################################################################################################
+
+
+##  COMBINE module (ascii text files)
+##  =================================
+
+#<------->
+&INIT_INFO
+ COMB_init_mode     = 'coldstart' ! # 'restart' => restart file OR 'coldstart' => automatically-generated initial condition
+ COMB_var_init_file = 'none' ! unit 2
+/
+#<------->
+
+
+##  DynSoil module (restarting mode, netCDF file and variables)
+##  ===========================================================
+#
+# => ignored if DynSoil is not activated
+
+#<---------->
+&DYNSOIL_INIT_INFO
+
+ ! # DynSoil initialization mode
+ init_mode = 'startup:eq'
+ ! #       - 'restart'      => read restart from existing file
+ ! #       - 'startup:null' => create null initial condition (reg. thick. = 0 everywhere)
+ ! #       - 'startup:eq'   => create initial conditions at equilibrium with given climatology and init pCO2 (using analytical formulas)
+
+ ! # Initialization file path (only used in 'restart' initialization mode):
+ init_file = ''
+
+ ! # Dimension names in initial condition file
+ DYNS_restart_dim(1) = 'lon'
+ DYNS_restart_dim(2) = 'lat'
+ DYNS_restart_dim(3) = 'litho'
+ DYNS_restart_dim(4) = 'xlevs'
+ ! # Variable names in initial condition file
+ DYNS_restart_var(1) = 'reg_thickness'
+ DYNS_restart_var(2) = 'x_P_surf'
+ DYNS_restart_var(3) = 'age_surf'
+ DYNS_restart_var(4) = 'z'
+ DYNS_restart_var(5) = 'age'
+ ! # Note: this block is used both for restarting from a initial condition file (init_mode='restart') AND writing the next restart file
+
+/
+#<---------->
+
+
+
+
+############################################################################################################################################
+##                                                                                                                                        ##
+##                                                               INPUT FILES:                                                             ##
+##                                                                                                                                        ##
+############################################################################################################################################
+
+
+## ========================= ##
+##  MAIN CONTINENTAL INPUTS  ##
+## ========================= ##
+
+# "cont_input_mode" tells GEOCLIM how to read the continental input
+# 2 options:
+#   * cont_input_mode='ascii' => read inputs from ascii files ("old" way)
+#                                 -> the code will read the file "GCM_input_condition_file"
+#   * cont_input_mode='GCM'   => read inputs from GCM netCDF outputs (land module annual climatology)
+#                                 -> the code will read the files ascii data files
+#                                     - "grid_area_file"
+#                                     - "cont_area_file"
+#                                     - "temperature_file"
+#                                     - "runoff_file"
+#                                     - "interp_T_factor"
+#                                     - "interp_R_factor"
+
+#<-------------->
+&CONT_INFO
+
+ cont_input_mode = 'GCM' ! must be 'ascii' or 'GCM'
+
+ ! # Only considered in input mode "ascii"
+ grid_area_file   = 'none' ! unit 301
+ cont_area_file   = 'none' ! unit 7
+ temperature_file = 'none' ! unit 30
+ runoff_file      = 'none' ! unit 31
+ interp_T_factor  = 'none' ! unit 302 -- NOTE: file *not read* in current version
+ interp_R_factor  = 'none' ! unit 303 -- NOTE: file *not read* in current version
+
+ ! # Only considered in input mode "GCM"
+ GCM_input_condition_file = 'config/90Ma_templates/GCM_input_conditions.2X-OrbAve' ! unit 333
+
+/
+#<-------------->
+
+
+## =========== ##
+##  LITHOLOGY  ##
+## =========== ##
+
+# Specify file, lithology fraction variable and fillvalue names of the netCDF input file
+#
+# Alternatively, you can specify directly the lithology fraction of each class (a geographically-uniform
+# lithology will be assumed):
+#     singlepixel_lithofrac = ...
+# (must be consistent with nlitho variable!)
+# To do so, LEAVE BLANK (or COMMENT) the lithology input file name "file_name"
+#
+# NOTE: the traditional 6 lithology classes version of GEOCLIM is:
+# ----
+#  1: metamorphic; 2: felsic; 3: intermediate; 4: mafic; 5: siliclastic sediments; 6: carbonates
+
+#<-------->
+&LITHO_INFO
+
+ !file_name    = ''
+ !var_name     = 'lithfrac'
+ !fillval_name = '_FillValue'
+
+ ! # if file_name is blank ("") or undefined (commented) => use uniform lithology:
+ singlepixel_lithofrac = 0.144, 0.074, 0.023, 0.053, 0.616, 0.090 
+ !                       --> derived from Hartmann & Moodsorf, G3, 2012 (10.1029/2012GC004370)
+
+/
+#<-------->
+
+
+## ========================== ##
+##  CONTINENTAL FLUX ROUTING  ##
+## ========================== ##
+
+# This block is only needed if more than one epicontinental basin is defined (only counting
+# the surface basins, ignoring the vertical discretization)
+# Even so, the routing through the definition of rontinental drainage basins can be bypassed
+# by specifying "uniform_routing = .true." (and no other variable is required in the namelist)
+# Doing so, the global continental fluxes will be split into all the epicontinental basins
+# proportionally to their areas.
+
+#<-------->
+&BASINMAP_INFO
+
+ ! # Use this option in absence of information about drainage basins
+ !uniform_routing = .true.
+
+ file_name    = 'INPUT/IPSL/90Ma_Laugie/other/GEOCLIM_basin_map_IPSL-90Ma.nc'
+ var_name     = 'geoclim_routing_map_globoce'
+ !fillval_name = '' ! # possibility to define a fill-value
+
+/
+#<-------->
+
+
+## ======= ##
+##  SLOPE  ##
+## ======= ##
+
+# Continental output that is only used by DynSoil module
+# => ignored if DynSoil is not activated
+
+#<-------->
+&SLOPE_INFO
+ file_name    = 'INPUT/slope/slope_Mid-Cretaceous_90Ma.nc'
+ var_name     = 'slope'
+ fillval_name = '_FillValue'
+/
+#<-------->
+
+
+## ========================== ##
+##  OTHER CONTINENTAL INPUTS  ##
+## ========================== ##
+
+#   * vegetation map (through time). [Ignored if vegetation flag not activated]
+#<-------->
+&VEGET_INFO
+ file_name = 'none' ! unit 48
+/
+#<-------->
+
+#   * Climatic parameters (through time). [ignored if no additional climatic parameters (ie, other than CO2)]
+#<------------>
+&CLIMPARAM_INFO
+ file_name = 'none' ! unit 49
+/
+#<------------>
+
+
+## ============================== ##
+##  OCEANIC (ie, COMBINE) INPUTS  ##
+## ============================== ##
+
+#<---------->
+&COMBINE_INFO
+
+ ! ##  Main inputs
+ ocean_temp_mode    = 'file' ! if 'parametric', use parametric CO2-Toce relationship, and ignore input file
+ ocean_temp_file    = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/Orb-Mean_GCM_oce_temp.dat' ! unit 32
+
+ ! ##  Earth physical dimensions
+ box_volume_file    = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/oce_vol.dat' ! unit 33
+ box_surf_file      = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/oce_surf.dat' ! unit 34
+ box_surf_sedi_file = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/surf_sedi.dat' ! unit 37
+
+ ! ##  definition of boxes (files containing 0|1 indices)
+ deep_box_file      = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/indice_deep.dat' ! unit 35
+ appcont_box_file   = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/apport_ct.dat' ! unit 39
+ thermocline_file   = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/thermocline.dat' ! unit 40
+ surface_box_file   = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/indice_surface.dat' ! unit 41
+ epicont_box_file   = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/indice_epicont.dat' ! unit 46
+ polar_box_file     = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/indice_polar.dat' ! unit 47
+
+ ! ##  other physical parameters
+ box_press_file     = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/press_box.dat' ! unit 38
+ exchange_file      = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/Orb-Mean_exchange.dat' ! unit 42
+
+ ! ##  sediment transport mode and file for box boundary lengths
+ sedim_transport_mode = 'neighbour' ! 'uniform' or 'neighbour'
+ boundary_length_file = 'INPUT/COMBINE/IPSL-90Ma-splitepic-2X/box_sf_bnd_len.dat' ! unit 43. ! Ignored if transport mode is "uniform". Only used for the box-2-box "neighbour" transport scheme
+
+/
+#<---------->
+
+
+
+
+############################################################################################################################################
+##                                                                                                                                        ##
+##                                                           OUTPUT CONDITIONS:                                                           ##
+##                                                                                                                                        ##
+############################################################################################################################################
+
+
+# Select here the variables you want to output, and customize variable names, units and descriptions
+# --------------------------------------------------------------------------------------------------
+#
+# The "output file" namelists (&*_OUTPUT_FILE) only include the variable "file_name"
+#
+# The "dimension variables" namelists (&*_OUTPUT_DIM) include the arrays "dname(:)", "units(:)" (both mandatory) and vartype(:) (by default: "real")
+#
+# The "main netCDF variables" namelists (&*_OUTPUT_VAR) include the following arrays:
+#    Mandatory variables:
+#        "vname(:)", "units(:)" and "defdim(:,:)". (mandatory unless the netCDF variable is not written => see "writevar").
+#        "vname(:)" and "units(:)" can be customized by user. "defdim" should not be modified, unless re-writing GEOCLIM code.
+#    Optional variables:
+#        * "long_name(:)" -> description of the netCDF variable
+#        * "writevar(:)"  -> TRUE or FALSE, control whether or not the GEOCLIM variable is written in the output netCDF file (default: TRUE)
+#                            if specified "writevar=FALSE", no other variable is needed in the namelist
+#        * "fillval(:)"   -> fill-value of the netCDF variable. It is a "real" Fortran variable type, but will be converted into the netCDF type
+#        * "vartype(:)"   -> type of the netCDF variable. By default, "real", This should not be modified, unless re-writing GEOCLIM code.
+#
+# In all array, the index (e.g., vname(87)) correspond to the # of the dimension or variable in the code.
+
+
+## ================== ##
+##  COMBINE OUTPUTS:  ##
+## ================== ##
+
+#<------------->
+&CMB_OUTPUT_FILE
+  file_name='geoclim_output'
+/
+-------------
+&CMB_OUTPUT_DIM
+  dname(1)='box',	units(1)='1', vartype(1)='integer'
+  dname(2)='box2',	units(2)='1', vartype(2)='integer'
+  dname(3)='time',	units(3)='y'
+/
+---------------
+&CMB_OUTPUT_VAR
+ vname(1)='indice_surface',	units(1)='-',	vartype(1)='integer',	defdim(1,:)=1,0,0	long_name(1)='1|0 whether boxes are at top of water column',     fillval(1)=-1
+ vname(2)='indice_interm',	units(2)='-',	vartype(2)='integer',	defdim(2,:)=1,0,0	long_name(2)='1|0 whether boxes are within the water column',    fillval(2)=-1
+ vname(3)='indice_deep',	units(3)='-',	vartype(3)='integer',	defdim(3,:)=1,0,0	long_name(3)='1|0 whether boxes are at bottom of water column',  fillval(3)=-1
+ vname(4)='indice_polar',	units(4)='-',	vartype(4)='integer',	defdim(4,:)=1,0,0	long_name(4)='1|0 whether boxes are polar',                      fillval(4)=-1
+ vname(5)='indice_epicont',	units(5)='-',	vartype(5)='integer',	defdim(5,:)=1,0,0	long_name(5)='1|0 whether boxes are coastal (epicontinental)',   fillval(5)=-1
+ vname(6)='indice_lnd_inp',	units(6)='-',	vartype(6)='integer',	defdim(6,:)=1,0,0	long_name(6)='1|0 whether boxes receive continental inputs',     fillval(6)=-1
+ vname(7)='indice_sedim',	units(7)='-',	vartype(7)='integer',	defdim(7,:)=1,0,0	long_name(7)='1|0 whether boxes intercept seafloor',             fillval(7)=-1
+ vname(8)='box_volume',			units(8)='m3',			defdim(8,:)=1,0,0	long_name(8)='volume of oceanic boxes'
+ vname(9)='box_area',			units(9)='m2',			defdim(9,:)=1,0,0	long_name(9)='horizontal (top) area of oceanic boxes'
+ vname(10)='box_sedim_area',		units(10)='m2',			defdim(10,:)=1,0,0	long_name(10)='sedimenting (seafloor) area of oceanic boxes'
+ vname(11)='box_depth',			units(11)='km',			defdim(11,:)=1,0,0	long_name(11)='depth of bottom of boxes'
+ vname(12)='box_top_depth',		units(12)='km',			defdim(12,:)=1,0,0	long_name(12)='depth of top of boxes'
+ vname(13)='box_sed_capacity',		units(13)='m3/y',		defdim(13,:)=1,0,0	long_name(13)='Accumulation capacity (i.e., maximum sedimenting flux) of boxes'
+ writevar(14)=FALSE, vname(14)='clim_param_1', units(14)='-',		defdim(14,:)=0,0,1	long_name(14)='climatic parameter #1'
+ writevar(15)=FALSE, vname(15)='clim_param_2', units(15)='-',		defdim(15,:)=0,0,1	long_name(15)='climatic parameter #2'
+ writevar(16)=FALSE, vname(16)='clim_param_3', units(16)='-',		defdim(16,:)=0,0,1	long_name(16)='climatic parameter #3'
+ writevar(17)=FALSE, vname(17)='clim_param_4', units(17)='-',		defdim(17,:)=0,0,1	long_name(17)='climatic parameter #4'
+ writevar(18)=FALSE, vname(18)='clim_param_5', units(18)='-',		defdim(18,:)=0,0,1	long_name(18)='climatic parameter #5'
+ vname(19)='water_exchange',		units(19)='Sv',			defdim(19,:)=1,1,1	long_name(19)='Water fluxes from "box" to "box2" (oceanic circulation)'
+ vname(20)='DIC',			units(20)='mol/m3',		defdim(20,:)=1,0,1	long_name(20)='Dissolved Organic Carbon concentration'
+ vname(21)='alkalinity',		units(21)='eq/m3',		defdim(21,:)=1,0,1	long_name(21)='Seawater alkalinity'
+ vname(22)='PO4',			units(22)='mol/m3',		defdim(22,:)=1,0,1	long_name(22)='Phosphate ion concentration'
+ vname(23)='Ca',			units(23)='mol/m3',		defdim(23,:)=1,0,1	long_name(23)='Calcium ion concentration'
+ vname(24)='Sr',			units(24)='mol/m3',		defdim(24,:)=1,0,1	long_name(24)='Strontium ion concentration'
+ vname(25)='O2',			units(25)='mol/m3',		defdim(25,:)=1,0,1	long_name(25)='Molecular oxygen concentration'
+ writevar(26)=FALSE, vname(26)='pCO2',	units(26)='mol',		defdim(26,:)=1,0,1	long_name(26)='Partial pressure of CO2 (equiv. in moles)'
+ vname(27)='SO4',			units(27)='mol/m3',		defdim(27,:)=1,0,1	long_name(27)='Sulfate ion concentration'
+ vname(28)='Sr_PIC',			units(28)='mol/m3',		defdim(28,:)=1,0,1	long_name(28)='Sr in Particulate Inorganic Carbon (moles of Sr / m3 of water)'
+ vname(29)='POP',			units(29)='mol/m3',		defdim(29,:)=1,0,1	long_name(29)='Particulate Organic Phosphorus (moles of P / m3 of water)'
+ vname(30)='PIP',			units(30)='mol/m3',		defdim(30,:)=1,0,1	long_name(30)='Particulate Inorganic Phosphorus (moles of P / m3 of water)'
+ vname(31)='POC',			units(31)='mol/m3',		defdim(31,:)=1,0,1	long_name(31)='Particulate Organic Carbon (moles of C / m3 of water)'
+ vname(32)='PIC',			units(32)='mol/m3',		defdim(32,:)=1,0,1	long_name(32)='Particulate Inorganic Carbon (moles of C / m3 of water)'
+ vname(33)='DIC_d13C',			units(33)='-',			defdim(33,:)=1,0,1	long_name(33)='delta C 13 of Dissolved Inorganic Carbon'
+ vname(34)='PIC_d13C',			units(34)='-',			defdim(34,:)=1,0,1	long_name(34)='delta C 13 of Particulate Inorganic Carbon'
+ vname(35)='POC_d13C',			units(35)='-',			defdim(35,:)=1,0,1	long_name(35)='delta C 13 of Particulate Organic Carbon'
+ vname(36)='CO2_d13C',			units(36)='-',			defdim(36,:)=1,0,1	long_name(36)='delta C 13 of CO2'
+ vname(37)='Sr_iso_ratio',		units(37)='-',			defdim(37,:)=1,0,1	long_name(37)='Sr 87 / Sr 86 isotopic ratio'
+ vname(38)='PIC_Sr_iso_ratio',		units(38)='-',			defdim(38,:)=1,0,1	long_name(38)='Sr 87 / Sr 86 ratio in Particulate Inorganic Carbon'
+ vname(39)='H2CO3',			units(39)='mol/m3',		defdim(39,:)=1,0,1	long_name(39)='H2CO3 ion concentration'
+ vname(40)='HCO3',			units(40)='mol/m3',		defdim(40,:)=1,0,1	long_name(40)='HCO3 - ion concentration'
+ vname(41)='CO3',			units(41)='mol/m3',		defdim(41,:)=1,0,1	long_name(41)='CO3 2- ion concentration'
+ vname(42)='H2CO3_d13C',		units(42)='-',			defdim(42,:)=1,0,1	long_name(42)='delta C 13 of H2CO3'
+ vname(43)='HCO3_d13C',			units(43)='-',			defdim(43,:)=1,0,1	long_name(43)='delta C 13 of HCO3 -'
+ vname(44)='CO3_d13C',			units(44)='-',			defdim(44,:)=1,0,1	long_name(44)='delta C 13 of CO3 2-'
+ vname(45)='pH',			units(45)='-',			defdim(45,:)=1,0,1	long_name(45)='potential of hydrogen'
+ vname(46)='omega',			units(46)='-',			defdim(46,:)=1,0,1	long_name(46)='Calcite solubility product'
+ vname(47)='temperature',		units(47)='degrees_celsius',	defdim(47,:)=1,0,1	long_name(47)='Seawater temperature'
+ vname(48)='salinity',			units(48)='PSU',		defdim(48,:)=1,0,1	long_name(48)='Seawater salinity'
+ vname(49)='lysoc_depth_calc',		units(49)='km',			defdim(49,:)=1,0,1	long_name(49)='Model calcite lysocline depth'
+ vname(50)='diag_lys_dpth_calc',	units(50)='km',			defdim(50,:)=1,0,1	long_name(50)='Diagnosed calcite lysocline depth'
+ vname(51)='lysoc_depth_arag',		units(51)='km',			defdim(51,:)=1,0,1	long_name(51)='Model aragonite lysocline depth'
+ vname(52)='diag_lys_dpth_arag',	units(52)='km',			defdim(52,:)=1,0,1	long_name(52)='Diagnosed aragonite lysocline depth'
+ vname(53)='ocn_epsilon_OC',		units(53)='-',			defdim(53,:)=1,0,1	long_name(53)='C 13 fractionation coefficient during oceanic org. C production'
+ vname(54)='DIC_glob',			units(54)='mol/m3',		defdim(54,:)=0,0,1	long_name(54)='Mean ocean Dissolved Organic Carbon concentration'
+ vname(55)='alk_glob',			units(55)='eq/m3',		defdim(55,:)=0,0,1	long_name(55)='Mean ocean alkalinity'
+ vname(56)='PO4_glob',			units(56)='mol/m3',		defdim(56,:)=0,0,1	long_name(56)='Mean ocean Phosphate ion concentration'
+ vname(57)='Ca_glob',			units(57)='mol/m3',		defdim(57,:)=0,0,1	long_name(57)='Mean ocean Calcium ion concentration'
+ vname(58)='Sr_glob',			units(58)='mol/m3',		defdim(58,:)=0,0,1	long_name(58)='Mean ocean Strontium ion concentration'
+ vname(59)='O2_glob',			units(59)='mol/m3',		defdim(59,:)=0,0,1	long_name(59)='Mean ocean molecular oxygen concentration'
+ vname(60)='SO4_glob',			units(60)='mol/m3',		defdim(60,:)=0,0,1	long_name(60)='Mean ocean sulfate concentration'
+ vname(61)='Sr_PIC_glob',		units(61)='mol/m3',		defdim(61,:)=0,0,1	long_name(61)='Mean ocean Sr in Particulate Inorganic Carbon (moles of Sr)'
+ vname(62)='POP_glob',			units(62)='mol/m3',		defdim(62,:)=0,0,1	long_name(62)='Mean ocean Particulate Organic Phosphorus (moles of P)'
+ vname(63)='PIP_glob',			units(63)='mol/m3',		defdim(63,:)=0,0,1	long_name(63)='Mean ocean Particulate Inorganic Phosphorus (moles of P)'
+ vname(64)='POC_glob',			units(64)='mol/m3',		defdim(64,:)=0,0,1	long_name(64)='Mean ocean Particulate Organic Carbon (moles of C)'
+ vname(65)='PIC_glob',			units(65)='mol/m3',		defdim(65,:)=0,0,1	long_name(65)='Mean ocean Particulate Inorganic Carbon (moles of C)'
+ vname(66)='DIC_d13C_glob',		units(66)='-',			defdim(66,:)=0,0,1	long_name(66)='Mean ocean delta C 13 of Dissolved Inorganic Carbon'
+ vname(67)='PIC_d13C_glob',		units(67)='-',			defdim(67,:)=0,0,1	long_name(67)='Mean ocean delta C 13 of Particulate Inorganic Carbon'
+ vname(68)='POC_d13C_glob',		units(68)='-',			defdim(68,:)=0,0,1	long_name(68)='Mean ocean delta C 13 of Particulate Organic Carbon'
+ vname(69)='Sr_iso_rat_glob',		units(69)='-',			defdim(69,:)=0,0,1	long_name(69)='Mean ocean Sr 87 / Sr 86 isotopic ratio'
+ vname(70)='PIC_Sr_iso_rat_glob',	units(70)='-',			defdim(70,:)=0,0,1	long_name(70)='Mean ocean Sr 87 / Sr 86 ratio in Particulate Inorganic Carbon'
+ vname(71)='pH_glob',			units(71)='-',			defdim(71,:)=0,0,1	long_name(71)='Mean ocean potential of hydrogen'
+ vname(72)='temperature_glob',		units(72)='degrees_celsius',	defdim(72,:)=0,0,1	long_name(72)='Mean ocean temperature'
+ vname(73)='salinity_glob',		units(73)='PSU',		defdim(73,:)=0,0,1	long_name(73)='Mean ocean salinity'
+ vname(74)='mean_lysoc_depth',		units(74)='km',			defdim(74,:)=0,0,1	long_name(74)='Ocean area-averaged calcite lysocline depth'
+ vname(75)='pO2_atm',			units(75)='atm',		defdim(75,:)=0,0,1	long_name(75)='Partial pressure of atmospheric O2 (in units of modern atm. pressure)'
+ writevar(76)=FALSE  vname(76)='O2_atm_conc',	units(76)='%',		defdim(76,:)=0,0,1	long_name(76)='Atmospheric O2 mixing ratio'
+ vname(77)='pCO2_atm',			units(77)='1e-6 atm',		defdim(77,:)=0,0,1	long_name(77)='Partial pressure of atmospheric CO2 (in units of modern atm. pressure)'
+ writevar(78)=FALSE  vname(78)='CO2_atm_conc',	units(78)='ppmv',	defdim(78,:)=0,0,1	long_name(78)='Atmospheric CO2 mixing ratio'
+ vname(79)='GMST',			units(79)='degrees_celsius',	defdim(79,:)=0,0,1	long_name(79)='Global Mean Surface Temperature'
+ writevar(80)=FALSE, vname(80)='POP_sink_tot_flux',  units(80)='mol/y',	defdim(80,:)=0,0,1	long_name(80)='Total sinking flux of Phosphorus in organic particles'
+ writevar(81)=FALSE, vname(81)='fCO2anthros',	     units(81)='mol/y',	defdim(81,:)=0,0,1	long_name(81)='Anthropogenic CO2 flux'
+ writevar(82)=FALSE, vname(82)='trapp_rel_CO2_flux', units(82)='mol/y',	defdim(82,:)=0,0,1	long_name(82)='CO2 flux from trapp degassing'
+ vname(83)='MOR_CO2_degassing',		units(83)='mol/y',		defdim(83,:)=1,0,1	long_name(83)='CO2 flux from Mid-Ocean Ridges'
+ vname(84)='AO_CO2_flux',		units(84)='mol/y',		defdim(84,:)=1,0,1	long_name(84)='Net CO2 flux from atmosphere to each ocean box'
+ vname(85)='carb_bioprod_flux',		units(85)='mol/y',		defdim(85,:)=1,0,1	long_name(85)='Pelagic carbonate bioproduction flux'
+ vname(86)='org_C_bioprod_flux',	units(86)='mol/y',		defdim(86,:)=1,0,1	long_name(86)='Net bioproductivity of photic zone (moles of organic C)'
+ writevar(87)=FALSE  vname(87)='PIC_sink_flux',	units(87)='mol/y',	defdim(87,:)=1,0,1	long_name(87)='Sinking flux of carbonate particles in water column (moles of C)'
+ writevar(88)=FALSE  vname(88)='POC_sink_flux',	units(88)='mol/y',	defdim(88,:)=1,0,1	long_name(88)='Sinking flux of organic C particles in water column (moles of C)'
+ vname(89)='PIC_diss_flux',		units(89)='mol/y',		defdim(89,:)=1,0,1	long_name(89)='Carbonate particles dissolution flux in water column (moles of C)'
+ vname(90)='POC_oxyd_flux',		units(90)='mol/y',		defdim(90,:)=1,0,1	long_name(90)='Remineralization of organic C particles in water column (moles of C)'
+ vname(91)='sedim_rain_flux',		units(91)='kg/y',		defdim(91,:)=1,0,1	long_name(91)='"Raining" flux of bulk sediment on seafloor'
+ vname(92)='sedim_exchange_flux',	units(92)='kg/y',		defdim(92,:)=1,1,1	long_name(92)='Horizontal transport of bulk sediment on seafloor from "box" to "box2"'
+ vname(93)='sedim_flux',		units(93)='kg/y',		defdim(93,:)=1,0,1	long_name(93)='full sedimentation massic flux (rain + upslope - downslope)'
+ vname(94)='sedim_rate',		units(94)='m/y',		defdim(94,:)=1,0,1	long_name(94)='full sedimentation rate'
+ vname(95)='PIC_rain_flux',		units(95)='mol/y',		defdim(95,:)=1,0,1	long_name(95)='"Raining" flux of carbonate particles on seafloor (moles of C)'
+ vname(96)='POC_rain_flux',		units(96)='mol/y',		defdim(96,:)=1,0,1	long_name(96)='"Raining" flux of organic C particles on seafloor (moles of C)'
+ vname(97)='carb_ner_dep_flux',		units(97)='mol/y',		defdim(97,:)=1,0,1	long_name(97)='Neritic carbonate deposition flux before dissolution in sediment (moles of C)'
+ vname(98)='carb_dep_flux',		units(98)='mol/y',		defdim(98,:)=1,0,1	long_name(98)='Full (rain + upslope - downslope) deposition flux of pelagic carbonate particles on seafloor (moles of C)'
+ vname(99)='org_C_dep_flux',		units(99)='mol/y',		defdim(99,:)=1,0,1	long_name(99)='Full (rain + upslope - downslope) deposition flux of organic C particles on seafloor (moles of C)'
+ vname(100)='carb_ner_bur_flux',	units(100)='mol/y',		defdim(100,:)=1,0,1	long_name(100)='Neritic carbonate burial flux (moles of C)'
+ vname(101)='carb_pel_bur_flux',	units(101)='mol/y',		defdim(101,:)=1,0,1	long_name(101)='Pelagic carbonate burial flux (moles of C)'
+ vname(102)='org_C_bur_flux',		units(102)='mol/y',		defdim(102,:)=1,0,1	long_name(102)='Organic carbon burial flux (moles of C)'
+ vname(103)='burial_efficiency',	units(103)='-',			defdim(103,:)=1,0,1	long_name(103)='Preservation ratio of organic carbon in sediment'
+ vname(104)='P_bur_flux_orgC',		units(104)='mol/y',		defdim(104,:)=1,0,1	long_name(104)='Organic carbon-bound phosphorus burial flux'
+ vname(105)='P_bur_flux_phosph',	units(105)='mol/y',		defdim(105,:)=1,0,1	long_name(105)='Phosphorus burial flux in form of phosphorite'
+ vname(106)='P_bur_flux_hydro',		units(106)='mol/y',		defdim(106,:)=1,0,1	long_name(106)='Hydrothermal Fe-bound phosphorus burial flux'
+ vname(107)='sulf_red_flux',		units(107)='mol/y',		defdim(107,:)=1,0,1	long_name(107)='Sulfate-reduction flux in marine sediment (moles of S)'
+ vname(108)='orgCbur_O2_flux',		units(108)='mol/y',		defdim(108,:)=1,0,1	long_name(108)='O2 flux due to organic carbon burial'
+ vname(109)='seafloor_diss_flux',	units(109)='mol/y',		defdim(109,:)=1,0,1	long_name(109)='Seafloor weathering flux (moles of C)'
+ vname(110)='AO_tot_CO2_flux',		units(110)='mol/y',		defdim(110,:)=0,0,1	long_name(110)='Total net CO2 flux from atmosphere to ocean'
+ vname(111)='carb_ner_tot_bur_flux',	units(111)='mol/y',		defdim(111,:)=0,0,1	long_name(111)='Total neritic carbonate burial flux'
+ vname(112)='carb_pel_tot_bur_flux',	units(112)='mol/y',		defdim(112,:)=0,0,1	long_name(112)='Total Pelagic carbonate burial flux'
+ vname(113)='org_C_tot_bur_flux',	units(113)='mol/y',		defdim(113,:)=0,0,1	long_name(113)='Total organic carbon burial flux'
+ vname(114)='P_tot_bur_flux',		units(114)='mol/y',		defdim(114,:)=0,0,1	long_name(114)='Total phosphorus burial flux (in all forms)'
+ vname(115)='sulf_red_tot_flux',	units(115)='mol/y',		defdim(115,:)=0,0,1	long_name(115)='Total sulfate-reduction flux in marine sediment (moles of S)'
+ vname(116)='orgCbur_O2_tot_flux',	units(116)='mol/y',		defdim(116,:)=0,0,1	long_name(116)='Total O2 flux due to organic carbon burial'
+ vname(117)='seafloor_tot_diss_flux',	units(117)='mol/y',		defdim(117,:)=0,0,1	long_name(117)='Total seafloor weathering flux (moles of C)'
+ vname(118)='tot_CO2_degassing',	units(118)='mol/y',		defdim(118,:)=0,0,1	long_name(118)='Total CO2 degassing flux into ocean-atmosphere'
+ vname(119)='discharge',		units(119)='m3/y',		defdim(119,:)=0,0,1	long_name(119)='Freshwater discharge from continents'
+ vname(120)='TSS',			units(120)='kg/y',		defdim(120,:)=0,0,1	long_name(120)='Sediment discharge from continents'
+ vname(121)='sil_wth_flux',		units(121)='mol/y',		defdim(121,:)=0,0,1	long_name(121)='Silicate weathering flux from continents (moles of Ca-Mg)'
+ vname(122)='bas_wth_flux',		units(122)='mol/y',		defdim(122,:)=0,0,1	long_name(122)='Basalts weathering flux from continents (moles of Ca-Mg)'
+ vname(123)='carb_wth_flux',		units(123)='mol/y',		defdim(123,:)=0,0,1	long_name(123)='Carbonate weathering flux from continents (moles of Ca-Mg)'
+ vname(124)='ker_wth_flux',		units(124)='mol/y',		defdim(124,:)=0,0,1	long_name(124)='Land petrogenic carbon oxidation flux (moles of C)'
+ vname(125)='pyrite_wth_flux',		units(125)='mol/y',		defdim(125,:)=0,0,1	long_name(125)='Sulfur flux from continental pyrite oxidation)'
+ vname(126)='sil_sulfwth_flux',		units(126)='mol/y',		defdim(126,:)=0,0,1	long_name(126)='Silicate weathering flux by sulfuric acid (moles of Ca-Mg)'
+ vname(127)='carb_sulfwth_flux',	units(127)='mol/y',		defdim(127,:)=0,0,1	long_name(127)='Carbonate weathering flux by sulfuric acid (moles of Ca-Mg)'
+ vname(128)='P_wth_flux',		units(128)='mol/y',		defdim(128,:)=0,0,1	long_name(128)='Phosphorus weathering flux from continents'
+ vname(129)='cont_bio_POC_exp',		units(129)='mol/y',		defdim(129,:)=0,0,1	long_name(129)='Export of biogenic organic carbon from continents'
+ vname(130)='discharge_per_box',	units(130)='m3/y',		defdim(130,:)=1,0,1	long_name(130)='Freshwater discharge in each box'
+ vname(131)='TSS_per_box',		units(131)='kg/y',		defdim(131,:)=1,0,1	long_name(131)='Sediment discharge in each box'
+ vname(132)='sil_wth_flux_per_box',     units(132)='mol/y',		defdim(132,:)=1,0,1	long_name(132)='Silicate weathering flux in each box (moles of Ca-Mg)'
+ vname(133)='bas_wth_flux_per_box',     units(133)='mol/y',		defdim(133,:)=1,0,1	long_name(133)='Basalts weathering flux in each box (moles of Ca-Mg)'
+ vname(134)='carb_wth_flux_per_box',    units(134)='mol/y',		defdim(134,:)=1,0,1	long_name(134)='Carbonate weathering flux in each box (moles of Ca-Mg)'
+ vname(135)='ker_wth_flux_per_box',     units(135)='mol/y',		defdim(135,:)=1,0,1	long_name(135)='Land petrogenic carbon oxidation flux in each box (moles of C)'
+ vname(136)='pyrite_wth_flux_per_box',  units(136)='mol/y',		defdim(136,:)=1,0,1	long_name(136)='Sulfur flux from continental pyrite oxidation in each box'
+ vname(137)='sil_sulfwth_flux_per_box', units(137)='mol/y',		defdim(137,:)=1,0,1	long_name(137)='Silicate weathering flux by sulfuric acid in each box (moles of Ca-Mg)'
+ vname(138)='carb_sulfwth_flux_per_box',units(138)='mol/y',		defdim(138,:)=1,0,1	long_name(138)='Carbonate weathering flux by sulfuric acid in each box (moles of Ca-Mg)'
+ vname(139)='P_wth_flux_per_box',	units(139)='mol/y',		defdim(139,:)=1,0,1	long_name(139)='Phosphorus weathering flux in each box'
+ vname(140)='cont_bio_POC_exp_per_box', units(140)='mol/y',		defdim(140,:)=1,0,1	long_name(140)='Export of continental biogenic organic carbon in each box'
+ writevar(141)=FALSE, vname(141)='fCO2crust',	units(141)='-',		defdim(141,:)=1,0,1
+ writevar(142)=FALSE, vname(142)='fSO4_basin',	units(142)='-',		defdim(142,:)=1,0,1
+ writevar(143)=FALSE, vname(143)='fSO4_crust',	units(143)='-',		defdim(143,:)=1,0,1
+ writevar(144)=FALSE, vname(144)='Li_driv',	units(144)='-',		defdim(144,:)=0,0,1	long_name(144)='Global delta 7 Li of Lithium from silicate weathering'
+ writevar(145)=FALSE, vname(145)='Li_Friv',	units(145)='mol/y',	defdim(145,:)=0,0,1	long_name(145)='Global lithium flux from continental silicate weathering'
+ writevar(146)=FALSE, vname(146)='Li_driv_per_box',units(146)='-',	defdim(146,:)=1,0,1	long_name(146)='delta 7 Li of Lithium from silicate weathering in each box'
+ writevar(147)=FALSE, vname(147)='Li_Friv_per_box',units(147)='mol/y',	defdim(147,:)=1,0,1	long_name(147)='Lithium flux in each box from continental silicate weathering'
+ writevar(148)=FALSE, vname(148)='cont_org_C_d13C',units(148)='-',	defdim(148,:)=0,0,1	long_name(148)='delta 13 C of continental organic carbon'
+/
+#<------------->
+
+
+## ===================== ##
+##  GEOGRAPHIC OUTPUTS:  ##
+## ===================== ##
+
+#<------------->
+&GEO_OUTPUT_FILE
+ file_name='geographic_output'
+/
+-------------
+&GEO_OUTPUT_DIM
+ dname(1)='lon',	units(1)='degrees_east'
+ dname(2)='lat',	units(2)='degrees_north'
+ dname(3)='litho',	units(3)='-', vartype(3)='integer'
+ dname(4)='time',	units(4)='y'
+/
+---------------
+&GEO_OUTPUT_VAR
+ vname(1)='area',			units(1)='m2',			defdim(1,:)=1,1,0,0	long_name(1)='land area of grid cells'
+ vname(2)='litho_frac',			units(2)='-',			defdim(2,:)=1,1,1,0	long_name(2)='fraction of land covered by each lithology class'
+ vname(3)='basinmap', vartype(3)='integer',fillval(3)=-1, units(3)='-',	defdim(3,:)=1,1,0,0	long_name(3)='routing of continental fluxes in each oceanic box'
+ writevar(4)=FALSE, vname(4)='clim_param_1',	units(4)='-',		defdim(4,:)=0,0,0,1	long_name(4)='climatic parameter #1'
+ writevar(5)=FALSE, vname(5)='clim_param_2',	units(5)='-',		defdim(5,:)=0,0,0,1	long_name(5)='climatic parameter #2'
+ writevar(6)=FALSE, vname(6)='clim_param_3',	units(6)='-',		defdim(6,:)=0,0,0,1	long_name(6)='climatic parameter #3'
+ writevar(7)=FALSE, vname(7)='clim_param_4',	units(7)='-',		defdim(7,:)=0,0,0,1	long_name(7)='climatic parameter #4'
+ writevar(8)=FALSE, vname(8)='clim_param_5',	units(8)='-',		defdim(8,:)=0,0,0,1	long_name(8)='climatic parameter #5'
+ vname(9)='temperature',		units(9)='degrees_celsius',	defdim(9,:)=1,1,0,1	long_name(9)='Surface temperature'
+ vname(10)='runoff',			units(10)='cm/y',		defdim(10,:)=1,1,0,1	long_name(10)='Total runoff'
+ vname(11)='slope',			units(11)='m/m',		defdim(11,:)=1,1,0,0	long_name(11)='topographic slope'
+ vname(12)='sil_weathering',		units(12)='mol/m2/y',		defdim(12,:)=1,1,0,1	long_name(12)='Total silicate Ca-Mg weathering rate'
+ vname(13)='weathering_lithwgh',	units(13)='mol/m2/y',		defdim(13,:)=1,1,1,1	long_name(13)='Ca-Mg weathering rate per lithology (fraction-weighted)'
+ writevar(14)=FALSE, vname(14)='weathering_unwgh', units(14)='mol/m2/y',defdim(14,:)=1,1,1,1	long_name(14)='Ca-Mg weathering rate per lithology (unweighted)'
+ vname(15)='kerog_weathering',		units(15)='mol/m2/y',		defdim(15,:)=1,1,0,1	long_name(15)='Kerogen weathering rate (moles of C)'
+ vname(16)='biosph_org_C_export',	units(16)='mol/m2/y',		defdim(16,:)=1,1,0,1	long_name(16)='Rate of biospheric organic carbon export to the oceans'
+ vname(17)='phos_weathering',		units(17)='mol/m2/y',		defdim(17,:)=1,1,0,1	long_name(17)='Phosphorus weathering rate'
+ vname(18)='pyrite_weathering',		units(18)='mol/m2/y',		defdim(18,:)=1,1,0,1	long_name(18)='Pyrite weathering rate (moles of S)'
+/
+#<------------->
+
+
+## ================== ##
+##  DYNSOIL OUTPUTS:  ##
+## ================== ##
+#
+# => ignored if no coupled to DynSoil module
+
+#<------------->
+&DYN_OUTPUT_FILE
+ file_name='dynsoil_output'
+/
+-------------
+&DYN_OUTPUT_DIM
+ dname(1)='lon',	units(1)='degrees_east'
+ dname(2)='lat',	units(2)='degrees_north'
+ dname(3)='litho',	units(3)='-',  vartype(3)='integer'
+ dname(4)='xlevs',	units(4)='-'
+ dname(5)='time',	units(5)='y'
+/
+---------------
+&DYN_OUTPUT_VAR
+ vname(1)='area',				units(1)='m2',		defdim(1,:)=1,1,0,0,0	long_name(1)='land area of grid cells'
+ vname(2)='litho_frac',				units(2)='-',		defdim(2,:)=1,1,1,0,0	long_name(2)='fraction of land covered by each lithology class'
+ vname(3)='slope',				units(3)='m/m',		defdim(3,:)=1,1,0,0,0	long_name(3)='topographic slope'
+ writevar(4)=FALSE, vname(4)='clim_param_1',	units(4)='-',		defdim(4,:)=0,0,0,0,1	long_name(4)='climatic parameter #1'
+ writevar(5)=FALSE, vname(5)='clim_param_2',	units(5)='-',		defdim(5,:)=0,0,0,0,1	long_name(5)='climatic parameter #2'
+ writevar(6)=FALSE, vname(6)='clim_param_3',	units(6)='-',		defdim(6,:)=0,0,0,0,1	long_name(6)='climatic parameter #3'
+ writevar(7)=FALSE, vname(7)='clim_param_4',	units(7)='-',		defdim(7,:)=0,0,0,0,1	long_name(7)='climatic parameter #4'
+ writevar(8)=FALSE, vname(8)='clim_param_5',	units(8)='-',		defdim(8,:)=0,0,0,0,1	long_name(8)='climatic parameter #5'
+ writevar(9)=FALSE, vname(9)='temperature', units(9)='degrees_celsius',	defdim(9,:)=1,1,0,0,1	long_name(9)='Surface temperature'
+ writevar(10)=FALSE, vname(10)='runoff',	units(10)='cm/y',	defdim(10,:)=1,1,0,0,1	long_name(10)='Total runoff'
+ vname(11)='reg_thickness',			units(11)='m',		defdim(11,:)=1,1,1,0,1	long_name(11)='Regolith thickness'
+ vname(12)='x_P_surf',				units(12)='-',		defdim(12,:)=1,1,1,0,1	long_name(12)='Fraction of primary phases at top of regolith'
+ writevar(13)=FALSE, vname(13)='age_surf',	units(13)='y',		defdim(13,:)=1,1,1,0,1	long_name(13)='Age of particles at top of regolith'
+ writevar(14)=FALSE, vname(14)='z',		units(14)='m',		defdim(14,:)=1,1,1,1,1	long_name(14)='Height (from base of regolith) of x levels'
+ writevar(15)=FALSE, vname(15)='age',		units(15)='y',		defdim(15,:)=1,1,1,1,1	long_name(15)='Age of particles on x levels'
+ vname(16)='reg_prod_rate',			units(16)='m/y',	defdim(16,:)=1,1,1,0,1	long_name(16)='Regolith production rate'
+ vname(17)='reg_eros_rate',			units(17)='m/y',	defdim(17,:)=1,1,1,0,1	long_name(17)='Regolith erosion rate'
+ vname(18)='reg_P_diss_rate',			units(18)='m/y',	defdim(18,:)=1,1,1,0,1	long_name(18)='Volumetric dissolution rate of primary phases'
+ writevar(19)=FALSE, vname(19)='reg_P_eros_rate',units(19)='m/y',	defdim(19,:)=1,1,1,0,1	long_name(19)='Volumetric erosion rate of unweathered primary phases'
+ writevar(20)=FALSE, vname(20)='x_P_surf_eros',	units(20)='-',		defdim(20,:)=1,1,1,0,1	long_name(20)='Erosive fraction of primary phases'
+ vname(21)='x_P_mean',				units(21)='-',		defdim(21,:)=1,1,1,0,1	long_name(21)='Mean regolith fraction of primary phases'
+ vname(22)='reg_mean_age',			units(22)='y',		defdim(22,:)=1,1,1,0,1	long_name(22)='Mean regolith age'
+ writevar(23)=FALSE, vname(23)='Li_friv',	units(23)='mol/m2/y',	defdim(23,:)=1,1,1,0,1	long_name(23)='Specific flux of lithium leaching into rivers'
+ writevar(24)=FALSE, vname(24)='Li_fsp',	units(24)='mol/m2/y',	defdim(24,:)=1,1,1,0,1	long_name(24)='Specific flux of lithium kept in secondary phases'
+ writevar(25)=FALSE, vname(25)='Li_delta_riv',	units(25)='-',		defdim(25,:)=1,1,1,0,1	long_name(25)='delta Li 7 of leached lithium'
+/
+#<------------->
+
+
+
+
+############################################################################################################################################
+##                                                                                                                                        ##
+##                                              names of restart files written by the code:                                               ##
+##                                                                                                                                        ##
+############################################################################################################################################
+##
+# <><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+# Names in this section usually do not need to be modified
+# <><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+#<---------->
+&RESTART_INFO
+ COMBINE_restart_file = 'output'          ! unit 10
+ DynSoil_restart_file = 'dynsoil_restart'
+/
+#<---------->
+
