@@ -749,6 +749,15 @@ program geoclim
       call read_veget()
       call get_clim_param(time, tend, ijump_climparam, icount_climparam, prev_cpvec, next_cpvec, cpvec, cp_lowest_value)
       call creades(time)
+      !call creades_noP(time) ! => keep constant initial P weathering flux
+      !call creades_noWth(time) ! => keep constant all initial weathering fluxes
+      !call creades_noT(time) ! => keep constant initial oceanic temperature
+      !call creades_noX(time) ! => keep constant initial water exchanges
+      !call creades_noTX(time) ! => keep constant initial oceanic temperature and water exchanges
+      !call creades_noXWth(time) ! => keep constant initial water exchanges and continental fluxes
+      !call creades_noTWth(time) ! => keep constant initial oceanic temperature and continental fluxes
+      !call creades_noTXP(time) ! => keep constant initial oceanic temperature, water exchanges and P weathering
+      !call creades_noTXWth(time) ! => keep constant all initial fordings
       call rk4(y,dydx,nvb,time,htry,yout)
       do j=1,nvb
         y(j)=yout(j)
