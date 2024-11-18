@@ -15,6 +15,9 @@ CASE = 'None'
 # Examples for IPSL: ##
 # ------------------ ##
 
+# NOTE: some of IPSL inputs are stored in the archive "INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y__grid_U_grid_V_grid_W.tar.gz",
+# and must be unpacked first
+
 # IPSL CTRL (old way, without mask):
 if CASE == 'IPSL old PI ctrl':
     oce_output_2_GEOCLIM_BC(co2=[284.7],
@@ -90,6 +93,9 @@ if CASE == 'IPSL 90Ma':
 # ----------------- ##
 # Example for FOAM: ##
 # ----------------- ##
+
+# NOTE: FOAM outputs for this example are stored in the archive "INPUT/FOAM/PIctrl_cpld.tar.gz",
+# and must be unpacked first
 
 if CASE == 'FOAM':
     oce_output_2_GEOCLIM_BC(co2=[280, 1120],
