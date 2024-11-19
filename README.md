@@ -48,7 +48,7 @@ For the simulations presented here, all run names are in the form `.90Ma-$config
 
 All details can be found in the last section "Summary of all GEOCLIM simulations".
 
-### **How to reproduce the simulations**
+### HOW TO REPRODUCE THE SIMULATIONS
 
 Here are the steps to follow to reproduce the 90Ma simulations presented in Maffre et al. (submitted to GMD)
 
