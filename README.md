@@ -129,7 +129,7 @@ Here follows a summarized description of all the simulations corresponding to th
 * "AtlPac.Arct-3.2X-AveOrb.equil/" directory
   |                     |                                                                            |
   | ------------------- | -------------------------------------------------------------------------- |
-  | Description         | Same as previous case with 3 vertical levels in Arctic                     |
+  | Description         | Same as previous case with 3 vertical levels in Arctic (24-boxes)          |
   | Config name in Maffre et al. (Table 6) | -                                                       |
   | GEOCLIM run name                       | .90Ma-AtlPac-Arct3-AveOrb.equil                         |
   | Code modification   | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
@@ -145,7 +145,7 @@ Here follows a summarized description of all the simulations corresponding to th
 * "3bas.2X-AveOrb.equil/" directory
   |                     |                                                                            |
   | ------------------- | -------------------------------------------------------------------------- |
-  | Description         | Split N Atl/S Atl/rest + coastal (23-boxes), fixed CO2 (2X), equil. run    |
+  | Description         | Split N Atl/S Atl/rest + coastal (28-boxes), fixed CO2 (2X), equil. run    |
   | Config name in Maffre et al. (Table 6) | o27                                                     |
   | GEOCLIM run name                       | .90Ma-3bas-AveOrb.equil                                 |
   | Code modification   | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
@@ -153,7 +153,7 @@ Here follows a summarized description of all the simulations corresponding to th
 * "3bas.Arct-3.2X-AveOrb.equil/" directory
   |                     |                                                                            |
   | ------------------- | -------------------------------------------------------------------------- |
-  | Description         | Same as previous case with 3 vertical levels in Arctic                     |
+  | Description         | Same as previous case with 3 vertical levels in Arctic (29-boxes)          |
   | Config name in Maffre et al. (Table 6) | o28                                                     |
   | GEOCLIM run name                       | .90Ma-3bas-Arct3-AveOrb.equil                           |
   | Code modification   | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
