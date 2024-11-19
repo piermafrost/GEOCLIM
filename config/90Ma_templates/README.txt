@@ -1,4 +1,4 @@
-Each sub-directory in this current directory corresponds to a simulation conducted for Maffre et al. (2021, submitted to GMD).
+Each sub-directory in this current directory corresponds to a simulation conducted for Maffre et al. (2024, submitted to GMD).
 Each contains the configuration files "IO_CONDITIONS" and "cond_p20.dat" (potentially with some variations).
 To set-up a GEOCLIM simulation, copy the 2 files (one "IO_CONDITIONS..." and one "cond_p20./dat") of the given sub-directory and
 replace the original "IO_CONDITIONS" and "cond_p20.dat" in main "config/" directory (i.e., the parent directory).
