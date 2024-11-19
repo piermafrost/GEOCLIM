@@ -66,11 +66,31 @@ Those scripts use the following packages:
 
 
 ## Updates from GEOCLIM6:
+The version 7.0 of GEOCLIM is a major update from version 6.1. The definition of oceanic boxes has been made entirely flexible,
+and all oceanic boundary conditions can be generated from the climate simulation of the GCM coupled to GEOCLIM. Moreover, both
+oceanic temperature and circulation are now dependent on climatic conditions (pCO2 and external climate forcings, here called
+"climatic parameters"). The generation of boundary conditions can performed by the Python scripts "preproc/BC/BC\_generator.py"
+(for the oceanic ones) and "preproc/BC/basinmap/basinmap\_editor.py" (for the land-to-ocean routing scheme).
 
-... TO BE WRITTEN ...
+These improvements have required:
+* A complete rewriting of the sedimentation scheme (now integrating lateral fluxes for all elements), in the new file "seafloor\_sedimentation.f90".
+* A deep rewriting of "basin\_geometry.f", and of "creades.f" to implement the flexible box definition.
+* A reorganization of the interpolation of climate fields (put in "creadef.f"), since it includes oceanic circulation.
+* Changing the structure of continental fluxes variables into 1D arrays, since they can be split routed to several coastal boxes.
+* The implementation of land-to-ocean routing of continental fluxes in "cont\_weath.f".
+* The rewriting of the routing loading the oceanic circulation (now climate-dependent).
+* The addition of the reading of land-to-ocean routing map..
+* Significant changes in the COMBINE input files, to implement the flexible box definition.
+* The redefinition of COMBINE outputs to write additional variables, and add more information.
+* The implementation of all these new options in the compiling script "build\_GEOCLIM.sh".
+
+Additional changes includes:
+* The grouping of all fundamental chemistry functions and subroutine in "water\_chemistry.f90"
+* The implementation of self-generated COMBINE initial conditions (when trying a new box configuration).
+* The redefinition of test-run templates.
 
 ### Summary of former updates (from GEOCLIM5 to GEOCLIM6):
-* Flexibilization of inputs/outputs (netCDF), units and axis recognition (for inputs), use of "namelist" syntax (Fortran).
+* More flexible inputs/outputs (netCDF), units and axis recognition (for inputs), use of "namelist" syntax (Fortran).
 * Other code simplifications, remove redundant (multiple locations) or hard-coded definitions.
 * Implementation of climatic parameters, multilinear interpolation, and simplified sulfur cycle.
 
