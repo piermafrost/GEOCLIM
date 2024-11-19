@@ -1,19 +1,23 @@
-# GEOCLIM7.0 version for Turonian (90Ma) experiments with Milankovitch cycles
+﻿# GEOCLIM7.0 version for Turonian (90Ma) experiments with Milankovitch cycles
 
-This current branch is modified from GEOCLIM7.0 (release ...) of "main" branch, to be used specifically for the
-simulations presented in Maffre et al., submitted to GMD (2024).
+This current branch is modified from GEOCLIM7.0 (release ...) of "main" branch, to be used specifically for the simulations
+presented in Maffre et al., "GEOCLIM7, an Earth System Model for multi-million years evolution of the geochemical cycles and climate.",
+submitted to GMD (November 2024).
 
 This README only concerns the above-mentioned simulations (hereafter called "90Ma simulations").
-For a complete description of GEOCLIM and of the whole Github repository, please refer to the README of "main" branch.
+For a complete description of GEOCLIM and of the whole GitHub repository, please refer to the README of "main" branch.
 
 ## Data storage
 
 ### Raw netCDF inputs
-A few inputs are stored here...
+The only inputs stored in the current repository are the IPSL-CM5A2 pre-industrial control IPSL-CM5A2, the slope fields (both modern
+and 90Ma) and the modern lithology field.
+Because they require too much memory, the climate fields of the 90Ma IPSL-CM5A2 simulations (conducted for all orbital configurations
+and 2 CO2 levels) are stored in the PANGAEA archive ...
 
 ### Restart files
-COMBINE restart files for all 90Ma simulations are present in `restart/geoclim`.
-DynSoil restart files require too much memory, and are stored in the PANGAEA archive ... 
+The COMBINE restart files for all 90Ma simulations are present in `restart/geoclim`.
+The DynSoil restart files require too much memory, and are stored in the PANGAEA archive ... 
 
 ### COMBINE boundary condition files
 The COMBINE boundary condition files are generated using `preproc/BC/BC_generator.py`, from IPSL-CMA2 simulation outputs.
@@ -27,7 +31,7 @@ are stored in `config/90Ma_templates/`.
 Each subdirectory corresponds to a simulation case (see following section "Summary of GEOCLIM simulations").
 Only two configuration files are needed to replicate the simulation: "IO\_CONDITION" and "cond\_p20.dat".
 
-### GEOCLIM simulation sutputs
+### GEOCLIM simulation outputs
 The outputs of all 90Ma simulations are not stored in this repository because of they require too much memory.
 They are available on the PANGAEA archive ...
 
@@ -40,26 +44,26 @@ For each individual simulation, there are 3 GEOCLIM output files (all written in
 of the simulation.
 For the simulations presented here, all run names are in the form `.90Ma-$config$.$run_type$-$other$`, where:
 * "$config$ is the main GEOCLIM configuration (details of boxes definition and specificities).
-  "-AveOrb" means that climate inputs for that run are averages of all orbital confiurations.
+  "-AveOrb" means that climate inputs for that run are the average of all orbital configurations.
 * "$run-type$" can be "2X.equil" (or simply "equil") for equilibrium spin-up simulations with pCO2 fixed at 2xpre-industrial,
   "deg.equil" for equilibrium spin-up simulations with free pCO2 (force by degassing), "Laskar" (or "Lsk") for simulations run with
   95Ma-85Ma time-series fo orbital parameters from Laskar (2004).
 * "$other" indicates additional sensitivity tests.
 
 All details can be found in the last section "Summary of all GEOCLIM simulations".
-d
+
 ### HOW TO REPRODUCE THE SIMULATIONS
 
 Here are the steps to follow to reproduce the 90Ma simulations presented in Maffre et al. (submitted to GMD)
 
 0. Make sure the code of GEOCLIM compiles and runs properly
 
-    FOr this purpose, the bash script `make_test`, generating test-runs, is available on the branch "main" of current Github repository.
+    For this purpose, the bash script `make_test`, generating test-runs, is available on the branch "main" of current GitHub repository.
 
 1. Gather the needed inputs from the PANGAEA archive
 
-    * IPSL-CM5A2 netCDF inputs: ...
-    * DynSoil restarts: ...
+    * IPSL-CM5A2 netCDF inputs: the directory`"90Ma_Laugie/` from PANGAEA archive must be put in `INPUT/IPSL/`
+    * DynSoil restarts: all DynSoil restart files (`dynsoil_restart.*.nc`) from PANGAEA archive must be put in `restart/dynsoil/`
 
     If desired, the COMBINE boundary conditions files can be remade with `preproc/BC/IPSL_90Ma_all.py`
 
@@ -68,8 +72,8 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     The needed source code modifications are indicated, for each simulation case, in following section "Summary of all GEOCLIM simulations".
 
     * Spin-up equilibrium runs: the `scaling_factor` (defined in "dynsoil\_physical\_parameters.f90") must be reduced to 1d-3 for the regolith model
-      to reach steady-state in due time. (Note: the acceleration of oxygen and sulfure cycles are already set in the configuration files).
-    * Sensitivity experiments: one line of `geoclim_mainprog.f` should be commented/uncommented to desactivate a given process.
+      to reach steady-state in due time. (Note: the acceleration of oxygen and sulfur cycles are already set in the configuration files).
+    * Sensitivity experiments: one line of `geoclim_mainprog.f` should be commented/uncommented to deactivate a given process.
 
     **Important:**
     * When compiling the code for new simulation case, do not forget to undo the source code modification you have made.
@@ -95,6 +99,8 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
 
 
 ### Summary of all GEOCLIM simulations
+
+Here follows a summarized description of all the simulations corresponding to the configuration cases (directories) available in `config/90Ma_templates/`
 
 * "globoce.2X-AveOrb.equil/" directory
   |                     |                                                                            |
@@ -163,7 +169,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
 * "3bas.Arct-3.Laskar/" directory
   |                     |                                                                                                                      |
   | ------------------- | -------------------------------------------------------------------------------------------------------------------- |
-  | Description         | Same configuration than "3bas.Arct-3.AveOrb.equil/" forced with "laskar" 95Ma--85 Ma time-series of orbital cycles   |
+  | Description         | Same configuration than "3bas.Arct-3.AveOrb.equil/" forced with "Laskar" 95Ma--85 Ma time-series of orbital cycles   |
   | Config name in Maffre et al. (Table 6) | o28                                                                                               |
   | GEOCLIM run name                       | .90Ma-3bas-Arct3.Laskar                                                                           |
   | Compilation command | `./build_GEOCLIM --compset default --res 2,96,96 --nbasin 29 --clim-param 2,4,2 --param-periods ,360., --mode optim` |
@@ -237,7 +243,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
   * "IO\_CONDITIONS" file
     |                     |                                                                                                                           |
     | ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-    | Description         | Same configuration than "3bas.Arct-3.epol.AveOrb.equil/" forced with "laskar" 95Ma--85 Ma time-series of orbital cycles   |
+    | Description         | Same configuration than "3bas.Arct-3.epol.AveOrb.equil/" forced with "Laskar" 95Ma--85 Ma time-series of orbital cycles   |
     | Config name in Maffre et al. (Table 6) | o28'                                                                                                   |
     | GEOCLIM run name                       | .90Ma-3bas-Arct3-epol.Laskar                                                                           |
     | Compilation command | `./build_GEOCLIM --compset default --res 2,96,96 --nbasin 29 --clim-param 2,4,2 --param-periods ,360., --mode optim`      |
