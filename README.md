@@ -16,7 +16,7 @@ Because they require too much memory, the climate fields of the 90Ma IPSL-CM5A2 
 and 2 CO2 levels) are stored in the PANGAEA archive ...
 
 ### Restart files
-The COMBINE restart files for all 90Ma simulations are present in `restart/geoclim`.
+The COMBINE restart files for all 90Ma simulations are present in `restart/geoclim/`.
 The DynSoil restart files require too much memory, and are stored in the PANGAEA archive ... 
 
 ### COMBINE boundary condition files
