@@ -47,7 +47,7 @@ For the simulations presented here, all run names are in the form `.90Ma-$config
 * "$other" indicates additional sensitivity tests.
 
 All details can be found in the last section "Summary of all GEOCLIM simulations".
-
+d
 ### HOW TO REPRODUCE THE SIMULATIONS
 
 Here are the steps to follow to reproduce the 90Ma simulations presented in Maffre et al. (submitted to GMD)
@@ -101,7 +101,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
   | Article's config name | -                                                                          |
   | GEOCLIM run name      | .90Ma-globoce-AveOrb.equil                                                 |
   | Description           | ...                                                                        |
-  | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+  | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
   | Compilation command   | `./build_GEOCLIM --compset default --res 1,96,96 --mode optim`             |
 * "splitepic.2X-AveOrb.equil/" directory
   |                       |                                                                            |
@@ -109,7 +109,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
   | Article's config name | o13                                                                        |
   | GEOCLIM run name      | .90Ma-splitepic-AveOrb.equil                                               |
   | Description           | ...                                                                        |
-  | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+  | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
   | Compilation command   | `./build_GEOCLIM --compset default --res 1,96,96 --nbasin 14 --mode optim` |
 * "AtlPac.2X-AveOrb.equil/" directory
   |                       |                                                                            |
@@ -117,7 +117,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
   | Article's config name | o22                                                                        |
   | GEOCLIM run name      | .90Ma-AtlPac-AveOrb.equil                                                  |
   | Description           | ...                                                                        |
-  | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+  | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
   | Compilation command   | `./build_GEOCLIM --compset default --res 1,96,96 --nbasin 23 --mode optim` |
 * "AtlPac.Arct-3.2X-AveOrb.equil/" directory
   |                       |                                                                            |
@@ -125,7 +125,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
   | Article's config name | -                                                                          |
   | GEOCLIM run name      | .90Ma-AtlPac-Arct3-AveOrb.equil                                            |
   | Description           | ...                                                                        |
-  | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+  | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
   | Compilation command   | `./build_GEOCLIM --compset default --res 1,96,96 --nbasin 24 --mode optim` |
 * "AtlPac.Arct-3.epol.2X-AveOrb.equil/" directory
   |                       |                                                                            |
@@ -133,7 +133,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
   | Article's config name | -                                                                          |
   | GEOCLIM run name      | .90Ma-AtlPac-Arct3-epol-AveOrb.equil                                       |
   | Description           | ...                                                                        |
-  | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+  | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
   | Compilation command   | `./build_GEOCLIM --compset default --res 1,96,96 --nbasin 24 --mode optim` |
 * "3bas.2X-AveOrb.equil/" directory
   |                       |                                                                            |
@@ -141,7 +141,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
   | Article's config name | o27                                                                        |
   | GEOCLIM run name      | .90Ma-3bas-AveOrb.equil                                                    |
   | Description           | ...                                                                        |
-  | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+  | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
   | Compilation command   | `./build_GEOCLIM --compset default --res 1,96,96 --nbasin 28 --mode optim` |
 * "3bas.Arct-3.2X-AveOrb.equil/" directory
   |                       |                                                                            |
@@ -149,7 +149,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
   | Article's config name | o28                                                                        |
   | GEOCLIM run name      | .90Ma-3bas-Arct3-AveOrb.equil                                              |
   | Description           | ...                                                                        |
-  | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+  | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
   | Compilation command   | `./build_GEOCLIM --compset default --res 1,96,96 --nbasin 29 --mode optim` |
 * "3bas.Arct-3.AveOrb.equil/" directory
   |                       |                                                                            |
@@ -157,7 +157,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
   | Article's config name | o28                                                                        |
   | GEOCLIM run name      | .90Ma-3bas-Arct3-AveOrb.deg.equil                                          |
   | Description           | ...                                                                        |
-  | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+  | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
   | Compilation command   | `./build_GEOCLIM --compset default --res 2,96,96 --nbasin 29 --mode optim` |
 * "3bas.Arct-3.Laskar/" directory
   |                       |                                                                                                                      |
@@ -173,7 +173,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article's config name | o28'                                                                       |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-AveOrb.2X.equil                                      |
     | Description           | ...                                                                        |
-    | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+    | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
     | Compilation command   | `./build_GEOCLIM --compset default --res 1,96,96 --nbasin 29 --mode optim` |
   * "IO\_CONDITIONS.APx0.5" file
     |                       |                                                                            |
@@ -181,7 +181,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article's config name | o28'-APx0.5                                                                |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0.5-AveOrb.2X.equil                               |
     | Description           | ...                                                                        |
-    | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+    | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
     | Compilation command   | *same as previous case*                                                    |
   * "IO\_CONDITIONS.APx0.25" file
     |                       |                                                                            |
@@ -189,7 +189,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article's config name | o28'-APx0.25                                                               |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0.25-AveOrb.2X.equil                              |
     | Description           | ...                                                                        |
-    | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+    | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
     | Compilation command   | *same as previous case*                                                    |
   * "IO\_CONDITIONS.APx0" file
     |                       |                                                                            |
@@ -197,7 +197,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article's config name | o28'-APx0                                                                  |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0-AveOrb.2X.equil                                 |
     | Description           | ...                                                                        |
-    | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+    | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
     | Compilation command   | *same as previous case*                                                    |
 * "3bas.Arct-3.epol.AveOrb.equil/" directory
   * "IO\_CONDITIONS" file
@@ -206,7 +206,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article's config name | o28'                                                                       |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-AveOrb.deg.equil                                     |
     | Description           | ...                                                                        |
-    | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+    | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
     | Compilation command   | `./build_GEOCLIM --compset default --res 2,96,96 --nbasin 29 --mode optim` |
   * "IO\_CONDITIONS.APx0.5" file
     |                       |                                                                            |
@@ -214,7 +214,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article's config name | o28'-APx0.5                                                                |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0.5-AveOrb.deg.equil                              |
     | Description           | ...                                                                        |
-    | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+    | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
     | Compilation command   | *same as previous case*                                                    |
   * "IO\_CONDITIONS.APx0.25" file
     |                       |                                                                            |
@@ -222,7 +222,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article's config name | o28'-APx0.25                                                               |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0.25-AveOrb.deg.equil                             |
     | Description           | ...                                                                        |
-    | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+    | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
     | Compilation command   | *same as previous case*                                                    |
   * "IO\_CONDITIONS.APx0" file
     |                       |                                                                            |
@@ -230,7 +230,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article's config name | o28'-APx0                                                                  |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0-AveOrb.deg.equil                                |
     | Description           | ...                                                                        |
-    | Additional modif      | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
+    | Code modification     | Set `scaling_factor = 1d-3` in `source/dynsoil_physical_parameters.f90`    | 
     | Compilation command   | *same as previous case*                                                    |
 * "3bas.Arct-3.epol.Laskar/" directory
   * "IO\_CONDITIONS" file
@@ -269,7 +269,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article Table 8 name  | -                                                                                                                         |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0.25.Lsk-cstOceXchg                                                                              |
     | Description           | ...                                                                                                                       |
-    | Additional modif      | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 755 `call creades_noX(time)`     |
+    | Code modification     | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 755 `call creades_noX(time)`     |
     | Compilation command   | *same as previous case*                                                                                                   |
   * "IO\_CONDITIONS.APx0.25.csteOceTemp" file
     |                       |                                                                                                                           |
@@ -278,7 +278,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article Table 8 name  | -                                                                                                                         |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0.25.Lsk-cstOceTemp                                                                              |
     | Description           | ...                                                                                                                       |
-    | Additional modif      | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 754 `call creades_noT(time)`     |
+    | Code modification     | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 754 `call creades_noT(time)`     |
     | Compilation command   | *same as previous case*                                                                                                   |
   * "IO\_CONDITIONS.APx0.25.csteCntFlx" file
     |                       |                                                                                                                           |
@@ -287,7 +287,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article Table 8 name  | -                                                                                                                         |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0.25.Lsk-csteCntFlx                                                                              |
     | Description           | ...                                                                                                                       |
-    | Additional modif      | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 753 `call creades_noWth(time)`   |
+    | Code modification     | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 753 `call creades_noWth(time)`   |
     | Compilation command   | *same as previous case*                                                                                                   |
   * "IO\_CONDITIONS.APx0.25.csteOceTX" file
     |                       |                                                                                                                           |
@@ -296,7 +296,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article Table 8 name  | "Cont. fluxes"                                                                                                            |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0.25.Lsk-cstOceTX                                                                                |
     | Description           | ...                                                                                                                       |
-    | Additional modif      | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 756 `call creades_noWth(time)`   |
+    | Code modification     | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 756 `call creades_noWth(time)`   |
     | Compilation command   | *same as previous case*                                                                                                   |
   * "IO\_CONDITIONS.APx0.25.csteOceXCntFlx" file
     |                       |                                                                                                                           |
@@ -305,7 +305,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article Table 8 name  | "Oce. temperature"                                                                                                        |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0.25.Lsk-cstOceXchgCntFlx                                                                        |
     | Description           | ...                                                                                                                       |
-    | Additional modif      | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 757 `call creades_noXWth(time)`  |
+    | Code modification     | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 757 `call creades_noXWth(time)`  |
     | Compilation command   | *same as previous case*                                                                                                   |
   * "IO\_CONDITIONS.APx0.25.csteOceTCntFlx" file
     |                       |                                                                                                                           |
@@ -314,7 +314,7 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article Table 8 name  | "Oce. exchanges"                                                                                                          |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0.25.Lsk-cstOceTempCntFlx                                                                        |
     | Description           | ...                                                                                                                       |
-    | Additional modif      | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 758 `call creades_noTWth(time)`  |
+    | Code modification     | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 758 `call creades_noTWth(time)`  |
     | Compilation command   | *same as previous case*                                                                                                   |
   * "IO\_CONDITIONS.APx0.25.csteOceTXCntFlx" file
     |                       |                                                                                                                           |
@@ -323,6 +323,6 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     | Article Table 8 name  | "None"                                                                                                                    |
     | GEOCLIM run name      | .90Ma-3bas-Arct3-epol-APx0.25.Lsk-cstOceTXCntFlx                                                                          |
     | Description           | ...                                                                                                                       |
-    | Additional modif      | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 760 `call creades_noTXWth(time)` |
+    | Code modification     | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 760 `call creades_noTXWth(time)` |
     | Compilation command   | *same as previous case*                                                                                                   |
 
