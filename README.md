@@ -67,8 +67,9 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
 
     The needed source code modifications are indicated, for each simulation case, in following section "Summary of all GEOCLIM simulations".
 
-    * Spin-up equilibrium run
-    * Sensitivity experiments
+    * Spin-up equilibrium runs: the `scaling_factor` (defined in "dynsoil\_physical\_parameters.f90") must be reduced to 1d-3 for the regolith model
+      to reach steady-state in due time. (Note: the acceleration of oxygen and sulfure cycles are already set in the configuration files).
+    * Sensitivity experiments: one line of `geoclim_mainprog.f` should be commented/uncommented to desactivate a given process.
 
     **Important:**
     * When compiling the code for new simulation case, do not forget to undo the source code modification you have made.
