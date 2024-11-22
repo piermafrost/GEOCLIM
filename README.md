@@ -13,17 +13,17 @@ For a complete description of GEOCLIM and of the whole GitHub repository, please
 The only inputs stored in the current repository are the IPSL-CM5A2 pre-industrial control IPSL-CM5A2, the slope fields (both modern
 and 90Ma) and the modern lithology field.
 Because they require too much memory, the climate fields of the 90Ma IPSL-CM5A2 simulations (conducted for all orbital configurations
-and 2 CO2 levels) are stored in the PANGAEA archive ...
+and 2 CO2 levels) are stored in the Zenodo archive ...
 
 ### Restart files
 The COMBINE restart files for all 90Ma simulations are present in `restart/geoclim/`.
-The DynSoil restart files require too much memory, and are stored in the PANGAEA archive ... 
+The DynSoil restart files require too much memory, and are stored in the Zenodo archive ... 
 
 ### COMBINE boundary condition files
 The COMBINE boundary condition files are generated using `preproc/BC/BC_generator.py`, from IPSL-CMA2 simulation outputs.
 The script `preproc/BC/IPSL_90Ma_all.py` was specifically written to generate all boundary conditions needed for the 90Ma simulations.
 Those boundary condition files are all stored in `INPUT/COMBINE/` (one subdirectory per case). However, the IPSL outputs needed to
-generate them are stored in the PANGAEA archive ...
+generate them are stored in the Zenodo archive ...
 
 ### Configuration files
 The configuration files for all GEOCLIM simulations presented in Maffre et al. (submitted to GMD), plus additional simulations,
@@ -33,7 +33,7 @@ Only two configuration files are needed to replicate the simulation: "IO\_CONDIT
 
 ### GEOCLIM simulation outputs
 The outputs of all 90Ma simulations are not stored in this repository because of they require too much memory.
-They are available on the PANGAEA archive ...
+They are available on the Zenodo archive ...
 
 
 ## GEOCLIM simulations
@@ -60,10 +60,10 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
 
     For this purpose, the bash script `make_test`, generating test-runs, is available on the branch "main" of current GitHub repository.
 
-1. Gather the needed inputs from the PANGAEA archive
+1. Gather the needed inputs from the Zenodo archive
 
-    * IPSL-CM5A2 netCDF inputs: the directory`"90Ma_Laugie/` from PANGAEA archive must be put in `INPUT/IPSL/`
-    * DynSoil restarts: all DynSoil restart files (`dynsoil_restart.*.nc`) from PANGAEA archive must be put in `restart/dynsoil/`
+    * IPSL-CM5A2 netCDF inputs: the directory`"90Ma_Laugie/` from Zenodo archive must be put in `INPUT/IPSL/`
+    * DynSoil restarts: all DynSoil restart files (`dynsoil_restart.*.nc`) from Zenodo archive must be put in `restart/dynsoil/`
 
     If desired, the COMBINE boundary conditions files can be remade with `preproc/BC/IPSL_90Ma_all.py`
 
