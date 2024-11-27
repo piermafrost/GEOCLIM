@@ -1,6 +1,6 @@
 ﻿# GEOCLIM7 version for Turonian (90Ma) experiments with Milankovitch cycles - v1.0
 
-This current branch is modified from GEOCLIM7.0 (release ...) of "main" branch, to be used specifically for the simulations
+This current branch is modified from GEOCLIM7 (release "7.0") of "main" branch, to be used specifically for the simulations
 presented in Maffre et al., "GEOCLIM7, an Earth System Model for multi-million years evolution of the geochemical cycles and climate.",
 submitted to GMD (November 2024).
 
