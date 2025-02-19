@@ -228,10 +228,12 @@ def geoclim_default_basin_mask(nav_lat, nav_z, nav_bathy, lat_split=MIDLAT_RANGE
 # ----- #
 
 
-def generate_basin_mask(nav_lat, nav_z, nav_bathy, mask_2D_field=None, mask_values=None,
+def generate_basin_mask(nav_lat, nav_z, nav_bathy,
+                        mask_2D_field=None, epicmask_2D_field=None, mask_values=None, epicmask_values=None,
                         depth_split=(H_SURF, H_THERMO), lat_split=MIDLAT_RANGE, epicont_depth=H_EPICONT,
                         split_epicont=False,
-                        polar_mask_values=None, polar_auto_identification=False, merge_polar_upper_boxes=True):
+                        polar_auto_identification=False, polar_mask_values=None, polar_epicmask_values=None,
+                        merge_polar_upper_boxes=True):
     '''
     Create a mask telling if points are inside (T) or outside (F) each basin
     (GEOCLIM box). Basins are defined accordingly to the depth cutting points,
@@ -259,8 +261,14 @@ def generate_basin_mask(nav_lat, nav_z, nav_bathy, mask_2D_field=None, mask_valu
             define as GEOCLIM box.
             A degenerated (size-1) dimension on the vertical axis is expected.
 
+        epicmask_2D_field: numpy-array (rank-3), or None (default)
+            Same as 'mask_2D_field' for epicontinental boxes.
+
         mask_values: list of values, or None (default)
             The list of values to consider in "mask_2D_fields".
+
+        epicmask_values: list of values, or None (default)
+            Same as 'mask_values' for epicontinental boxes.
         
         depth_split: list of floats, default: (H_SURF, H_THERMO)
             List of cutting depths for defining GEOCLIM boxes.
@@ -284,13 +292,16 @@ def generate_basin_mask(nav_lat, nav_z, nav_bathy, mask_2D_field=None, mask_valu
             the horizontal division of open-ocean basins ("lat_split" and
             "mask_2D_field"). False: single epicontinental basin.
 
+        polar_auto_identification: bool, default: False,
+            Whether or not automatically identifying polar basins from their
+            latitude range.
+
         polar_mask_values: list of values, or None (default)
             The list of values in "mask_2D_fields" that will be considered as
             polar basins.
 
-        polar_auto_identification: bool, default: False,
-            Whether or not automatically identifying polar basins from their
-            latitude range.
+        polar_epicmask_values: list of values, or None (default)
+            Same as "polar_mask_values" for "epicmask_2D_field".
 
         merge_polar_upper_boxes: bool, default: True
             Whether or not merging the first boxes of polar water columns.
@@ -326,10 +337,15 @@ def generate_basin_mask(nav_lat, nav_z, nav_bathy, mask_2D_field=None, mask_valu
         box_depth: 1-D float numpy-array
             (bottom) depth of each box 
 
-    NOTE: nav_lat, nav_z and nav_bathy and mask_2D_field (if provided) MUST ALL
+    NOTES:
+
+    nav_lat, nav_z and nav_bathy, mask_2D_field and epicmask_2D_field MUST ALL
     BE RANK-3, even if they are not defined on all dimensions (e.g., latitude
     and bathymetry should be defined on horizontal, dimensions, whereas z should
     be defined on the vertical dimension).
+
+    mask_2D_field and epicmask_2D_field are optional, but if used, both must be
+    given.
     '''
 
 
@@ -337,26 +353,33 @@ def generate_basin_mask(nav_lat, nav_z, nav_bathy, mask_2D_field=None, mask_valu
     # Check given arguments #
     # ===================== #
 
-    if mask_2D_field is None:
+    if (mask_2D_field is None) or (epicmask_2D_field is None):
 
-        if polar_mask_values is not None:
-            print('argument "polar_mask_values" passed to the function will be ignored: no mask field provided.')
-
-        if mask_values is not None:
-            print('argument "mask_values" passed to the function will be ignored: no mask field provided')
+        for var,name in zip([polar_mask_values,   mask_values,   polar_epicmask_values,   epicmask_values],
+                           ['polar_mask_values', 'mask_values', 'polar_epicmask_values', 'epicmask_values']):
+            if var is not None:
+                print('argument "{:}" passed to the function will be ignored: no mask field provided.'.format(name))
 
         # Trick to cover the whole ocean
         mask_2D_field = np.ones((1,1,1), dtype='int8')
         mask_values = (1,)
+        epicmask_2D_field = mask_2D_field
+        epicmask_values = mask_values
 
-    else:
+    elif (mask_2D_field is not None) and (epicmask_2D_field is not None):
 
         if mask_values is None:
             mask_values = np.unique(mask_2D_field)
 
+        if epicmask_values is None:
+            epicmask_values = np.unique(epicmask_2D_field)
+
         if polar_mask_values is not None and polar_auto_identification:
             print('Automatic identification of polar boxes ("polar_auto_identification=True") desactivated \
                    since the list of values of polar boxes in the mask field ("polar_mask_values") was provided')
+
+    else:
+        raise ValueError('Both "mask_2D_field" and "epicmask_2D_field" must be provided, or none.')
 
     if lat_split is None or lat_split is False or lat_split==() or lat_split==[]:
         lat_split = None
@@ -525,13 +548,11 @@ def generate_basin_mask(nav_lat, nav_z, nav_bathy, mask_2D_field=None, mask_valu
     # * epicontinental nested loop
     #   ==========================
 
-    if split_epicont:
-        epic_mask_values = mask_values
-    else:
+    if not split_epicont:
         # erase latitude and 2D mask data
         latit_fieldmask = [True]
-        mask_2D_field = 1
-        epic_mask_values = [1]
+        epicmask_2D_field = 1
+        epicmask_values = [1]
 
     if depth_split is None:
         izmax = 1
@@ -539,7 +560,7 @@ def generate_basin_mask(nav_lat, nav_z, nav_bathy, mask_2D_field=None, mask_valu
         izmax = 1 + np.searchsorted(depth_split, epicont_depth)
 
     # loop on 2D basin mask
-    for imsk in epic_mask_values:
+    for imsk in epicmask_values:
 
         # Loop on latitude
         for latmsk in latit_fieldmask:
@@ -549,8 +570,14 @@ def generate_basin_mask(nav_lat, nav_z, nav_bathy, mask_2D_field=None, mask_valu
 
                 locmsk = np.logical_and(epic_maskfield,
                                         np.logical_and(np.logical_and(zmsk, latmsk),
-                                                       (mask_2D_field==imsk)))
+                                                       (epicmask_2D_field==imsk)))
                 if locmsk.any():
+
+                    if polar_epicmask_values is not None:
+                        ispolar = (imsk in polar_epicmask_values)
+                    else:
+                        ispolar = False
+                        # -> no epicontinental polar boxes, unless an epicontinental mask field is provided.
 
                     # Record GEOCLIM basin
                     mask[ibasin] = np.logical_or(mask[ibasin], locmsk)
@@ -569,7 +596,7 @@ def generate_basin_mask(nav_lat, nav_z, nav_bathy, mask_2D_field=None, mask_valu
                     intm_boxmask.append(0)
 
                     # - polar flag
-                    pole_boxmask.append(0)
+                    pole_boxmask.append(1 if ispolar else 0)
 
                     # - epicontinental flag
                     epic_boxmask.append(1)
@@ -620,7 +647,8 @@ def oce_output_2_GEOCLIM_BC(input_files, latitude, z, temperature,
                             u=None, v=None, w=None, w_method='divergence', inverted_w=False,
                             flux_correction='relative least square', h_mix_reduct_factor=1.,
                             periodic_x=True, x_overlap=0, special_wrap=None,
-                            basins_kw='historical', mask_nc_file=None, mask_nc_var=None, mask_values=None,
+                            basins_kw='historical',
+                            mask_nc_file=None, mask_nc_var=None, epicmask_nc_var=None, mask_values=None, epicmask_values=None,
                             outdir='./',
                             temp_outfile='GCM_oceanic_temp.dat', surf_outfile='oce_surf.dat', sedsurf_outfile='surf_sedi.dat',
                             vol_outfile='oce_vol.dat', watflux_outfile='exchange_2.dat', bndlen_outfile='box_sf_bnd_len.dat',
@@ -783,25 +811,50 @@ def oce_output_2_GEOCLIM_BC(input_files, latitude, z, temperature,
                 'split_epicont':
                     True/False, single epicontinental basin, or split
                     accordingly to the provided basin mask.
+                    This argument is ignored if an epicontinental mask field is
+                    provided (see "epicmask_nc_var" argument).
+                'polar_auto_identification':
+                    True/False, to automatically identify polar boxes from their
+                    latitude range.
                 'polar_mask_values':
                     None (if automatic polar identification) or tuple of "mask"
                     values corresponding to polar boxes (if a "mask" is given
                     to the main function, see main arguments "mask_nc_file",
                     "mask_nc_var" and "mask_values").
-                'polar_auto_identification':
-                    True/False, to automatically identify polar boxes from their
-                    latitude range.
+                'polar_epicmask_values':
+                    Same as 'polar_mask_values' for epicontinental boxes.
+                    This input is only used if an epicontinental mask field is
+                    given. Note thatn in the default settings of GEOCLIM, none
+                    of the epicontinental boxes have a "polar" flag.
                 'merge_polar_upper_boxes':
-                    True/False, to merge the first boxes of polar water columns.
+                    True/False, to merge the upper two boxes of polar water
+                    columns (in open ocean only).
             See "generate_basin_mask" function for more details, and default
             values.
 
-        mask_nc_file, mask_nc_var: string
-            Name (path) of the netCDF file and name of its basin mask variable.
+        mask_nc_file, mask_nc_var, epicmask_nc_var: string
+            Those arguments are only used if basins_kw!='historical'.
+            mask_nc_file: path of the netCDF file containing the variables:
+            mask_nc_var:     name of the netCDF variable of the basins mask.
+                             This variable must be 2D, and have a small number
+                             of values, each value corresponding to the
+                             horizontal division of a basin.
+            epicmask_nc_var: name of the (optional) netCDF variable of the
+                             epicontinental basins mask. Similar to mask_nc_var.
+            Open ocean basins are always the areas from "mask_nc_var" deeper
+            than 'epicont_depth' (see "basins_kw" argument).
+            Epicontinental basins are the areas from "mask_nc_var" shallower
+            than 'epicont_depth' if "epicmask_nc_var" is None, otherwise, the
+            areas from "epicmask_nc_var" shallower than 'epicont_depth'.
 
         mask_values: list of numbers
-            List of values of the basin "mask" variable (see previous arguments)
-            to consider for the definition of GEOCLIM boxes.
+            List of values of the basin "mask" variable ("mask_nc_var" argument)
+            that will be considered for the definition of GEOCLIM boxes.
+
+        epicmask_values: list of numbers
+            List of values of the epicontinental basin "mask" variable
+            ("epicmask_nc_var" argument) that will be considered for the
+            definition of GEOCLIM epicontinental boxes.
 
         outdir: string
             Path of the directory where the output files will be written.
@@ -1217,8 +1270,17 @@ def oce_output_2_GEOCLIM_BC(input_files, latitude, z, temperature,
             except FileNotFoundError as err:
                 fmsk = nc.Dataset(mask_nc_file)
             
-            basins_kw['mask_2D_field'] = fmsk[mask_nc_var][:,:]
+            basins_kw['mask_2D_field'] = fmsk[mask_nc_var][:,:].reshape((1,)+horiz_shp)
             basins_kw['mask_values']   = mask_values
+
+            if epicmask_nc_var is None:
+                basins_kw['epicmask_2D_field'] = basins_kw['mask_2D_field']
+                basins_kw['epicmask_values']   = basins_kw['mask_values']
+            else:
+                basins_kw['epicmask_2D_field'] = fmsk[epicmask_nc_var][:,:].reshape((1,)+horiz_shp)
+                basins_kw['epicmask_values']   = epicmask_values
+                basins_kw['split_epicont'] = True
+
             fmsk.close()
 
         Gmask, i_surfbox, deep_mask, surf_mask, intm_mask, pole_mask, epic_mask, appc_mask, box_depth = \
