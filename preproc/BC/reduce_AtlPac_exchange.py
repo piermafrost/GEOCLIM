@@ -3,8 +3,10 @@ import sys
 
 list_file = sys.argv[1:]
 
-IBOX_ATL = (3, 4, 5)
-IBOX_PAC = (9, 10, 11)
+#IBOX_ATL = (3, 4, 5)
+#IBOX_PAC = (9, 10, 11)
+IBOX_ATL = (3, 4,  5,  3,  4,  5)
+IBOX_PAC = (9, 10, 11, 12, 13, 14)
 
 for fname in list_file:
 
@@ -20,8 +22,8 @@ for fname in list_file:
     X = np.loadtxt(fname)
     nk,k = X.shape # (configs*boxes, boxes)
 
-    if k != 29:
-        raise ValueError('{0:} boxes found in file {1:}.\nThis script was designed for, and can only be applied to GEOCLIM 90Ma 29 boxes configuration'.format(k, fname))
+    #if k != 29:
+    #    raise ValueError('{0:} boxes found in file {1:}.\nThis script was designed for, and can only be applied to GEOCLIM 90Ma 29 boxes configuration'.format(k, fname))
 
     n = nk//k
     if n*k != nk:
@@ -36,10 +38,10 @@ for fname in list_file:
         list_XPA.append(X[:,ip,ia].copy())
         list_Fbid.append(np.minimum(list_XAP[-1], list_XPA[-1]))
 
-    for redfact in (0.5, 0.25, 0):
+    for redfact in (0.25,):#(0.5, 0.25, 0):
         for ia, ip, XAP, XPA, Fbid in zip(IBOX_ATL, IBOX_PAC, list_XAP, list_XPA, list_Fbid):
             X[:,ia,ip] = XAP - (1-redfact)*Fbid
             X[:,ip,ia] = XPA - (1-redfact)*Fbid
 
-        np.savetxt(fname[:ispl]+'_APx{:}'.format(redfact)+fname[ispl:], X.reshape((n*k,k)), **fmtargs)
+        np.savetxt(fname[:ispl]+'_APTx{:}'.format(redfact)+fname[ispl:], X.reshape((n*k,k)), **fmtargs)
 
