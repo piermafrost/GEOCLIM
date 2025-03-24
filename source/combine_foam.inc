@@ -16,7 +16,7 @@
     !            number of lithology classes ('nlitho'),
     !            number of DynSoil levels ('nDSlev') 
     !            number of additional climatic parameters ('len_p1', 'len_p2', 'len_p3', 'len_p4', and 'len_p5')
-    integer, parameter :: nvar_diss=8, nvar_part=5, nvar_isot=6
+    integer, parameter :: nvar_diss=9, nvar_part=5, nvar_isot=7
     integer, parameter :: nvb = (nvar_diss + nvar_part + nvar_isot)*nbasin
     integer, parameter :: npixel=nlon*nlat
 
@@ -188,7 +188,6 @@
     double precision, dimension(nlitho,npixel) :: reg_thick,reg_x_surf,reg_tau_surf,reg_P_vol,reg_mean_age,reg_x_mean
     double precision, dimension(nlitho,npixel) :: reg_thick_0,reg_x_surf_0,reg_tau_surf_0,reg_P_vol_0
     double precision, dimension(nlitho,npixel) :: reg_prod,reg_eros,reg_P_diss,reg_P_eros,reg_x_surf_eros
-    double precision, dimension(nlitho,npixel) :: reg_Li_Friv, reg_Li_Fsp, reg_Li_driv
     double precision, dimension(nDSlev,nlitho,npixel) :: reg_z_prof,reg_tau_prof
     double precision, dimension(nDSlev,nlitho,npixel) :: reg_z_prof_0,reg_tau_prof_0
     double precision, dimension(npixel) :: slope, reg_eros_lithmean
@@ -313,7 +312,6 @@
     common /dynsoil_dim/      DS_timestep, xlevs
     common /dynsoil_dble2D_1/ reg_thick,reg_x_surf,reg_tau_surf,reg_P_vol,reg_mean_age,reg_x_mean
     common /dynsoil_dble2D_2/ reg_prod,reg_eros,reg_P_diss,reg_P_eros,reg_x_surf_eros
-    common /dynsoil_dble2D_3/ reg_Li_Friv, reg_Li_Fsp, reg_Li_driv
     common /dynsoil_dble3D/   reg_z_prof,reg_tau_prof
     common /dynsoil_dble1D/   slope
     common /dynsoil_bool1D/   DS_missingpoints

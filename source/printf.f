@@ -52,7 +52,7 @@ subroutine printf(t, icount, y, COMB_outvar_info, GEOG_outvar_info, DYNS_outvar_
             call dynsoil_write_output(DYNS_ofile_name, DYNS_time_dimname, DYNS_outvar_info, t, cpvec, Tclim, runclim, &
                                       reg_thick, reg_x_surf, reg_tau_surf, reg_z_prof, reg_tau_prof,                  &
                                       reg_prod, reg_eros, reg_P_diss, reg_P_eros, reg_x_surf_eros,                    &
-                                      reg_x_mean, reg_mean_age, reg_Li_Friv, reg_Li_Fsp, reg_Li_driv                  )
+                                      reg_x_mean, reg_mean_age                                                        )
         end if
     end if
 

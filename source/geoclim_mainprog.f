@@ -406,6 +406,11 @@ program geoclim
         y(j0+nbasin) = 0 ! atmosphere
 
         j0 = j0+nbasin
+        ! Lithium
+        y(j0+1 : j0+nbasin-1) = 26d-3
+        y(j0+nbasin) = 0 ! atmosphere
+
+        j0 = j0+nbasin
         ! Strontium in PIC
         y(j0+1 : j0+nbasin-1) = 2d-5
         y(j0+nbasin) = 0 ! atmosphere
@@ -445,6 +450,10 @@ program geoclim
         j0 = j0+nbasin
         ! 87Sr/86Sr & 87Sr/86Sr in PIC
         y(j0+1 : j0+2*nbasin) = 0.709
+
+        j0 = j0+2*nbasin
+        ! seawater d7Li
+        y(j0+1 : j0+nbasin-1) = 31d-3
 
 
     else ! => COMB_init_mode == 'restart'
@@ -612,9 +621,6 @@ program geoclim
             reg_tau_prof(:,nlitho,j) = DYNS_outvar_info(15)%fillval
             reg_x_mean(nlitho,j)     = DYNS_outvar_info(21)%fillval
             reg_mean_age(nlitho,j)   = DYNS_outvar_info(22)%fillval
-            reg_Li_Friv(nlitho,j)    = DYNS_outvar_info(23)%fillval
-            reg_Li_Fsp(nlitho,j)     = DYNS_outvar_info(24)%fillval
-            reg_Li_driv(nlitho,j)    = DYNS_outvar_info(25)%fillval
             ! missing-value for initial fluxes on ALL pixels (can only be computed between two time steps)
             reg_prod(:,j)        = DYNS_outvar_info(16)%fillval
             reg_eros(:,j)        = DYNS_outvar_info(17)%fillval
@@ -630,9 +636,6 @@ program geoclim
                 reg_tau_prof(:,:,j) = DYNS_outvar_info(15)%fillval
                 reg_x_mean(:,j)     = DYNS_outvar_info(21)%fillval
                 reg_mean_age(:,j)   = DYNS_outvar_info(22)%fillval
-                reg_Li_Friv(:,j)    = DYNS_outvar_info(23)%fillval
-                reg_Li_Fsp(:,j)     = DYNS_outvar_info(24)%fillval
-                reg_Li_driv(:,j)    = DYNS_outvar_info(25)%fillval
             end if
         end do
     end if
@@ -749,6 +752,7 @@ program geoclim
       call read_veget()
       call get_clim_param(time, tend, ijump_climparam, icount_climparam, prev_cpvec, next_cpvec, cpvec, cp_lowest_value)
       call creades(time)
+      !call creades_noX(time) ! => keep constant initial water exchanges
       call rk4(y,dydx,nvb,time,htry,yout)
       do j=1,nvb
         y(j)=yout(j)

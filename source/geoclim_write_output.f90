@@ -8,7 +8,7 @@ subroutine geoclim_write_output(t, COMB_outvar_info)
   use io_module,        only: netcdf_output_var
   use netcdf_io_module, only: open_file, close_file, inquire_dim, put_var
   use water_chemistry,  only: omega_with_pressure
-  use constante,        only: sink_veloc, rho_sed, PI_n_O2_atm, PI_n_CO2_atm, PI_n_rest_of_atm
+  use constante,        only: sink_veloc, rho_sed, PI_n_O2_atm, PI_n_CO2_atm, PI_n_rest_of_atm, k_authigenic_Li
   !
   double precision, parameter:: PI_atm_moles = PI_n_O2_atm+PI_n_CO2_atm+PI_n_rest_of_atm ! molecular mass of the atmosphere
   !
@@ -53,7 +53,7 @@ subroutine geoclim_write_output(t, COMB_outvar_info)
         vartot_isot(3)       = vartot_isot(3) + var_isot(3,j)*var_part(4,j)*box_vol(j) ! POC d13C
         vartot_isot(5)       = vartot_isot(5) + var_isot(5,j)*var_diss(5,j)*box_vol(j) ! diss Sr isotopic ration
         vartot_isot(6)       = vartot_isot(6) + var_isot(6,j)*var_part(1,j)*box_vol(j) ! PIC Sr isotopic ration
-        !vartot_isot()       = vartot_isot() + var_isot(,j)*var_diss(,j)*box_vol(j) ! d7Li
+        vartot_isot(7)       = vartot_isot(7) + var_isot(7,j)*var_diss(9,j)*box_vol(j) ! seawater d7Li
         ph_tot               = ph_tot + pH(j)*box_vol(j)
         temp_tot             = temp_tot + temp_box(j)*box_vol(j)
         salin_tot            = salin_tot + salin(j)*box_vol(j)
@@ -95,7 +95,7 @@ subroutine geoclim_write_output(t, COMB_outvar_info)
         vartot_isot(6) = vartot_isot(6) / vartot_part(1) ! PIC Sr iso ration
     end if
     !
-    !vartot_isot()    = vartot_isot() / vartot_diss() ! d7Li
+    vartot_isot(7) = vartot_isot(7) / vartot_diss(9) ! d7Li
 
     ! Normalize mean intensive variables (e.g., concentration)
     vartot_diss    = vartot_diss / vol_tot ! dissolved variables
@@ -663,7 +663,7 @@ subroutine geoclim_write_output(t, COMB_outvar_info)
     !
     i = 144
       if (COMB_outvar_info(i)%writevar) &
-        call put_var(fid, varname=COMB_outvar_info(i)%vname, var_real0D=real(sum(dLiriv*FrivLi)), &
+        call put_var(fid, varname=COMB_outvar_info(i)%vname, var_real0D=real(sum(dLiriv*FrivLi)/sum(FrivLi)), &
                      stt=(/nt/), cnt=(/1/))
     !
     i = 145
@@ -685,6 +685,48 @@ subroutine geoclim_write_output(t, COMB_outvar_info)
       if (COMB_outvar_info(i)%writevar) &
         call put_var(fid, varname=COMB_outvar_info(i)%vname, var_real0D=real(epsiCont), &
                      stt=(/nt/), cnt=(/1/))
+    !
+    i = 149
+      if (COMB_outvar_info(i)%writevar) &
+        call put_var(fid, varname=COMB_outvar_info(i)%vname, var_real1D=real(var_diss(9,:)), &
+                     stt=(/1,nt/), cnt=(/nbasin,1/))
+    !
+    i = 150
+      if (COMB_outvar_info(i)%writevar) &
+        call put_var(fid, varname=COMB_outvar_info(i)%vname, var_real1D=real(var_isot(7,:)), &
+                     stt=(/1,nt/), cnt=(/nbasin,1/))
+    !
+    i = 151
+      if (COMB_outvar_info(i)%writevar) &
+        call put_var(fid, varname=COMB_outvar_info(i)%vname, var_real0D=real(vartot_diss(9)), &
+                     stt=(/nt/), cnt=(/1/))
+    !
+    i = 152
+      if (COMB_outvar_info(i)%writevar) &
+        call put_var(fid, varname=COMB_outvar_info(i)%vname, var_real0D=real(vartot_isot(7)), &
+                     stt=(/nt/), cnt=(/1/))
+    !
+    i = 153
+      if (COMB_outvar_info(i)%writevar) &
+        call put_var(fid, varname=COMB_outvar_info(i)%vname, var_real0D=real(sum(FhydLi(:))), &
+                     stt=(/nt/), cnt=(/1/))
+    !
+    i = 154
+      if (COMB_outvar_info(i)%writevar) &
+        call put_var(fid, varname=COMB_outvar_info(i)%vname, var_real1D=real(FhydLi(:)), &
+                     stt=(/1,nt/), cnt=(/nbasin,1/))
+    !
+    i = 155
+      if (COMB_outvar_info(i)%writevar) &
+        call put_var(fid, varname=COMB_outvar_info(i)%vname, var_real0D=real(sum( &
+                                                                  k_authigenic_Li * var_diss(9,:) * box_vol(:) * indice_sedi(:))), &
+                     stt=(/nt/), cnt=(/1/))
+    !
+    i = 156
+      if (COMB_outvar_info(i)%writevar) &
+        call put_var(fid, varname=COMB_outvar_info(i)%vname, var_real1D=real( &
+                                                                   k_authigenic_Li * var_diss(9,:) * box_vol(:) * indice_sedi(:)), &
+                     stt=(/1,nt/), cnt=(/nbasin,1/))
 
 
   ! Close output file

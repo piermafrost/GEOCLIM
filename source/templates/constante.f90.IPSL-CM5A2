@@ -104,7 +104,7 @@ module constante
 
     ! Lithium cycle
     !    Kinetic constant of lithium incorportion in authigenic clay
-    double precision, parameter :: k_authigenic_Li=2.22d+11 !1.11d+12
+    double precision, parameter :: k_authigenic_Li=7.27d-7 ! <- FOAM calibration
     !    Fractionation parameter (capital Delta) of Li during authigenic clay incorporation
     double precision, parameter :: Del_auth=0.015
     !    d7Li of hydrothermal vents flux

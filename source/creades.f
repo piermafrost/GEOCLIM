@@ -265,6 +265,31 @@
     end do
 
 
+!ccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccc
+    i=9 ! dissolved Li
+!ccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccc
+
+    ! Epicontinental box(es):
+    do j0=1,nappcont
+        j = jbox_appcont(j0)
+        R_diss(i,j) = FrivLi(j)
+    end do
+
+    ! Sedimenting boxes
+    do j0=1,nsedi
+        j = jbox_sedi(j0)
+        R_diss(i,j) = R_diss(i,j) - k_authigenic_Li*var_diss(i,j)*box_vol(j)
+    end do
+
+    ! Deep boxes
+    do j0=1,ndeep
+        j = jbox_deep(j0)
+        R_diss(i,j) = R_diss(i,j) + FhydLi(j)
+    end do
+
+
 
 
 !<><><><><><><><><><><><><><><>!
@@ -542,6 +567,39 @@
     end do
 
     ! Note: no advection of particules
+
+
+!ccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccc
+    i=7 ! seawater Li isotopic composition
+!ccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccc
+
+    ! Epicontinental box(es):
+    do j0=1,nappcont
+        j = jbox_appcont(j0)
+        R_isot(i,j) = FrivLi(j)*(dLiriv(j) - var_isot(i,j))
+    end do
+
+    ! Sedimenting boxes
+    do j0=1,nsedi
+        j = jbox_sedi(j0)
+        R_isot(i,j) = R_isot(i,j) + k_authigenic_Li*var_diss(9,j)*box_vol(j)*Del_auth
+    end do !           dissolved Li concentration --^^^^^^^^^^^^^
+
+    ! Deep boxes
+    do j0=1,ndeep
+        j = jbox_deep(j0)
+        R_isot(i,j) = R_isot(i,j) + FhydLi(j)*(dLihyd - var_isot(i,j))
+    end do
+
+    ! Put advection part in "R" term (because of specificity of isotopic equation) and divide by "main" variable
+    do j=1,nbasin-1
+        do k=1,nbasin-1 ! advection terms
+            R_isot(i,j) = R_isot(i,j) + F(k,j)*var_diss(9,k)*(var_isot(i,k) - var_isot(i,j))
+        end do
+        R_isot(i,j) = R_isot(i,j) / (var_diss(9,j)*box_vol(j)) ! divide by [Li]*volume
+    end do
 
 
 

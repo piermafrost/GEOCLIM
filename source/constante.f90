@@ -47,7 +47,7 @@ module constante
     !! unused constant
     !double precision, parameter :: O2limit=0.16
     ! Kinetic constant for carbonate dissolution (below lysocline)
-    double precision, parameter :: akdiss=0.025 !2.9
+    double precision, parameter :: akdiss=0.035 !0.025 !2.9 |=> optimized for FOAM PIctrl
 
     ! Organic matter degradation in water column
     !    O2 limitation (~ for lower O2 concentration than KO2)
@@ -93,8 +93,8 @@ module constante
     !    thickness of sulfate-reduction layer (m)
     double precision, parameter :: hsr=0.5
     !    Kinetics constants
-    double precision, parameter :: betahml=0.10773 ! for org C oxidation in bioturbated layer 
-    double precision, parameter :: gammahsr=4.6100d-6 ! for sulfate-reduction
+    double precision, parameter :: betahml=0.07470 ! for org C oxidation in bioturbated layer | => Optimized for FOAM PIctrl
+    double precision, parameter :: gammahsr=4.1100d-6 ! for sulfate-reduction                 |
     !    Fraction of organic matter NOT lost in form of methan (that will be re-oxidized)
     double precision, parameter :: xmethan=0.64
     ! Kinetic constant for phosphorite deposition in deep basins
@@ -104,7 +104,7 @@ module constante
 
     ! Lithium cycle
     !    Kinetic constant of lithium incorportion in authigenic clay
-    double precision, parameter :: k_authigenic_Li=2.22d+11 !1.11d+12
+    double precision, parameter :: k_authigenic_Li=7.27d-7 ! <- FOAM calibration
     !    Fractionation parameter (capital Delta) of Li during authigenic clay incorporation
     double precision, parameter :: Del_auth=0.015
     !    d7Li of hydrothermal vents flux

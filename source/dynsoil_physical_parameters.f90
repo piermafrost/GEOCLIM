@@ -105,35 +105,14 @@ module dynsoil_physical_parameters
     ! Useless for dynsoil_steeady_state, only used for the dynamic version
 
 
-
-
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    !!                          OBSOLETE OR CURRENTLY UNUSED PARAMETERS                               !!
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ! Do keep the uncommented lines to avoid compilation errors
-
-
     ! CONSTANTS FOR SECONDARY PHASES AND LITHIUM CYCLE
     ! ------------------------------------------------
     !
-    ! Regolith porosity (-)
-    double precision, parameter:: reg_porosity = 0.2
-    ! Minimum fraction of precip sec phases / dissolved prim phases (kg/kg)
-    double precision, parameter:: xSP_min = 0.3  !(kg/kg), 
-    ! Maximum fraction of precip sec phases / dissolved prim phases (kg/kg)
-    double precision, parameter:: xSP_max = 0.88 !0.8
-    ! Activation energy for secondary phases formation at T0 (J/mol)
-    double precision, parameter:: Ea_SP = 48200
-    ! Characteristic time of secondary phases formation at T0 (yr)
-    double precision, parameter:: TauSP0 = 50 ! 0.2
-    ! Lithium abundance (mol/kg) in ...
-    double precision, parameter:: Li_UCC = 0.011 !77ppm ! 176ppm !22ppm !       ... bedrock
-    double precision, parameter:: Li_SP =  0.0125 !0.087 5ppm ! 200ppm !25ppm ! ... Secondary Phases
-    double precision, parameter:: Li_enrichment = Li_SP / Li_UCC
-    ! WARNING: xSP_max must be lower or equal to 1/Li_enrichment to avoid negative Li Friv
+    ! Lithium abundance in bedrock (mol/kg)
+    double precision, parameter:: Li_UCC = 0.011 !77ppm ! 176ppm !22ppm !
     ! Lithium delta isotopic in bedrock (-)
     double precision, parameter:: dLi_UCC = 0.0017
-    ! Temperature coefficients for fractionation parameter: Delta = a*T + b
+    ! Temperature coefficients for fractionation parameter: Delta = a/T^2 + b
     double precision, parameter:: aDland = 1.63e+3 , bDland = -2.04e-3
 
 

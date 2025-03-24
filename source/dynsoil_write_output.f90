@@ -4,7 +4,7 @@ implicit none
 contains
 
 subroutine dynsoil_write_output(ofile_name, time_dimname, DYNS_outvar_info, t, cpvec, temp, runoff, hsoil, xsurf, tausurf, z, tau, &
-                             reg_prod, reg_eros, reg_P_diss, reg_P_eros, xsurf_eros, x_mean, reg_mean_age, Li_Friv, Li_Fsp, Li_driv)
+                             reg_prod, reg_eros, reg_P_diss, reg_P_eros, xsurf_eros, x_mean, reg_mean_age)
                                  
   use io_module, only: netcdf_output_var
   use netcdf_io_module, only: open_file, close_file, inquire_dim, put_var
@@ -17,8 +17,7 @@ subroutine dynsoil_write_output(ofile_name, time_dimname, DYNS_outvar_info, t, c
   double precision, dimension(5), intent(in):: cpvec
   double precision, dimension(nlon*nlat), intent(in):: temp, runoff
   double precision, dimension(nlitho,nlon*nlat), intent(in):: hsoil, xsurf, tausurf, reg_prod, reg_eros, &
-                                                              reg_P_diss, reg_P_eros, xsurf_eros, x_mean, reg_mean_age, &
-                                                              Li_Friv, Li_Fsp, Li_driv
+                                                              reg_P_diss, reg_P_eros, xsurf_eros, x_mean, reg_mean_age
   double precision, dimension(nDSlev,nlitho,nlon*nlat), intent(in):: z, tau
   integer:: i, ierr, nt, fid, timevarid, dimid
 
@@ -122,21 +121,6 @@ subroutine dynsoil_write_output(ofile_name, time_dimname, DYNS_outvar_info, t, c
     if (DYNS_outvar_info(i)%writevar) &
       call put_var(fid, varname=DYNS_outvar_info(i)%vname, var_real3D=real(reshape(reg_mean_age, shape=(/nlon,nlat,nlitho/), &
                                                               order=(/3,1,2/))), stt=(/1,1,1,nt/), cnt=(/nlon,nlat,nlitho,1/))
-    !
-    i = 23 ! LI_FRIV
-    if (DYNS_outvar_info(i)%writevar) &
-      call put_var(fid, varname=DYNS_outvar_info(i)%vname, var_real3D=real(reshape(Li_Friv, shape=(/nlon,nlat,nlitho/), &
-                                                         order=(/3,1,2/))), stt=(/1,1,1,nt/), cnt=(/nlon,nlat,nlitho,1/))
-    !
-    i = 24 ! LI_FSP
-    if (DYNS_outvar_info(i)%writevar) &
-      call put_var(fid, varname=DYNS_outvar_info(i)%vname, var_real3D=real(reshape(Li_Fsp, shape=(/nlon,nlat,nlitho/), &
-                                                        order=(/3,1,2/))), stt=(/1,1,1,nt/), cnt=(/nlon,nlat,nlitho,1/))
-    !
-    i = 25 ! LI_DRIV
-    if (DYNS_outvar_info(i)%writevar) &
-      call put_var(fid, varname=DYNS_outvar_info(i)%vname, var_real3D=real(reshape(Li_driv, shape=(/nlon,nlat,nlitho/), &
-                                                         order=(/3,1,2/))), stt=(/1,1,1,nt/), cnt=(/nlon,nlat,nlitho,1/))
 
 
     ! Close output file

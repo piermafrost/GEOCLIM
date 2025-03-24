@@ -72,27 +72,6 @@ contains
 
 !----------------------------------------------------------------------------------------------------------------------------------!
 
-  function SP_fraction(temp,runoff,h_soil)
-    use dynsoil_physical_parameters, only: xSP_max, xSP_min, reg_porosity, TauSP0
-    double precision, intent(in):: temp, runoff, h_soil ! temperature (°C) ; runoff (m/y) ; h_soil (m)
-    double precision:: TauWat, TauSP ! water residence time (y) ; SP charcteristic time (y)
-    double precision:: SP_fraction
-    if (runoff == 0) then
-      SP_fraction = xSP_max
-    elseif (h_soil == 0) then
-      SP_fraction = xSP_min
-    else
-!     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      TauWat = reg_porosity * h_soil / runoff
-      TauSP = TauSP0 !* exp((Ea_SP/Rgas)*(1./(temp+273.15)-1./T0))
-!     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-      SP_fraction = xSP_min  +  (xSP_max-xSP_min) / ( 1 + (TauSP/TauWat) )
-!     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    end if
-  end function SP_fraction
-
-!----------------------------------------------------------------------------------------------------------------------------------!
-
   function Li_fractionation(temp)
    use dynsoil_physical_parameters, only: aDland, bDland
    double precision, intent(in):: temp ! temperature (°C)
