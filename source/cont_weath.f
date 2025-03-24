@@ -4,7 +4,7 @@ use dynsoil, only: regolith_time_integration
 use dynsoil_steady_state, only: steady_state_surface_regolith
 use constante, only: PI_n_CO2_atm, Rgas, TSS_density, rsw_litho, CaMg_rock, P_rock, P2C_ker, P2C_carb, OC_rock, cp_cont, &
                      Sulf_rock, BASALT_LITHO_NUM, k_carb_wth
-!use dynsoil_lithium, only: lithium
+use dynsoil_lithium, only: lithium
 implicit none
 double precision :: loc_granwth, sum_tss, loc_flx
 include 'combine_foam.inc'
@@ -66,8 +66,6 @@ if (.not. coupling_dynsoil) then
     ! initialising:
     fsilw(:) = 0.
     fbasw(:) = 0.
-    FrivLi(:) = 0
-    dLiriv(:) = 0.
     fkerw(:) = 0.
     total_cont_POC_export(:) = 0.
     weighted_rsw(:) = 0.
@@ -208,7 +206,7 @@ else
                                            DS_timestep,                                                                     &
                                            veget_factor, veget_eros_factor, list_cont_pixel, ncontpxl                       )
         end if
-        !call lithium(reg_P_diss, Tclim, runclim, reg_thick, reg_Li_Friv, reg_Li_Fsp, reg_Li_driv, list_cont_pixel, ncontpxl)
+        call lithium(reg_prod, reg_P_diss, list_cont_pixel, cont_basin_map, ncontpxl, litho_frac, areaclimber, FrivLi, dLiriv)
 
 
         ! Continental sum:
@@ -217,8 +215,6 @@ else
         ! initialising:
         fsilw(:) = 0.
         fbasw(:) = 0.
-        FrivLi(:) = 0.
-        dLiriv(:) = 0.
         tss(:)   = 0.
         fkerw(:) = 0.
         total_cont_POC_export(:) = 0.
@@ -241,8 +237,6 @@ else
                 fsilj = fsilj  +  wth_litho_wgh(k,j) * 1e12*areaclimber(j)
                 !   WARNING: conversion: 1e6km2 -> m2: ^^^^
                 weighted_rsw(kl) = weighted_rsw(kl) + rsw_litho(k)*wth_litho_wgh(k,j)*1e12*areaclimber(j)
-                !FrivLi(kl) = FrivLi(kl) + reg_Li_Friv(k,j)*litho_frac(k,j)*1e12*areaclimber(j)   !mol/yr
-                !dLiriv(kl) = dLiriv(kl) + reg_Li_driv(k,j)*(reg_Li_Friv(k,j)*litho_frac(k,j)*1e12*areaclimber(j))
             end do
             !
             ! Impose erosion of carbonates = erosion of sediments
@@ -301,9 +295,6 @@ else
 
         end do
 
-
-        ! Lithium riverine isotopic delta
-        !dLiriv(:) = dLiriv(:)/FrivLi(:)
 
         ! lithology-averaged Strontium isotopic ratio
         where (fsilw /= 0d0)  weighted_rsw(:) = weighted_rsw(:)/fsilw(:)
@@ -388,6 +379,7 @@ if (uniform_routing) then
         fpw(j)                   = appcont_fract(j)*fpw(kl)
         fcarbw(j)                = appcont_fract(j)*fcarbw(kl)
         FrivLi(j)                = appcont_fract(j)*FrivLi(kl)
+        dLiriv(j)                = dLiriv(kl)
     end do
 end if
 
