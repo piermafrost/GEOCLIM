@@ -1,0 +1,13 @@
+A. pohl
+5 oct 2020
+
+PI control runs copied on 5 Oct 2020 from:
+*** for the slab: krenek [/archive/crct/al1966po/Phanerozoic_GENIE/METABOLIC_INDEX_PHANERO/foam_output]
+*** for the coupled model: obelix [/home/climold/apohl/COUPLED/cGENIE/CTRL]
+
+P. Maffre
+17 jun 2024
+Selected variables of "coupler" and "ocean" files averaged over time (1-year climatology)
+"RNF" (from coupler) converted from "m/30min" to "m/yr"
+Land-Sea Mask generated from "ORO" variable, carefully removing sea-ice
+

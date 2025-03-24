@@ -1,0 +1,1 @@
+These pre-industrial inputs come from simulations conducted for, and published in Marcilly et al., EPSL (2022) "Understanding the early Paleozoic carbon cycle balance and climate change from modelling", https://doi.org/10.1016/j.epsl.2022.117717
