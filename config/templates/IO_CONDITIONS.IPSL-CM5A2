@@ -475,11 +475,19 @@
  writevar(141)=FALSE, vname(141)='fCO2crust',	units(141)='-',		defdim(141,:)=1,0,1
  writevar(142)=FALSE, vname(142)='fSO4_basin',	units(142)='-',		defdim(142,:)=1,0,1
  writevar(143)=FALSE, vname(143)='fSO4_crust',	units(143)='-',		defdim(143,:)=1,0,1
- writevar(144)=FALSE, vname(144)='Li_driv',	units(144)='-',		defdim(144,:)=0,0,1	long_name(144)='Global delta 7 Li of Lithium from silicate weathering'
- writevar(145)=FALSE, vname(145)='Li_Friv',	units(145)='mol/y',	defdim(145,:)=0,0,1	long_name(145)='Global lithium flux from continental silicate weathering'
+ vname(144)='Li_driv',			units(144)='-',			defdim(144,:)=0,0,1	long_name(144)='Global delta 7 Li of Lithium from silicate weathering'
+ vname(145)='Li_Friv',			units(145)='mol/y',		defdim(145,:)=0,0,1	long_name(145)='Global lithium flux from continental silicate weathering'
  writevar(146)=FALSE, vname(146)='Li_driv_per_box',units(146)='-',	defdim(146,:)=1,0,1	long_name(146)='delta 7 Li of Lithium from silicate weathering in each box'
  writevar(147)=FALSE, vname(147)='Li_Friv_per_box',units(147)='mol/y',	defdim(147,:)=1,0,1	long_name(147)='Lithium flux in each box from continental silicate weathering'
  writevar(148)=FALSE, vname(148)='cont_org_C_d13C',units(148)='-',	defdim(148,:)=0,0,1	long_name(148)='delta 13 C of continental organic carbon'
+ vname(149)='Li',			units(149)='mol/m3',		defdim(149,:)=1,0,1	long_name(149)='seawater lithium concentration'
+ vname(150)='d7Li',			units(150)='-',			defdim(150,:)=1,0,1	long_name(150)='seawater delta 7 Li'
+ vname(151)='Li_glob',			units(151)='mol/m3',		defdim(151,:)=0,0,1	long_name(151)='mean seawater lithium concentration'
+ vname(152)='d7Li_glob',		units(152)='-',			defdim(152,:)=0,0,1	long_name(152)='mean seawater delta 7 Li'
+ vname(153)='Li_Fhyd',			units(153)='mol/y',		defdim(153,:)=0,0,1	long_name(153)='Global lithium released flux by hydrothermalism'
+ vname(154)='Li_Fhyd_per_box',		units(154)='mol/y',		defdim(154,:)=1,0,1	long_name(154)='Lithium released flux by hydrothermalism in each box'
+ vname(155)='Li_Faut',			units(155)='mol/y',		defdim(155,:)=0,0,1	long_name(155)='Global lithium precipitation flux on authigenic clays'
+ vname(156)='Li_Faut_per_box',		units(156)='mol/y',		defdim(156,:)=1,0,1	long_name(156)='Lithium precipitation flux on authigenic clays in each box'
 /
 #<------------->
 
@@ -565,9 +573,6 @@
  writevar(20)=FALSE, vname(20)='x_P_surf_eros',	units(20)='-',		defdim(20,:)=1,1,1,0,1	long_name(20)='Erosive fraction of primary phases'
  vname(21)='x_P_mean',				units(21)='-',		defdim(21,:)=1,1,1,0,1	long_name(21)='Mean regolith fraction of primary phases'
  vname(22)='reg_mean_age',			units(22)='y',		defdim(22,:)=1,1,1,0,1	long_name(22)='Mean regolith age'
- writevar(23)=FALSE, vname(23)='Li_friv',	units(23)='mol/m2/y',	defdim(23,:)=1,1,1,0,1	long_name(23)='Specific flux of lithium leaching into rivers'
- writevar(24)=FALSE, vname(24)='Li_fsp',	units(24)='mol/m2/y',	defdim(24,:)=1,1,1,0,1	long_name(24)='Specific flux of lithium kept in secondary phases'
- writevar(25)=FALSE, vname(25)='Li_delta_riv',	units(25)='-',		defdim(25,:)=1,1,1,0,1	long_name(25)='delta Li 7 of leached lithium'
 /
 #<------------->
 
