@@ -460,15 +460,15 @@ def generate_basin_mask(nav_lat, nav_z, nav_bathy, mask_2D_field=None, mask_valu
                     else:
                         if polar_auto_identification:
                             #
-                            # Consider box is polar if >50% of the box is poleward of 60°N/S 
+                            # Consider box is polar if >80% of the box is poleward of 50°N/S 
                             #
                             hl_locmsk = locmsk.any(0) # Any point on the vertical column
                             try:
-                                hl_locmsk[np.abs(nav_lat[0,:,:])<60] = False
+                                hl_locmsk[np.abs(nav_lat[0,:,:])<50] = False
                             except IndexError:
-                                hl_locmsk[np.abs(nav_lat[0,:,0])<60, :] = False
+                                hl_locmsk[np.abs(nav_lat[0,:,0])<50, :] = False
 
-                            ispolar = (np.count_nonzero(hl_locmsk) / np.count_nonzero(locmsk.any(0)) > 0.5)
+                            ispolar = (np.count_nonzero(hl_locmsk) / np.count_nonzero(locmsk.any(0)) > 0.8)
 
                         elif polar_mask_values is not None:
                             ispolar = (imsk in polar_mask_values)
