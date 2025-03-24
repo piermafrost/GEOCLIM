@@ -241,11 +241,15 @@
         j = jbox_sediepicsurf(j0)
         sedbastype_fract(j) = surf_sedi(j)/area_sediepicsurf
         accumul_capacity(j) = sedbastype_fract(j) * ksed*area_sediepicsurf**1.5
+        !accumul_capacity(j) = sedbastype_fract(j) * (ksed/30)*area_sediepicsurf**1.5
+        !! => reduced sedimentation capacity of epicontinental seas
     end do
     do j0 = 1,nsediepicnosurf
         j = jbox_sediepicnosurf(j0)
         sedbastype_fract(j) = surf_sedi(j)/area_sediepicnosurf
         accumul_capacity(j) = sedbastype_fract(j) * ksed*area_sediepicnosurf**1.5
+        !accumul_capacity(j) = sedbastype_fract(j) * (ksed/2.5)*area_sediepicnosurf**1.5
+        !! => reduced sedimentation capacity of epicontinental seas
     end do
     do j0 = 1,nsediintermed
         j = jbox_sediintermed(j0)
