@@ -188,14 +188,16 @@
     double precision, dimension(nlitho,npixel) :: reg_thick,reg_x_surf,reg_tau_surf,reg_P_vol,reg_mean_age,reg_x_mean
     double precision, dimension(nlitho,npixel) :: reg_thick_0,reg_x_surf_0,reg_tau_surf_0,reg_P_vol_0
     double precision, dimension(nlitho,npixel) :: reg_prod,reg_eros,reg_P_diss,reg_P_eros,reg_x_surf_eros
+    double precision, dimension(nlitho,npixel) :: reg_prod_0,reg_eros_0,reg_P_diss_0,reg_P_eros_0,reg_x_surf_eros_0
     double precision, dimension(nDSlev,nlitho,npixel) :: reg_z_prof,reg_tau_prof
     double precision, dimension(nDSlev,nlitho,npixel) :: reg_z_prof_0,reg_tau_prof_0
-    double precision, dimension(npixel) :: slope, reg_eros_lithmean
+    double precision, dimension(npixel) :: slope, slope_0, reg_eros_lithmean, upl_mask
     logical, dimension(npixel) :: DS_missingpoints
     integer, dimension(nlitho,npixel) :: reg_ktop, reg_ktop_0
     character(len=500) :: DYNS_ofile_name
     character(len=100) :: DYNS_time_dimname, DYNS_restart_dim(4), DYNS_restart_var(5)
     character(len=200) :: DynSoil_restart_file
+    logical:: uplift_flag, uplift_flag_0
 
 
     !LIP degassing
@@ -311,14 +313,17 @@
     common /dynsoil_intg0D/   ijump_DS_integration, ijump_DS_print, icount_DS_int, icount_DS_pri
     common /dynsoil_dim/      DS_timestep, xlevs
     common /dynsoil_dble2D_1/ reg_thick,reg_x_surf,reg_tau_surf,reg_P_vol,reg_mean_age,reg_x_mean
-    common /dynsoil_dble2D_2/ reg_prod,reg_eros,reg_P_diss,reg_P_eros,reg_x_surf_eros
-    common /dynsoil_dble3D/   reg_z_prof,reg_tau_prof
-    common /dynsoil_dble1D/   slope
+    common /dynsoil_dble2D_2/ reg_thick_0,reg_x_surf_0,reg_tau_surf_0,reg_P_vol_0
+    common /dynsoil_dble2D_3/ reg_prod,reg_eros,reg_P_diss,reg_P_eros,reg_x_surf_eros
+    common /dynsoil_dble2D_4/ reg_prod_0,reg_eros_0,reg_P_diss_0,reg_P_eros_0,reg_x_surf_eros_0
+    common /dynsoil_dble3D/   reg_z_prof,reg_tau_prof,reg_z_prof_0,reg_tau_prof_0
+    common /dynsoil_dble1D/   slope, slope_0, upl_mask
     common /dynsoil_bool1D/   DS_missingpoints
-    common /dynsoil_intg2D/   reg_ktop
+    common /dynsoil_intg2D/   reg_ktop, reg_ktop_0
     common /dynsoil_charvar1/ DYNS_ofile_name
     common /dynsoil_charvar2/ DYNS_time_dimname, DYNS_restart_dim, DYNS_restart_var
     common /dynsoil_charvar3/ DynSoil_restart_file
+    common /dynsoil_other/ uplift_flag
     ! vegetation:
     common /veget_log/ coupling_veget
     common /veget_int/ icount_veget, ijump_veget, veget_occup
