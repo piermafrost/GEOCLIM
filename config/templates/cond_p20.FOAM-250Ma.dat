@@ -13,14 +13,6 @@ Use "!" to comment blocks within the namelist
   fCO2_atmos    = 0.0d+13	!CO2 degassing by trapp onset into the atmosphere  !1d13
   fCO2_deep     = 0.0d+12	!CO2 degassing by trapp onset into the deep ocean
 
-  ! Flags for ecological module
-  ! ---------------------------
-  i_rnd          = 1	!random biodiversity (y:1/n:0)
-  fauna          = 1	!fauna type (global:0/endemic:1)
-  iextinct       = 0	!extinction if biomass below a threshold (y:1/n:0)
-  extrinsic_flag = 0	!extrinsic extinction (only producers (y:1/n:0)
-  iweb           = 0	!interactions between producers (y:1/n:0)
-
   ! Other flags
   ! -----------
   ipeak    = 0	!Trapp degassing (y:1/n:0)
