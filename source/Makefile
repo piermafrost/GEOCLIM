@@ -205,7 +205,7 @@ endif
 
 
 # source files:
-sources = anoxic.f basin_geometry.f bio_frac.f biological_pump.f carb_dep.f carbo.f climatic_parameters.f90 constante.f90 cont_weath.f creades.f creades_noX.f degassing.f derivs.f diss_oxygen.f DOfA.f dynsoil.f90 dynsoil_create_init_condition.f90 dynsoil_create_output.f90 dynsoil_create_restart.f90 dynsoil_empirical_laws.f90 dynsoil_initialization.f90 dynsoil_lithium.f90 dynsoil_offline_computation.f90 dynsoil_physical_parameters.f90 dynsoil_read_input.f90 dynsoil_steady_state.f90 dynsoil_write_output.f90 facco2.f GCM_io_module.f90 geoclim_create_output.f90 geoclim_mainprog.f geoclim_write_output.f90 geographic_create_output.f90 geographic_io_module.f90 geographic_write_output.f90 get_cont_pixel.f initialize_fluxes.f90 io_module.f90 multidimensional_interpolation.f90 netcdf_io_module.f90 newton.f newton2.f open_ascii_files.f output_netcdf2ascii.f90 phfunc.f phfunc2.f phosphorite.f Phydrotherm.f physical_units.f90 printf.f read_conditions.f read_deathnote.f90 read_main_IO_conditions.f read_oceanic_temperature.f90 read_veget.f recycle.f rk4.f rtbis.f rtbis2.f seafloor_sedimentation.f90 strontium_ratio.f terrestrial_dep.f utils.f90 varset.f water_chemistry.f90
+sources = anoxic.f basin_geometry.f bio_frac.f biological_pump.f carb_dep.f carbo.f climatic_parameters.f90 constante.f90 cont_weath.f creades.f creades_noX.f degassing.f derivs.f diss_oxygen.f DOfA.f dynsoil.f90 dynsoil_create_init_condition.f90 dynsoil_create_output.f90 dynsoil_create_restart.f90 dynsoil_empirical_laws.f90 dynsoil_initialization.f90 dynsoil_lithium.f90 dynsoil_offline_computation.f90 dynsoil_physical_parameters.f90 dynsoil_read_input.f90 dynsoil_steady_state.f90 dynsoil_write_output.f90 facco2.f GCM_io_module.f90 geoclim_create_output.f90 geoclim_mainprog.f geoclim_write_output.f90 geographic_create_output.f90 geographic_io_module.f90 geographic_write_output.f90 get_cont_pixel.f initialize_fluxes.f90 io_module.f90 multidimensional_interpolation.f90 netcdf_io_module.f90 newton.f newton2.f open_ascii_files.f output_netcdf2ascii.f90 phfunc.f phfunc2.f phosphorite.f Phydrotherm.f physical_units.f90 printf.f read_conditions.f read_deathnote.f90 read_main_IO_conditions.f read_oceanic_temperature.f90 read_veget.f recycle.f rk4.f rtbis.f rtbis2.f seafloor_sedimentation.f90 strontium_ratio.f terrestrial_dep.f uplift_scenario.f90 utils.f90 varset.f water_chemistry.f90
 
 
 # Executable file:
@@ -251,7 +251,8 @@ dynsoil.o: dynsoil_empirical_laws.o dynsoil_physical_parameters.o
 dynsoil_steady_state.o: dynsoil_empirical_laws.o dynsoil_physical_parameters.o
 dynsoil_lithium.o: constante.o dynsoil_physical_parameters.o shape.inc
 facco2.o: combine_foam.inc coupler.inc shape.inc $(pathsource)
-cont_weath.o: carbo.o constante.o dynsoil.o dynsoil_lithium.o dynsoil_steady_state.o facco2.o combine_foam.inc coupler.inc shape.inc $(pathsource)
+uplift_scenario.o: shape.inc $(pathsource)
+cont_weath.o: carbo.o constante.o dynsoil.o dynsoil_lithium.o dynsoil_steady_state.o facco2.o uplift_scenario.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 diss_oxygen.o: constante.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 degassing.o: constante.o combine_foam.inc coupler.inc shape.inc $(pathsource)
 multidimensional_interpolation.o: coupler.inc shape.inc

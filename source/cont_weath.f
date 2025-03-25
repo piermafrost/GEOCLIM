@@ -5,6 +5,7 @@ use dynsoil_steady_state, only: steady_state_surface_regolith
 use constante, only: PI_n_CO2_atm, Rgas, TSS_density, rsw_litho, CaMg_rock, P_rock, P2C_ker, P2C_carb, OC_rock, cp_cont, &
                      Sulf_rock, BASALT_LITHO_NUM, k_carb_wth
 use dynsoil_lithium, only: lithium
+use uplift_scenario, only: uplift
 implicit none
 double precision :: loc_granwth, sum_tss, loc_flx
 include 'combine_foam.inc'
@@ -191,6 +192,15 @@ else
         ! counter reinitialization:
         icount_DS_int = 0
 
+        ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
+        ! <>   -------------------------------------------------  <> !
+        ! <>   Modify slope field to account for uplift scenario  <> !
+        ! <>   -------------------------------------------------  <> !
+        ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if (uplift_flag) call uplift(t, slope_0, upl_mask, slope, DS_missingpoints)
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
         ! =============================
         ! DYNSOIL (silicate weathering)
         ! =============================
@@ -199,12 +209,30 @@ else
             call steady_state_surface_regolith(reg_thick, reg_x_surf, reg_tau_surf, reg_prod, reg_eros, reg_P_diss, &
                                                Tclim, runclim, slope, DS_timestep, veget_factor, veget_eros_factor, &
                                                list_cont_pixel, ncontpxl                                            )
+            if (uplift_flag) then
+                ! second call, without slope modification
+                call steady_state_surface_regolith(reg_thick_0, reg_x_surf_0, reg_tau_surf_0, reg_prod_0, reg_eros_0, reg_P_diss_0,&
+                                                Tclim, runclim, slope_0, DS_timestep, veget_factor, veget_eros_factor,             &
+                                                list_cont_pixel, ncontpxl                                                          )
+            end if
         else
             call regolith_time_integration(xlevs, reg_thick, reg_x_surf, reg_tau_surf, reg_P_vol, reg_ktop,                 &
                                            reg_z_prof, reg_tau_prof,                                                        &
                                            reg_prod,reg_eros,reg_P_diss,reg_P_eros, reg_x_surf_eros, Tclim, runclim, slope, &
                                            DS_timestep,                                                                     &
                                            veget_factor, veget_eros_factor, list_cont_pixel, ncontpxl                       )
+            if (uplift_flag) then
+                ! second call, without slope modification
+                call regolith_time_integration(xlevs, reg_thick_0, reg_x_surf_0, reg_tau_surf_0, reg_P_vol_0, reg_ktop_0,          &
+                                           reg_z_prof_0, reg_tau_prof_0,                                                           &
+                                           reg_prod_0,reg_eros_0,reg_P_diss_0,reg_P_eros_0,reg_x_surf_eros_0,Tclim,runclim,slope_0,&
+                                           DS_timestep,                                                                            &
+                                           veget_factor, veget_eros_factor, list_cont_pixel, ncontpxl                              )
+            end if
+        end if
+        if (.not. uplift_flag) then
+            reg_eros_0   = reg_eros
+            reg_P_diss_0 = reg_P_diss
         end if
         call lithium(reg_prod, reg_P_diss, list_cont_pixel, cont_basin_map, ncontpxl, litho_frac, areaclimber, FrivLi, dLiriv)
 
