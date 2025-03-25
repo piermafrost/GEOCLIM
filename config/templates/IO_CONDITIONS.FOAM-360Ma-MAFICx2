@@ -229,6 +229,9 @@
  file_name    = 'INPUT/slope/slope_360Ma_FOAM-128x128.nc'
  var_name     = 'slope'
  fillval_name = '_FillValue'
+ ! # Mask of uplifted region. => uncomment/comment those 2 lines to activate/desactivate uplift
+ !uplift_mask_fname = ''
+ !uplift_mask_vname = ''
 /
 #<-------->
 
