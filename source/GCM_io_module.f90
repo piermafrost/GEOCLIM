@@ -87,7 +87,7 @@ module GCM_io_module
                            !                                                           ^^^^^^^^^^^
                            xvec=all_x(3:2+red_pspace_size,:), yvec=all_y(3:2+red_pspace_size,:), &
                            landarea=areaclimber, paramspace_filling_order=paramspace_filling_order, &
-                           fill_missing=.false., fillval_handling_option=ERROR_HANDLING_OPTION(2))
+                           fill_missing=.true., fillval_handling_option=ERROR_HANDLING_OPTION(2))
         ! note: ERROR_HANDLING_OPTION(2) tells the code what to do if it found missing-value where area > 0
 
         ! get runoff
@@ -97,7 +97,7 @@ module GCM_io_module
                            multiple_input_file=climo_file(1:red_pspace_size), varout7D=Runclimber, &
                            !                                                           ^^^^^^^^^^
                            landarea=areaclimber, paramspace_filling_order=paramspace_filling_order, &
-                           fill_missing=.false., fillval_handling_option=ERROR_HANDLING_OPTION(2))
+                           fill_missing=.true., fillval_handling_option=ERROR_HANDLING_OPTION(2))
 
         ! get optional global temperature
         ! -------------------------------
