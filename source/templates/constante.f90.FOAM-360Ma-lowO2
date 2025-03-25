@@ -129,14 +129,6 @@ module constante
     double precision, parameter :: quiet=9.d+5
 
 
-    ! Ecological module parameters
-    ! ----------------------------
-
-    double precision, parameter :: probcarb=0.2  !probability of being a carbonate producer
-    double precision, parameter :: evol_prob=0.000000    !1   !probability of evolution within one time step
-    double precision, parameter :: extrinsic_prob=0.0000  !1  !probability of extrinsic extinction within one time step
-
-
     ! Continental parameters:
     ! -----------------------
 
