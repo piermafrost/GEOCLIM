@@ -4,15 +4,14 @@ implicit none
 ! Shape of the temporal uplift pulse = > lognormal function of time
 ! =================================================================
 
-! ----------------------------------------------------------------------------------------------------- !
-! Parameters meant to replicate "Baby et al., Terra Nova, 2019"'s sediment pulse on the Orange river fan,
-! for a starting time (t=0) at 105 Ma, and ending time at 65 Ma
-double precision, parameter:: t_peak = 15d6 ! (i.e., peak of the pulse at 90 Ma)
-double precision, parameter:: sigma_pulse = 0.27
-double precision, parameter:: pulse_amplitude = 15
+! -------------------------------------------------------------- !
+! Shape parameters of log-normal uplift pulse
+double precision, parameter:: t_peak = 3d6
+double precision, parameter:: sigma_pulse = 0.3
+double precision, parameter:: pulse_amplitude = 3
 double precision, parameter:: pulse_baseline = 1
 double precision, parameter:: t_mu = t_peak * dexp(sigma_pulse**2)
-! ----------------------------------------------------------------------------------------------------- !
+! -------------------------------------------------------------- !
 
 contains
 
