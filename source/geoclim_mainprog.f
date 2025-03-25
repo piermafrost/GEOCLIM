@@ -494,10 +494,10 @@ program geoclim
     if (coupling_dynsoil) then
 
         ! read init file info or create init cond
-        call dynsoil_read_input( 0,                                                               &
-                                 ref_x_axis,ref_y_axis,areaclimber, xlevs,                        &
-                                 reg_thick,reg_x_surf,reg_tau_surf,reg_z_prof,reg_tau_prof,slope, &
-                                 DS_missingpoints, DYNS_restart_dim, DYNS_restart_var             )
+        call dynsoil_read_input( 0,                                                                        &
+                                 ref_x_axis,ref_y_axis,areaclimber, xlevs,                                 &
+                                 reg_thick,reg_x_surf,reg_tau_surf,reg_z_prof,reg_tau_prof,slope,upl_mask, &
+                                 DS_missingpoints, DYNS_restart_dim, DYNS_restart_var, uplift_flag         )
 
         ! initialisation of offline dynsoil variables (ktop and P_vol):
         call dynsoil_initialization( xlevs, reg_thick, reg_x_surf, reg_z_prof, DS_missingpoints,  &
@@ -506,6 +506,9 @@ program geoclim
         DS_timestep = ijump_DS_integration * ijump_climate * ts
         icount_DS_int = ijump_DS_integration
         icount_DS_pri = ijump_DS_print
+
+        ! Backup of initial slope (unaffected by uplift)
+        slope_0 = slope
 
     end if
 
@@ -680,6 +683,8 @@ program geoclim
     ! SAVE INITIAL VAR:
     y_0 = y
     ! dynsoil prognostic variables:
+    uplift_flag_0 = uplift_flag !
+    uplift_flag = .false.       !--> for not mofidying "_0" variables
     if (coupling_dynsoil) then
       reg_thick_0    = reg_thick
       reg_x_surf_0   = reg_x_surf
@@ -702,6 +707,7 @@ program geoclim
 
     ! RESET VARIABLES WITH INITIAL VALUES:
     y = y_0
+    uplift_flag = uplift_flag_0
     if (coupling_dynsoil) then
       reg_thick    = reg_thick_0
       reg_x_surf   = reg_x_surf_0

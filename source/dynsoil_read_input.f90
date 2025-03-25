@@ -9,8 +9,8 @@ implicit none
 contains
 
 subroutine dynsoil_read_input(IOcondID, &
-                              lon, lat, area, xlevs, reg_z_s, reg_x_s, reg_tau_s, reg_z, reg_tau, slope, missingpoints, &
-                              DYNS_restart_dim, DYNS_restart_var)
+                              lon, lat, area, xlevs, reg_z_s, reg_x_s, reg_tau_s, reg_z, reg_tau, slope, upl_mask, missingpoints, &
+                              DYNS_restart_dim, DYNS_restart_var, uplift_flag)
 
     use io_module, only: load_netcdf_dimvar, load_netcdf, load_netcdf_3D, load_netcdf_4D, check_axis, &
                          check_landcells, check_landcells_generic, check_invalid, check_namelist_def, UNDEFINED_VALUE_CHAR
@@ -24,11 +24,12 @@ subroutine dynsoil_read_input(IOcondID, &
     double precision, intent(inout), dimension(nlat):: lat
     double precision, intent(inout), dimension(npxl):: area
     double precision, intent(out), dimension(nDSlev):: xlevs
-    double precision, intent(out), dimension(npxl):: slope
+    double precision, intent(out), dimension(npxl):: slope, upl_mask
     double precision, intent(out), dimension(nlitho,npxl):: reg_z_s,reg_x_s,reg_tau_s
     double precision, intent(out), dimension(nDSlev,nlitho,npxl):: reg_z,reg_tau
     logical, intent(out), dimension(npxl):: missingpoints
     character(len=100), intent(out):: DYNS_restart_dim(4), DYNS_restart_var(5)
+    logical, intent(out):: uplift_flag
     !
     double precision, dimension(nlon):: loc_lon
     double precision, dimension(nlat):: loc_lat
@@ -36,8 +37,8 @@ subroutine dynsoil_read_input(IOcondID, &
     integer, parameter:: flg=200, vlg=50, ulg=30, mlg=20
     integer, parameter:: nvar=9
     character(len=30) :: init_mode
-    character(len=flg):: init_file, file_name
-    character(len=vlg):: var_name
+    character(len=flg):: init_file, file_name, uplift_mask_fname
+    character(len=vlg):: var_name, uplift_mask_vname
     character(len=ulg):: units(nvar)
     character(len=mlg):: fillval_name
     double precision  :: missval(nvar)
@@ -55,7 +56,7 @@ subroutine dynsoil_read_input(IOcondID, &
 
     ! Namelist declaration
     namelist /DYNSOIL_INIT_INFO/ init_mode, init_file, DYNS_restart_dim, DYNS_restart_var
-    namelist /SLOPE_INFO/ file_name, var_name, fillval_name
+    namelist /SLOPE_INFO/ file_name, var_name, fillval_name, uplift_mask_fname, uplift_mask_vname
 
 
     ! Set default fill_value (in case cannot be read in netCDF files)
@@ -177,7 +178,7 @@ subroutine dynsoil_read_input(IOcondID, &
 
 
     !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-    !%             Slope            %!
+    !%      Slope + uplift mask     %!
     !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
     print *
@@ -190,6 +191,8 @@ subroutine dynsoil_read_input(IOcondID, &
     file_name    = UNDEFINED_VALUE_CHAR
     var_name     = UNDEFINED_VALUE_CHAR
     fillval_name = defmissvalname
+    uplift_mask_fname = UNDEFINED_VALUE_CHAR
+    uplift_mask_vname = UNDEFINED_VALUE_CHAR
 
     ! <><><><><><><><><><><><><><><><> !
     read(unit=IOcondID, nml=SLOPE_INFO)
@@ -199,9 +202,12 @@ subroutine dynsoil_read_input(IOcondID, &
                             ' given in config/IO_CONDITIONS', char_var=file_name)
     call check_namelist_def('Error - in dynsoil_read_input.f90: variable "var_name" from namelist "SLOPE_INFO" was not'// &
                             ' given in config/IO_CONDITIONS', char_var=var_name)
+    !
+    uplift_flag = .not. (uplift_mask_fname==UNDEFINED_VALUE_CHAR .or. uplift_mask_vname==UNDEFINED_VALUE_CHAR)
 
     ! Add GEOCLIM root path if needed
     call add_path(file_name)
+    if (uplift_flag) call add_path(uplift_mask_fname)
 
     ! Load data
     if (all(lon==0d0) .and. all(lat==0d0)) then ! no reference axis
@@ -211,6 +217,9 @@ subroutine dynsoil_read_input(IOcondID, &
                          x_axis_ref=lon, y_axis_ref=lat, expected_units='dimensionless')
     end if
     nlev = size(xlevs)
+    if (uplift_flag) then
+        call load_netcdf(uplift_mask_fname, uplift_mask_vname, upl_mask, x_axis_ref=lon, y_axis_ref=lat)
+    end if
 
 
 
