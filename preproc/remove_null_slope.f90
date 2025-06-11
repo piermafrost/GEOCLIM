@@ -1,6 +1,5 @@
-! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! Remove null slope values in a netCDF file, and replace them by the minimum non-zero slope value
 ! Use: `./remove_null_slope slope_file_name`
-! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 program remove_null_slope
 use netcdf
