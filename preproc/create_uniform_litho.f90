@@ -28,11 +28,12 @@ program create_uniform_litho
 !
 ! Examples of use:
 !
-!    ./create_uniform_litho --size 48,40 0.1 0.7 0.2
+!    ./create_uniform_litho --size 48,40 -o "litho_frac_48x40.nc" 0.1 0.7 0.2
 !
 !    --> create a 48x40 file (longitude x latitude) with 3 lithological classes
 !        whose proportions are (respectively) 0.1, 0.7 and 0.2
 !        the lower-left corner is assumed to be {-180°E,-90°N}
+!        the name of the output file is "litho_frac_48x40.nc"
 !
 !
 !    ./create_uniform_litho --match ../INPUT/temperature_piCTRL.nc 0.5 0.5
@@ -40,6 +41,7 @@ program create_uniform_litho
 !    ---> create a file matching the shape of ../INPUT/temperature_piCTRL.nc
 !         with 2 lithological classes whose proportions are (respectively) 0.5
 !         and 0.5
+!         the default output file name is used
 !
 !
 
@@ -47,9 +49,10 @@ use netcdf
 use nf90check_mod, only: nf90check
 implicit none
 
-character(len=*), parameter:: ofname='litho_frac.nc'
+character(len=*), parameter:: def_ofname='litho_frac.nc'
 
 double precision, dimension(:), allocatable:: lon, lat, litho_frac
+character(len=500):: ofname
 character(len=100):: arg, fname, varname
 logical:: got_shape
 integer:: Narg, n, i,j,k, nlon,nlat, nlitho
@@ -67,6 +70,7 @@ nlat = 0
 
 Narg = command_argument_count()
 
+ofname = def_ofname
 nlitho = 0
 n = 0
 do while (n < Narg)
@@ -87,23 +91,23 @@ do while (n < Narg)
     n = n+1
     call get_command_argument(n, fname)
     ierr = nf90_open(fname, NF90_NOWRITE, fid)
-    call nf90check(ierr,'Error while openning file '//fname)
+    call nf90check(ierr,'Error while openning file '//trim(fname))
     ierr = nf90_inquire_dimension(fid, 1, name=varname, len=nlon)
-    call nf90check(ierr,'Error while inquiring 1st dimension (longitude) of '//fname)
+    call nf90check(ierr,'Error while inquiring 1st dimension (longitude) of '//trim(fname))
     allocate(lon(nlon))
     ierr = nf90_inq_varid(fid, varname, varid(1))
-    call nf90check(ierr,'Error while inquiring ID of longitude variable '//varname)
+    call nf90check(ierr,'Error while inquiring ID of longitude variable '//trim(varname))
     ierr = nf90_get_var(fid, varid(1), lon)
-    call nf90check(ierr,'Error while getting longitude variable '//varname)
+    call nf90check(ierr,'Error while getting longitude variable '//trim(varname))
     ierr = nf90_inquire_dimension(fid, 2, name=varname, len=nlat)
-    call nf90check(ierr,'Error while inquiring 1st dimension (latitude) of '//fname)
+    call nf90check(ierr,'Error while inquiring 1st dimension (latitude) of '//trim(fname))
     allocate(lat(nlat))
     ierr = nf90_inq_varid(fid, varname, varid(1))
-    call nf90check(ierr,'Error while inquiring ID of latitude variable '//varname)
+    call nf90check(ierr,'Error while inquiring ID of latitude variable '//trim(varname))
     ierr = nf90_get_var(fid, varid(1), lat)
-    call nf90check(ierr,'Error while getting latitude variable '//varname)
+    call nf90check(ierr,'Error while getting latitude variable '//trim(varname))
     ierr = nf90_close(fid)
-    call nf90check(ierr,'Error while closing file '//fname)
+    call nf90check(ierr,'Error while closing file '//trim(fname))
     
 
   elseif (arg(1:6)=='--size') then
@@ -121,6 +125,11 @@ do while (n < Narg)
     allocate(lat(nlat))
     lon = (/ ( -180 + 360*(dble(i)-0.5)/nlon , i=1,nlon ) /)
     lat = (/ ( -90  + 180*(dble(j)-0.5)/nlat , j=1,nlat ) /)
+
+
+  elseif (arg(1:2)=='-o') then
+    n = n+1
+    call get_command_argument(n, ofname)
 
 
   else
@@ -161,15 +170,15 @@ do while (k<=nlitho)
   end if
 end do
 
-if ( abs(sum(litho_frac(1:nlitho))-1) > 1d-12 ) then
-  print *, 'ERROR: the sum of all lithology fraction must be 1'
-  stop
-end if
-
 write(*,fmt='(A43,I3)') 'Number of lithological classe(s) detected: ',nlitho
 do k = 1,nlitho
   write(*,fmt='(A21,I2.2,A1,F10.5)') '  Fraction of class #',k,':',litho_frac(k)
 end do
+
+if ( abs(sum(litho_frac(1:nlitho))-1) > 1d-12 ) then
+  print *, 'ERROR: the sum of all lithology fraction must be 1'
+  stop
+end if
 
 
 
@@ -228,7 +237,7 @@ ierr = nf90_put_att(fid, varid(4) , 'units', '-')
 
 ! End of definition
 ierr = nf90_enddef(fid)
-call nf90check(ierr,'Error while end of definition of file'//ofname)
+call nf90check(ierr,'Error while end of definition of file'//trim(ofname))
 
 ! Writing:
 ierr = nf90_put_var(fid, varid(1), real(lon))
@@ -246,7 +255,11 @@ end do
 
 ! Close file
 ierr = nf90_close(fid)
-call nf90check(ierr,'Error while closing file'//ofname)
+call nf90check(ierr,'Error while closing file'//trim(ofname))
+
+
+print *
+print *, 'Sucessfully created netCDF file '//trim(ofname)
 
 
 end program
