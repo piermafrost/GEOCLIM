@@ -253,6 +253,9 @@ the "lithology" dimension.
 
 Alternatively, a uniform lithology distribution can be specified, without providing a map (see next section "Input/Output user interface")
 
+The Fortran script "preproc/create\_uniform\_lithology.f90" generates a netCDF file with a 3-D uniform lithology, file that can thereafter
+be modified.
+
 ###### Note on lithological classes
 The number of lithological classes is defined by the parameter 'nlitho' in "source/shape.inc", and is conventionally configured with
 `build_GEOCLIM`.
@@ -274,7 +277,11 @@ It represents the average of the absolute slope of the high-resolution topograph
 
 Even though this input field is critical (it largely determines the erosion rates, that controls many other geochemical fluxes), there is
 no pre-defined way to generate the slope field of paleogeographic reconstruction.
-What is often done is to use empirical correlation between topography and mean absolute slope.
+What is often done is to use an empirical correlation between topography and mean absolute slope, or to perform a non-parametric
+reconstruction from topography and broad geological categories.
+
+Several Fortran and Python scripts in "preproc/" are designed to create or modify paleo slope files, including the non-parametric
+reconstruction one ("preproc/generate\_slope\_field.py").
 
 ##### Time-series of climatic parameters
 
