@@ -51,22 +51,29 @@ end module
 
 program create_slope
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!! create a random slope matching geographic forcings from the variable       !!
-!! "area" in a "geographic" storing netCDF file                               !! 
+!! create a random slope matching geographic forcings from the area (or       !!
+!! landfrac) variable in a "geographic" storing netCDF file                   !! 
+!! The generated slope is pseudo-uniform: mean value * multiplicative noise   !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 use netcdf
 use local_functions, only: mult_noise, init_random_seed, check
 implicit none
 
-  character(len=*), parameter::geofile='../INPUT/FOAM/CTRL_48x40/FOAM_Aire_CtrlR.nc'
-  character(len=*), parameter::fileout='../INPUT/FOAM/CTRL_48x40/slope_random_FOAMctrl48x40.nc'
-  integer, parameter:: nx=48, ny=40
-! ============================================================================================
-  real, parameter:: NOISE_AMPLITUDE = 100.
+
+! ================================================================================================ !
+!                                          USER PARAMETERS                                         !
+! ================================================================================================ !
+  integer, parameter:: nx=96, ny=96
+  character(len=*), parameter:: geofile='../INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_sechiba.nc'
+  character(len=*), parameter:: xvar='lon', yvar='lat', areavar='Areas'
+  character(len=*), parameter:: fileout='test_uniform_slope.nc'
+! ================================================================================================ !
+  real, parameter:: NOISE_AMPLITUDE = 5.
   real, parameter:: MEANSLOPE = 0.03354 & ! 0.03354 is present-day Earth mean slope
                                *  2.*log(NOISE_AMPLITUDE)/(NOISE_AMPLITUDE-1./NOISE_AMPLITUDE)
-! ============================================================================================
+! ================================================================================================ !
+
 
   integer:: i,j, ierr, gfid,ofid,gdimid(2),odimid(2),gvarid(3),ovarid(3)
   real:: lon(nx), lat(ny)
@@ -79,9 +86,9 @@ implicit none
   ierr = nf90_open(   geofile , NF90_NOWRITE , gfid )  ;  call check(ierr)
   ierr = nf90_create( fileout , NF90_CLOBBER , ofid )  ;  call check(ierr)
 
-  ierr = nf90_inq_varid( gfid , 'lon'  , gvarid(1) )  ;  call check(ierr)
-  ierr = nf90_inq_varid( gfid , 'lat'  , gvarid(2) )  ;  call check(ierr)
-  ierr = nf90_inq_varid( gfid , 'area' , gvarid(3) )  ;  call check(ierr)
+  ierr = nf90_inq_varid( gfid , xvar    , gvarid(1) )  ;  call check(ierr)
+  ierr = nf90_inq_varid( gfid , yvar    , gvarid(2) )  ;  call check(ierr)
+  ierr = nf90_inq_varid( gfid , areavar , gvarid(3) )  ;  call check(ierr)
 
   ierr = nf90_get_var( gfid , gvarid(1) , lon )   ;  call check(ierr)
   ierr = nf90_get_var( gfid , gvarid(2) , lat )   ;  call check(ierr)
@@ -93,16 +100,16 @@ implicit none
 
   !---!
 
-  ierr = nf90_def_dim( ofid , 'lon' , nx , odimid(1) )  ;  call check(ierr)
-  ierr = nf90_def_dim( ofid , 'lat' , ny , odimid(2) )  ;  call check(ierr)
+  ierr = nf90_def_dim( ofid , xvar , nx , odimid(1) )  ;  call check(ierr)
+  ierr = nf90_def_dim( ofid , yvar , ny , odimid(2) )  ;  call check(ierr)
 
-  ierr = nf90_def_var( ofid , 'lon' , NF90_REAL , odimid(1) , ovarid(1) )       ;  call check(ierr)
+  ierr = nf90_def_var( ofid , xvar , NF90_REAL , odimid(1) , ovarid(1) )       ;  call check(ierr)
   ierr = nf90_copy_att( gfid , gvarid(1) , 'axis'       , ofid , ovarid(1) )    ;  call check(ierr)
   ierr = nf90_copy_att( gfid , gvarid(1) , 'nav_model'  , ofid , ovarid(1) )    ;  call check(ierr)
   ierr = nf90_copy_att( gfid , gvarid(1) , 'name'       , ofid , ovarid(1) )    ;  call check(ierr)
   ierr = nf90_copy_att( gfid , gvarid(1) , 'units'      , ofid , ovarid(1) )    ;  call check(ierr)
   !
-  ierr = nf90_def_var( ofid , 'lat' , NF90_REAL , odimid(2) , ovarid(2) )       ;  call check(ierr)
+  ierr = nf90_def_var( ofid , yvar , NF90_REAL , odimid(2) , ovarid(2) )       ;  call check(ierr)
   ierr = nf90_copy_att( gfid , gvarid(2) , 'axis'       , ofid , ovarid(2) )    ;  call check(ierr)
   ierr = nf90_copy_att( gfid , gvarid(2) , 'nav_model'  , ofid , ovarid(2) )    ;  call check(ierr)
   ierr = nf90_copy_att( gfid , gvarid(2) , 'name'       , ofid , ovarid(2) )    ;  call check(ierr)
