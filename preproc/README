@@ -1,0 +1,16 @@
+The scripts present in this repertory are meant to generate or modify the boundary condition
+files "slope" and "lithology fraction".
+All these scripts (Fortran and Python ones) contain a short description about how to use them,
+at the beginning of the code.
+
+The Fortran source files can be compiled with the Makefile (e.g., `make remove_null_slope`).
+To do so, use the same compilation options as for the main GEOCLIM program, that are stored in
+"../GEOCLIM_environment" after invoking `build_GEOCLIM`.
+e.g., `make remove_null_slope FC=ifort NCPATH=/usr MODE=optim`
+
+The subrepertory "example_tecto_split/" contains the input data for generating paleo slope field
+with the non-parametric method based on elevation and geology categories.
+!Those example data files are archived (tar.gz file)!
+
+The subrepertory "BC/" contains the Python scripts for generating the "main" boundary condition files 
+
