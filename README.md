@@ -52,7 +52,7 @@ For the simulations presented here, all run names are in the form `.90Ma-$config
 
 All details can be found in the last section "Summary of all GEOCLIM simulations".
 
-### HOW TO REPRODUCE THE SIMULATIONS
+### HOW TO REPRODUCE THE SIMULATIONS (AND BOUNDARY CONDITIONS)
 
 Here are the steps to follow to reproduce the 90Ma simulations presented in Maffre et al. (submitted to GMD)
 
@@ -65,7 +65,11 @@ Here are the steps to follow to reproduce the 90Ma simulations presented in Maff
     * IPSL-CM5A2 netCDF inputs: the directory`"90Ma_Laugie/` from Zenodo archive must be put in `INPUT/IPSL/`
     * DynSoil restarts: all DynSoil restart files (`dynsoil_restart.*.nc`) from Zenodo archive must be put in `restart/dynsoil/`
 
-    If desired, the COMBINE boundary conditions files can be remade with `preproc/BC/IPSL_90Ma_all.py`
+    One can re-generate all boundary conditions files from the raw climate netCDF ouputs, with the following scripts:
+    * `preproc/BC/IPSL_90Ma_all.py` for COMBINE boundary condition files (toolkit #1)
+    * `preproc/BC/basinmap/IPSL_90Ma_allroutingmaps.py` for the land-to-ocean routing map (toolkit #2).
+       Warning: preproc/BC/IPSL\_90Ma\_all.py must be called first.
+    * `preproc/generate_slope_field.py` for the non-parametric slope field reconstruction (toolkit #3)
 
 2. Modify the source code if needed.
 
