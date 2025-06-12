@@ -1,7 +1,7 @@
 from BC_generator import oce_output_2_GEOCLIM_BC
 
 
-WHICH = 'none'
+WHICH = '3bas Arct-3'
 
 
 # Single global ocean, all orbital configurations, 1 CO2 level (2*pre-industrial)
@@ -66,7 +66,7 @@ if WHICH == 'single ocean 2X' or WHICH == 'ALL':
                             horiz_weight='cell_area', x_weight='e1t', y_weight='e2t', z_weight='e3t',
                             flux_correction='RLS', special_wrap='ORCA F-pivot',
                             outdir='../../INPUT/COMBINE/IPSL-90Ma-2X/',
-                            export_mask_fields=False)
+                            export_mask_fields=True)
 
 
 # Single global ocean, all orbital configurations, all CO2 levels (2X and 4X)
@@ -244,7 +244,7 @@ if WHICH == 'split epicont 2X' or WHICH == 'ALL':
                             horiz_weight='cell_area', x_weight='e1t', y_weight='e2t', z_weight='e3t',
                             flux_correction='RLS', special_wrap='ORCA F-pivot',
                             outdir='../../INPUT/COMBINE/IPSL-90Ma-splitepic-2X/',
-                            export_mask_fields=False)
+                            export_mask_fields=True)
 
 
 # Single global ocean, split epicontinental basin, all orbital configurations, all CO2 levels (2X and 4X)
@@ -489,7 +489,7 @@ if WHICH == 'Atl-Pac 2X' or WHICH == 'ALL':
                             horiz_weight='cell_area', x_weight='e1t', y_weight='e2t', z_weight='e3t',
                             flux_correction='RLS', special_wrap='ORCA F-pivot',
                             outdir='../../INPUT/COMBINE/IPSL-90Ma-AtlPac-2X/',
-                            export_mask_fields=False)
+                            export_mask_fields=True)
 
 
 # Split oceans Arctic - Atlantic - Pacific - South Pole Pac - South Pole Atl, all orbital configurations, all CO2 levels (2X and 4X)
@@ -667,7 +667,7 @@ if WHICH == '3bas 2X' or WHICH == 'ALL':
                             horiz_weight='cell_area', x_weight='e1t', y_weight='e2t', z_weight='e3t',
                             flux_correction='RLS', special_wrap='ORCA F-pivot',
                             outdir='../../INPUT/COMBINE/IPSL-90Ma-3bas-2X/',
-                            export_mask_fields=False)
+                            export_mask_fields=True)
 
 
 # Split oceans Arctic - N Atlantic - S Atlantic - Pacific - South Pole Pac - South Pole Atl, all orbital configurations,  all CO2 levels (2X and 4X)
@@ -916,7 +916,7 @@ if WHICH == '3bas Arct-3 2X' or WHICH == 'ALL':
                             horiz_weight='cell_area', x_weight='e1t', y_weight='e2t', z_weight='e3t',
                             flux_correction='RLS', special_wrap='ORCA F-pivot',
                             outdir='../../INPUT/COMBINE/IPSL-90Ma-3bas-Arct3-2X/',
-                            export_mask_fields=False)
+                            export_mask_fields=True)
 
 
 # Split oceans Arctic - N Atlantic - S Atlantic - Pacific - South Pole Pac - South Pole Atl, Arctic ocean declared as "no polar" (to generate 3 vertical levels instead of 2.
