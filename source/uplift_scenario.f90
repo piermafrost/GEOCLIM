@@ -8,7 +8,7 @@ implicit none
 ! Shape parameters of log-normal uplift pulse
 double precision, parameter:: t_peak = 3d6
 double precision, parameter:: sigma_pulse = 0.3
-double precision, parameter:: pulse_amplitude = 3
+double precision, parameter:: pulse_amplitude = 7.2 ! 3 for moderate uplift, 10 for large uplift (in tropics), 7.2 for equivalent uplift in whole Gondwana
 double precision, parameter:: pulse_baseline = 1
 double precision, parameter:: t_mu = t_peak * dexp(sigma_pulse**2)
 ! -------------------------------------------------------------- !
