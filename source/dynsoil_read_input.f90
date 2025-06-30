@@ -219,6 +219,7 @@ subroutine dynsoil_read_input(IOcondID, &
     nlev = size(xlevs)
     if (uplift_flag) then
         call load_netcdf(uplift_mask_fname, uplift_mask_vname, upl_mask, x_axis_ref=lon, y_axis_ref=lat)
+        !upl_mask = 1 ! --> to uplift all continents
     end if
 
 
