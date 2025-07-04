@@ -1,4 +1,4 @@
-﻿# GEOCLIM7.0
+﻿# GEOCLIM7.0.1
 
 
 
@@ -66,6 +66,8 @@ Those scripts use the following packages:
 
 
 ## Updates from GEOCLIM6:
+The subversion 7.0.1 has minor modifications from v7.0, that only concerns the scripts (in "preproc/") generating slope and
+lithology boundary conditions.
 The version 7.0 of GEOCLIM is a major update from version 6.1. The definition of oceanic boxes has been made entirely flexible,
 and all oceanic boundary conditions can be generated from the climate simulation of the GCM coupled to GEOCLIM. Moreover, both
 oceanic temperature and circulation are now dependent on climatic conditions (pCO2 and external climate forcings, here called
