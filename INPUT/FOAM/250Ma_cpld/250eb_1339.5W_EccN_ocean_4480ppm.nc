@@ -1,1 +1,0 @@
-/home/piermafrost/Documents/Crisis-project_FOAM_Feifei/boundary_conditions/250eb_1339.5W_EccN_ocean_4480ppm.nc
