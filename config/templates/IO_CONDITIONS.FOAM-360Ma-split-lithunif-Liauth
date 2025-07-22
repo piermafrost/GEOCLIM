@@ -49,7 +49,7 @@
 
 #<------->
 &MAIN_INFO
-run_name         = '.360Ma_split_lithunif_Liauth2_WestGondwanauplift-x20.dt-x0.5'
+run_name         = '.360Ma_split_lithunif_Liauth2_eq.repl' ! # => for "uplift" run: '.360Ma_split_lithunif_Liauth2_WestGondwanauplift-x20.dt-x0.5'
  output_directory = 'OUTPUT/'
  phys_cond_file   = 'config/cond_p20.dat' ! unit 3
  ! #                 |=> contains most of the run configuration, such as solver time steps, printing time steps,
@@ -88,7 +88,7 @@ run_name         = '.360Ma_split_lithunif_Liauth2_WestGondwanauplift-x20.dt-x0.5
 &DYNSOIL_INIT_INFO
 
  ! # DynSoil initialization mode
- init_mode = 'restart'
+ init_mode = 'startup:eq'
  ! #       - 'restart'      => read restart from existing file
  ! #       - 'startup:null' => create null initial condition (reg. thick. = 0 everywhere)
  ! #       - 'startup:eq'   => create initial conditions at equilibrium with given climatology and init pCO2 (using analytical formulas)
@@ -229,8 +229,8 @@ run_name         = '.360Ma_split_lithunif_Liauth2_WestGondwanauplift-x20.dt-x0.5
  var_name     = 'slope'
  fillval_name = '_FillValue'
  ! # Mask of uplifted region. => uncomment/comment those 2 lines to activate/desactivate uplift
- uplift_mask_fname = 'INPUT/slope/360Ma_uplift_mask_WestGondwana.nc'
- uplift_mask_vname = 'uplift_mask'
+ ! #uplift_mask_fname = 'INPUT/slope/360Ma_uplift_mask_WestGondwana.nc'
+ ! #uplift_mask_vname = 'uplift_mask'
 /
 #<-------->
 
