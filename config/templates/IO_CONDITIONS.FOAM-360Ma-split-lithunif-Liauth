@@ -229,7 +229,7 @@ run_name         = '.360Ma_split_lithunif_Liauth2_WestGondwanauplift-x20.dt-x0.5
  var_name     = 'slope'
  fillval_name = '_FillValue'
  ! # Mask of uplifted region. => uncomment/comment those 2 lines to activate/desactivate uplift
- uplift_mask_fname = 'INPUT/slope/360Ma_uplift_mask_WestGondwana.nc' !WholeGondwana.nc'
+ uplift_mask_fname = 'INPUT/slope/360Ma_uplift_mask_WestGondwana.nc'
  uplift_mask_vname = 'uplift_mask'
 /
 #<-------->
