@@ -7,13 +7,57 @@ This README only concerns the above-mentioned simulations.
 For a complete description of GEOCLIM and of the whole GitHub repository, please refer to the README of "main" branch.
 
 
-## Code modifications
+## Key information on GEOCLIM simulations
+
+### Code modifications
 
 * Implementation of an uplift ("source/uplift.f90"): a mask file is read at the beginning of the run (in "source/dynsoil_read_input.f90"),
   and the slope field is modified during the run according to the uplift mask and the shape of the uplift pulse.
 * Implementation of lithium cycle: add two main GEOCLIM variables "Li concentration" and "d7Li", with computation of Li and 7Li budgets
   in "source/creades.f", implementation of Cave Rugenstein et al. (2019)'s model in "source/dynsoil_lithium.f90" and route Li fluxes
   in "source/cont_weath.f".
+
+### Tuned parameters
+Three parameters have been adjusted to represent the pre-industrial steady-state ocean-atmosphere geochemistry with FOAM climate fields (try `diff source/templates/constante.f90.FOAM source/templates/constante.f90.IPSL-CM5A2`):
+* "akdiss": the rate constant for PIC dissolution in water column
+* "betahml": the rate constant for OC oxidation by O2 in sediment
+* "gammahsr": the rate constant for OC oxidation by SO4^2- in sediment 
+
+Two additional parameters, conerning the Li cycle, have been modified for the 360Ma configuration: (try `diff source/templates/constante.f90.FOAM-360Ma source/templates/constante.f90.FOAM`)
+* "k_authigenic_Li": the rate constant for Li sink (incorporation on authigenic clays)
+* "Del_auth": the fractionation coefficient of the authigenic clays Li sink
+
+### Definition of GEOCLIM (COMBINE) ocean-atmosphere boxes
+
+#### pre-industrial configuration
+The standard 10-boxes configuration is used, with the Northern high-latitude mask in "INPUT/FOAM/PIctrl_cpld/mask_oce_FOAM_PIctrl.nc"
+
+#### 360Ma "split" configuration
+A 22-boxes configuration was designed for the 360 Ma paleogeography.
+The boxes were designed with the 2D horizontal basin masks in "INPUT/FOAM/360Ma_cpld/360eb_OceBasMsk.nc".
+They are ordered as follows:
+1. Northern high-latitude surface (<100m)
+2. Northern high-latitude intermediate (100-1000m)
+3. Northern high-latitude deep (>1000m)
+4. Mid-latitude Panthalassa surface (<100m)
+5. Mid-latitude Panthalassa intermediate (100-1000m)
+6. Mid-latitude Panthalassa deep (>1000m)
+7. Paleo-Tethys surface (<100m)
+8. Paleo-Tethys intermediate (100-1000m)
+9. Paleo-Tethys deep (>1000m)
+10. Southern high-latitude surface & mixed layer (<1000m)
+11. Southern high-latitude deep (>1000m)
+12. Coast of Siberia/North Gondwana connected to Panthalassa, surface (<100m)
+13. Coast of Siberia/North Gondwana connected to Panthalassa, deep (100-250m)
+14. Coast of West Gondwana connected to Panthalassa, surface (<100m)
+15. Coast of West Gondwana connected to Panthalassa, deep (100-250m)
+16. Coast of East Gondwana connected to Panthalassa, surface (<100m)
+17. Coast of East Gondwana connected to Panthalassa, deep (100-250m)
+18. Coastal paleo-Tethys, surface (<100m)
+19. Coastal paleo-Tethys, deep (100-250m)
+20. Coastal Southern high-latitude, surface (<100m)
+21. Coastal Southern high-latitude, deep (100-250m)
+22. Atmosphere
 
 
 ## Stored data
@@ -33,6 +77,14 @@ The COMBINE boundary condition files for FOAM pre-industrial and 360 simulations
 
 ### Configuration files
 The configuration files for the FOAM pre-industrial run, the 360Ma spin-up run, and the 360Ma "uplift" run, are stored in "config/templates/".
+
+### GEOCLIM outputs
+The archive file "OUTPUT/geoclim_outputs.tar.gz" contains the COMBINE outputs (i.e., geochemical variables and fluxes in ocean-atmosphere boxes) of the 3 simulations published for the article:
+* Pre-industrial "control" (equilibrium) run
+* 360Ma spin-up (equilibrium) run
+* 360Ma run with West Gondwana uplift
+
+The geographically-distributed outputs and DynSoil outputs are stored in a separated repository, due to memory constraint.
 
 
 ## HOW TO REPRODUCE THE SIMULATIONS
