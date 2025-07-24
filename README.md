@@ -23,7 +23,7 @@ Three parameters have been adjusted to represent the pre-industrial steady-state
 * "betahml": the rate constant for OC oxidation by O2 in sediment
 * "gammahsr": the rate constant for OC oxidation by SO4^2- in sediment 
 
-Two additional parameters, conerning the Li cycle, have been modified for the 360Ma configuration: (try `diff source/templates/constante.f90.FOAM-360Ma source/templates/constante.f90.FOAM`)
+Two additional parameters, concerning the Li cycle, have been modified for the 360Ma configuration: (try `diff source/templates/constante.f90.FOAM-360Ma source/templates/constante.f90.FOAM`)
 * "k_authigenic_Li": the rate constant for Li sink (incorporation on authigenic clays)
 * "Del_auth": the fractionation coefficient of the authigenic clays Li sink
 
@@ -82,7 +82,7 @@ The configuration files for the FOAM pre-industrial run, the 360Ma spin-up run, 
 The archive file "OUTPUT/geoclim_outputs.tar.gz" contains the COMBINE outputs (i.e., geochemical variables and fluxes in ocean-atmosphere boxes) of the 3 simulations published for the article:
 * Pre-industrial "control" (equilibrium) run
 * 360Ma spin-up (equilibrium) run
-* 360Ma run with West Gondwana uplift
+* 360Ma run with uplift perturbation (West Gondwana)
 
 The geographically-distributed outputs and DynSoil outputs are stored in a separated repository, due to memory constraint.
 
@@ -95,7 +95,7 @@ Here are the steps to follow to reproduce the FOAM pre-industrial and 360 simula
 
 For this purpose, the bash script `make_test`, generating test-runs, is available on the branch "main" of current GitHub repository.
 
-##### FOAM pre-instrial simulation.
+##### FOAM pre-industrial simulation.
 
 The default source and configuration files are for this run.
 The only needed modification is to set "scaling_factor = 1d-3" in "source/dynsoil_physical_parameters.f90".
@@ -121,11 +121,11 @@ Then, simply run the executable `executable/geoclim_B-10_R-1x128x128x6_DS-10lev.
    except "scaling_factor" that must be put back to "1"  
    NOTE: if the "360Ma spin-up" configuration was already set, it is still necessary to recompile the code
    (with `build_GEOCLIM` or `make`) because of the parameter "scaling_factor" is changed.
-2. Uncommented the lines "uplift_mask_fname = ..." and "uplift_mask_vname = ..." in "config/IO_CONDITIONS".
+2. Uncomment the lines "uplift_mask_fname = ..." and "uplift_mask_vname = ..." in "config/IO_CONDITIONS".
 3. Use the "360Ma spin-up" COMBINE restart file ("&INIT_INFO" block in "config/IO_CONDITIONS"), set DynSoil in "restart" mode
    and use the "360Ma spin-up" DynSoil restart file  ("&DYNSOIL_INIT_INFO" in "config/IO_CONDITIONS").
 4. Change the run name
 5. In "source/cond_p20.dat", follow the instruction of the "NOTE ON TIME-STEPS" black:
-   divide the timestep by 2, multiply the asyncrhonicity and printing factors by 2, and set the acceleration factors back to 1.
+   divide the timestep by 2, multiply the asynchronicity and printing factors by 2, and set the acceleration factors back to 1.
 6. Run the executable `executable/geoclim_B-10_R-7x128x128x6_DS-10lev.exe 0 1 3 0 0`
 
