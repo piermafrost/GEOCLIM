@@ -74,7 +74,7 @@
 #<------->
 &INIT_INFO
  COMB_init_mode     = 'restart' ! # 'restart' => restart file OR 'coldstart' => automatically-generated initial condition
- COMB_var_init_file = 'restart/geoclim/output.calib_FOAM-PIctrl.equil' ! unit 2
+ COMB_var_init_file = 'restart/geoclim/output.FOAM-PIctrl.repl' ! unit 2
 /
 #<------->
 
@@ -88,13 +88,13 @@
 &DYNSOIL_INIT_INFO
 
  ! # DynSoil initialization mode
- init_mode = 'restart'
+ init_mode = 'startup:eq'
  ! #       - 'restart'      => read restart from existing file
  ! #       - 'startup:null' => create null initial condition (reg. thick. = 0 everywhere)
  ! #       - 'startup:eq'   => create initial conditions at equilibrium with given climatology and init pCO2 (using analytical formulas)
 
  ! # Initialization file path (only used in 'restart' initialization mode):
- init_file = 'restart/dynsoil/dynsoil_restart.calib_FOAM-PIctrl.equil.nc'
+ init_file = ''
 
  ! # Dimension names in initial condition file
  DYNS_restart_dim(1) = 'lon'

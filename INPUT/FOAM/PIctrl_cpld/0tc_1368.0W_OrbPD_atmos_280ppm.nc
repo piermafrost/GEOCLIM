@@ -1,1 +1,0 @@
-/home/piermafrost/Data/GCM/FOAM/Ordovician/ctrlAC/PI_CTRL_cpl/0tc_1368.0W_OrbPD_atmos_280ppm.nc

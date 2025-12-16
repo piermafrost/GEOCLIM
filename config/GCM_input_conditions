@@ -42,20 +42,20 @@
 # file path                                                                                x_var_name    y_var_name    main_var_name
 #-----------------------------------------------------------------------------------------------------------------------------------
 &AREA_INFO
- area_file       = 'INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_atm.nc'
+ area_file       = 'INPUT/FOAM/grid_FOAM_128x128.nc'
  area_x_dim_name = 'lon'
  area_y_dim_name = 'lat'
- area_var_name   = 'aire'
+ area_var_name   = 'area'
 /
 
 #    File for land fraction (or land area, will be interpreted according to its units)
 # file path                                                                                x_var_name    y_var_name    main_var_name
 #-----------------------------------------------------------------------------------------------------------------------------------
 &LAND_AREA_INFO
- landarea_file       = 'INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_sechiba.nc'
+ landarea_file       = 'INPUT/FOAM/PIctrl_cpld/lsm.nc'
  landarea_x_dim_name = 'lon'
  landarea_y_dim_name = 'lat'
- landarea_var_name   = 'Contfrac'
+ landarea_var_name   = 'lsm'
 /
 
 
@@ -71,11 +71,11 @@
  land_x_dim_name = 'lon'
  land_y_dim_name = 'lat'
 
- land_temp_var_name = 't2m'
- runoff_var_name    = 'runoff + drainage'
+ land_temp_var_name = 'TSSUB1'
+ runoff_var_name    = 'RNF'
 
  ! # File paths (MUST BE CONSISTENT WITH ORDER OF UNIQUE CLIMATIC PARAMETER COMBINATIONS),
- land_list_file(1) = 'INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_sechiba.nc'
+ land_list_file(1) = 'INPUT/FOAM/PIctrl_cpld/0tc_1368.0W_OrbPD_coupl_280ppm_yave.nc'
 
 /
 
@@ -93,10 +93,10 @@
  glob_x_dim_name = 'lon'
  glob_y_dim_name = 'lat'
 
- glob_temp_var_name = 't2m'
+ glob_temp_var_name = 'TSSUB1'
 
  ! # File paths (MUST BE CONSISTENT WITH ORDER OF UNIQUE CLIMATIC PARAMETER COMBINATIONS),
- glob_list_file(1) = 'INPUT/IPSL/CTRL_CM5A2/piControl_SE_2750_2849_1Y_atm.nc'
+ glob_list_file(1) = 'INPUT/FOAM/PIctrl_cpld/0tc_1368.0W_OrbPD_coupl_280ppm_yave.nc'
 
 /
 

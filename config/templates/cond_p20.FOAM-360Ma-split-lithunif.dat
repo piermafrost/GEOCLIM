@@ -33,8 +33,16 @@ Use "!" to comment blocks within the namelist
 
   solver = 'rk4'
 
+  !#############################################################################################################!
+  !# NOTE ON TIME-STEPS:                                                                                       #!
+  !#   The commented time-step "ds" divided by 2 is meant for the "uplift" run.                                #!
+  !#   When using it, the asynchronous coupling time "ijump_climate" and the printing time steps               #!
+  !#   "ijump_print", "ijump_geogprint" and "ijump_DS_print" should be multiplied by 2 (see commented values). #!
+  !#   (The acceleration factors "oxy_acc_fact" and "sulf_acc_fact" should also be reset to 1.)                #!
+  !#############################################################################################################!
+
   ! Time step, starting and ending times
-  ts   = 0.02!0.01 	!solver timestep (yrs)  !-> 0.01 with O2 and SO4 accelerated
+  ts   = 0.02!0.01 	!solver timestep (yrs)
   tsta = 0d6	!Starting time for iteration (yrs)
   tfi  = 10d6	!Ending time for iteration (yrs)
 
