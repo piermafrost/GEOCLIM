@@ -74,7 +74,7 @@ run_name         = '.360Ma_split_lithunif_Liauth2_nopel_redshlf_eq.0' ! #'.360Ma
 #<------->
 &INIT_INFO
  COMB_init_mode     = 'restart' ! # 'restart' => restart file OR 'coldstart' => automatically-generated initial condition
- COMB_var_init_file = 'restart/geoclim/output.360Ma_split_lithunif_Liauth2_nopel_eq' ! unit 2
+ COMB_var_init_file = 'restart/geoclim/output.360Ma_split_lithunif_Liauth2_nopel_redshlf_eq.1' ! unit 2
 /
 #<------->
 
@@ -94,7 +94,7 @@ run_name         = '.360Ma_split_lithunif_Liauth2_nopel_redshlf_eq.0' ! #'.360Ma
  ! #       - 'startup:eq'   => create initial conditions at equilibrium with given climatology and init pCO2 (using analytical formulas)
 
  ! # Initialization file path (only used in 'restart' initialization mode):
- init_file = 'restart/dynsoil/dynsoil_restart.360Ma_split_lithunif_Liauth2_nopel_eq.nc'
+ init_file = 'restart/dynsoil/dynsoil_restart.360Ma_split_lithunif_Liauth2_nopel_redshlf_eq.1.nc'
 
  ! # Dimension names in initial condition file
  DYNS_restart_dim(1) = 'lon'
