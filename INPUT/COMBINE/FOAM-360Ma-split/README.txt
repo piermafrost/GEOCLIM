@@ -1,4 +1,4 @@
-"ARTIFICIAL" MODIFICATION OF INPUT DATA:
+## "ARTIFICIAL" MODIFICATION OF INPUT DATA:
 
 The original sedimenting areas of intermediate boxes were zero, because seafloor is 3500m deep everywhere on FOAM bathymetry
 (except along the coasts, where it is 50m or 250m deep).
@@ -14,4 +14,11 @@ Concerned boxes are #: 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 2
 lastly, northern high-latitude boxes had to be manually declared as "polar", and because there is an epicontinental box specific for southern high-latitude, it has been declared "polar" to reduce its primary productivity.
 Try `diff indice_polar.dat indice_polar.ORIGINAL.dat` to see the modifications.
 Concerned boxes are #: 1, 2, 3, 20, 21
+
+
+## Sensitivity test
+
+The files "oce_vol_reduceshelf.dat", "oce_surf_reduceshelf.dat" and "surf_sedi_reduceshelf.dat" corresponds to a sensivitity test where the area (and volume) of
+coastal boxes are reduced by 75%.
+Note: the area of low elevation continental points must be increased accordingly => file "../../FOAM/360Ma_cpld/360eb_lsm_reduceshelf.nc"
 
