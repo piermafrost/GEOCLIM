@@ -3,6 +3,8 @@
     implicit none
     include 'combine_foam.inc'
 
+    !! constant DOA:
+    !out = 0.5
     out=4.7862d+01*O2*O2*O2*O2-3.6086d+1*O2*O2*O2 &
         +6.3448*O2*O2-2.2631*O2+1.0000
 
