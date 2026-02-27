@@ -259,6 +259,17 @@
     end do
 
 
+    ! Volume fraction of deep basins:
+    ! -------------------------------
+
+    deepfrac(:) = 0
+    do j0=1,ndeep
+        j = jbox_deep(j0)
+        deepfrac(j) = box_vol(j)
+    end do
+    deepfrac = deepfrac/sum(deepfrac)
+
+
 
     return
     end

@@ -47,7 +47,7 @@
     double precision oce_surf(nbasin), oce_surf_tot, temp_box(nbasin), depth_box(nbasin), depth_top_box(nbasin), box_thick(nbasin),&
                      press_box(nbasin), surf_sedi(nbasin), sedbastype_fract(nbasin),accumul_capacity(nbasin)
     integer, dimension(nbasin) :: indice_deep, indice_sedi, app_cont,indice_thermo, indice_surface, indice_epicont, indice_polar
-    double precision, dimension(nbasin) :: appcont_fract
+    double precision, dimension(nbasin) :: appcont_fract, deepfrac
     integer :: ndeep, nnodeep, nsedi, nnosedi, nthermo, nnothermo, nsurface, nnosurface, &
                nepicont, nnoepicont, npolar, nnopolar, nappcont, nnoappcont, nsediepicsurf, &
                nsediepicnosurf, nsediintermed, nsedideep, nsurfnoappcont, nnosurfnoappcont
@@ -231,7 +231,7 @@
     common /basin_parameter/  oce_surf, oce_surf_tot, temp_box, depth_box, depth_top_box, box_thick, press_box, &
                               surf_sedi, sedbastype_fract, accumul_capacity, indice_deep, indice_sedi, app_cont, &
                               indice_thermo, indice_surface, indice_epicont, indice_polar
-    common /basin_paramdble/ appcont_fract
+    common /basin_paramdble/ appcont_fract, deepfrac
     common /basin_ndex/ ndeep, nnodeep, nsedi, nnosedi, nthermo, nnothermo, nsurface, nnosurface, &
                         nepicont, nnoepicont, npolar, nnopolar, nappcont, nnoappcont, nsediepicsurf, &
                         nsediepicnosurf, nsediintermed, nsedideep, nsurfnoappcont, nnosurfnoappcont
