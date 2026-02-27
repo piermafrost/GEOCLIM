@@ -113,7 +113,7 @@ module constante
     double precision, parameter :: xhydLiin=13.d+9
 
     ! Trap degassing parameters
-    double precision, parameter :: tstart_deg=1d+5 ! (yr since run start)
+    double precision, parameter :: tstart_deg=0 ! (yr since run start)
     ! UNUSED TRAPP PARAMETERS:
     double precision, parameter :: tend_deg=1.d+9 ! (yr since run start)
     double precision, parameter :: lamdeg1=0.528, lamdeg2=0.705, lamdeg3=0.177   !trappdegassing GTC/yr
