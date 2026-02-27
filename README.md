@@ -1,11 +1,10 @@
-﻿# GEOCLIM7 version for Turonian (90Ma) experiments with Milankovitch cycles - v1.0
+﻿# GEOCLIM7 version for Turonian (90Ma) experiments with Milankovitch cycles - v2.0
 
-This current branch is modified from GEOCLIM7 (release "7.0") of "main" branch, to be used specifically for the simulations
-presented in Maffre et al., "GEOCLIM7, an Earth System Model for multi-million years evolution of the geochemical cycles and climate.",
-submitted to GMD (November 2024).
-
-This README only concerns the above-mentioned simulations (hereafter called "90Ma simulations").
-For a complete description of GEOCLIM and of the whole GitHub repository, please refer to the README of "main" branch.
+This version 2.0 is an extension of "Mil-90Ma" original branch with new experiments designed for simulating the OAE2 as a consequence
+of magmatic CO2 emission. These new experiments were conducted for the study "A shift in Earth system feedback strength explains
+the disappearance of OAEs in the Cenozoic" (Maffre et al., submitted to Nature Geoscience).
+They were build upon the original experiments from v1.0 and published in Maffre et al. (2025) (doi: 10.5194/gmd-18-6367-2025)
+This branch originally forked from GEOCLIM7 main branch (release "7.0").
 
 ## Data storage
 
@@ -46,7 +45,7 @@ For the simulations presented here, all run names are in the form `.90Ma-$config
 * "$config$ is the main GEOCLIM configuration (details of boxes definition and specificities).
   "-AveOrb" means that climate inputs for that run are the average of all orbital configurations.
 * "$run-type$" can be "2X.equil" (or simply "equil") for equilibrium spin-up simulations with pCO2 fixed at 2xpre-industrial,
-  "deg.equil" for equilibrium spin-up simulations with free pCO2 (force by degassing), "Laskar" (or "Lsk") for simulations run with
+  "deg.equil" for equilibrium spin-up simulations with free pCO2 (forced by degassing), "Laskar" (or "Lsk") for simulations run with
   95Ma-85Ma time-series fo orbital parameters from Laskar (2004).
 * "$other" indicates additional sensitivity tests.
 
