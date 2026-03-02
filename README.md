@@ -480,7 +480,7 @@ Here follows a summarized description of all the simulations corresponding to th
     | Config name in Maffre et al. (2025) [Tab. 6] | o28'                                                                                             |
     | Exper. name in Maffre et al. (2025) [Tab. 8] | "Cont. fluxes"                                                                                   |
     | GEOCLIM run name                             | .90Ma-3bas-Arct3-epol-APx0.25.Lsk-cstOceTX                                                       |
-    | Code modification   | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 756 `call creades_noWth(time)`   |
+    | Code modification   | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 756 `call creades_noTX(time)`    |
     | Compilation command | *same as previous case*                                                                                                   |
     | COMBINE input dir   | *same as previous case*                                                                                                   |
   * "IO\_CONDITIONS.APx0.25.csteOceXCntFlx" file
