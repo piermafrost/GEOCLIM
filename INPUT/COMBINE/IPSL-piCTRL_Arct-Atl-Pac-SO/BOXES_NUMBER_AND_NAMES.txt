@@ -1,0 +1,22 @@
+NUM NAME
+01: open-ocean N high latitudes mixed layer
+02: open-ocean N high latitudes deep
+03: open-ocean Atlantic surface
+04: open-ocean Atlantic intermediate
+05: open-ocean Atlantic deep
+06: open-ocean Pacific surface
+07: open-ocean Pacific intermediate
+08: open-ocean Pacific deep
+09: open-ocean S high latitudes mixed layer
+10: open-ocean S high latitudes deep
+-----
+11: coastal N high latitudes 0-100m
+12: coastal N high latitudes 100-200m
+13: coastal Atlantic 0-100m
+14: coastal Atlantic 100-200m
+15: coastal Pacific 0-100m
+16: coastal Pacific 100-200m
+17: coastal S high latitudes 0-100m
+18: coastal S high latitudes 100-200m
+-----
+19: Atmosphere

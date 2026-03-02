@@ -1,0 +1,49 @@
+NUM NAME
+01: open-ocean Arctic surface
+02: open-ocean Arctic intermediate
+03: open-ocean Arctic deep
+04: open-ocean N Atlantic surface
+05: open-ocean N Atlantic intermediate
+06: open-ocean N Atlantic deep
+07: open-ocean S Atlantic surface
+08: open-ocean S Atlantic intermediate
+09: open-ocean S Atlantic deep
+10: open-ocean Tethys surface
+11: open-ocean Tethys intermediate
+12: open-ocean Tethys deep
+13: open-ocean Pacific surface
+14: open-ocean Pacific intermediate
+15: open-ocean Pacific deep
+16: open-ocean S Pole-Pacific mixed layer
+17: open-ocean S Pole-Pacific deep
+18: open-ocean S Pole-Atlantic mixed layer
+19: open-ocean S Pole-Atlantic deep
+-----
+20: WIS-Arctic 0-100m
+21: WIS-Arctic 100-200m
+22: European Arctic margins 0-100m
+23: European Arctic margins 100-200m
+24: WIS-Atlantic 0-100m
+25: WIS-Atlantic 100-200m
+26: NE America/Greenland Atlantic margins 0-100m
+27: NE America/Greenland Atlantic margins 100-200m
+28: Trans-Sahara seaway + NW African margins 0-100m
+29: Trans-Sahara seaway + NW African margins 100-200m
+30: S American N Atlantic margins 0-100m
+31: S American N Atlantic margins 100-200m
+32: All S Atlantic margins 0-100m
+33: All S Atlantic margins 100-200m
+34: European Tethys margins 0-100m
+35: European Tethys margins 100-200m
+36: N African Tethys margins 0-100m
+37: N African Tethys margins 100-200m
+38: Asian Tethys margins 0-100m
+39: Asian Tethys margins 100-200m
+40: All Pacific margins 0-100m
+41: All Pacific margins 100-200m
+42: All S Pole-Pacific margins 0-100m
+43: All S Pole-Pacific margins 100-200m
+44: All S Pole-Atlantic margins 0-100m
+45: All S Pole-Atlantic margins 100-200m
+-----
+46: Atmosphere

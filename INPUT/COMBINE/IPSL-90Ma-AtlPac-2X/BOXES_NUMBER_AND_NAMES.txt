@@ -1,0 +1,26 @@
+NUM NAME
+01: open-ocean Arctic mixed layer
+02: open-ocean Arctic deep
+03: open-ocean Atlantic surface
+04: open-ocean Atlantic intermediate
+05: open-ocean Atlantic deep
+06: open-ocean rest of mid-latitudes surface
+07: open-ocean rest of mid-latitudes intermediate
+08: open-ocean rest of mid-latitudes deep
+09: open-ocean S Pole-Pacific mixed layer
+10: open-ocean S Pole-Pacific deep
+11: open-ocean S Pole-Atlantic mixed layer
+12: open-ocean S Pole-Atlantic deep
+-----
+13: coastal Arctic 0-100m
+14: coastal Arctic 100-200m
+15: coastal Atlantic 0-100m
+16: coastal Atlantic 100-200m
+17: coastal rest of mid-latitudes 0-100m
+18: coastal rest of mid-latitudes 100-200m
+19: coastal S Pole-Pacific 0-100m
+20: coastal S Pole-Pacific 100-200m
+21: coastal S Pole-Atlantic 0-100m
+22: coastal S Pole-Atlantic 100-200m
+-----
+23: Atmosphere
