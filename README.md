@@ -558,7 +558,7 @@ Here follows a summarized description of all the simulations corresponding to th
     | Used in version     | v2.0                                                                                                                                                  |
     | Config name in Maffre et al. (submitted) [Tab. 1] | N/A                                                                                                                     |
     | GEOCLIM run name (Clarkson degassing scenario)    | .90Ma-3bas-Arct3-epol-APx0.25-AveOrb.noPHydPhos.LIPOAE                                                                  |
-    | Code modification (Clarkson degassing scenario)   | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 752 `call creades_noPHydPhos(time)`; Replace `source/combine_foam.inc` by `source/templates/combine_foam_LIPOAE_-5pm.inc` |
+    | Code modification (Clarkson degassing scenario)   | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 761 `call creades_noPHydPhos(time)`; Replace `source/combine_foam.inc` by `source/templates/combine_foam_LIPOAE_-5pm.inc` |
     | Compilation command | *same as previous case*                                                                                                                               |
     | COMBINE input dir   | *same as previous case*                                                                                                                               |
 
@@ -581,7 +581,7 @@ Here follows a summarized description of all the simulations corresponding to th
       | Used in version     | v2.0                                                                                                                                                  |
       | Config name in Maffre et al. (submittedœ) [Tab. 1] | N/A                                                                                                                    |
       | GEOCLIM run name (Clarkson degassing scenario)     | .90Ma-HR-APTx0.25-AveOrb.noPHydPhos.LIPOAE                                                                             |
-      | Code modification (Clarkson degassing scenario)    | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 752 `call creades_noPHydPhos(time)`; Replace `source/combine_foam.inc` by `source/templates/combine_foam_LIPOAE.inc` |
+      | Code modification (Clarkson degassing scenario)    | In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 761 `call creades_noPHydPhos(time)`; Replace `source/combine_foam.inc` by `source/templates/combine_foam_LIPOAE.inc` |
       | Compilation command | *same as previous case*                                                                                                                               |
       | COMBINE input dir   | *same as previous case*                                                                                                                               |
     * case with primary productivity deactived in trans-Sahara seaway (TSS)
@@ -601,7 +601,7 @@ Here follows a summarized description of all the simulations corresponding to th
       | Used in version     | v2.0                                                                                                                                                  |
       | Config name in Maffre et al. (submitted) [Tab. 1]     | CT 46bx-TSS P-fbk                                                                                                   |
       | GEOCLIM run name (Clarkson degassing scenario)        | .90Ma-HR-APTx0.25-AveOrb.noSah.noPHydPhos.LIPOAE                                                                    |
-      | Code modification (Clarkson degassing scenario)       | Replace `source/Makefile` by `source/templates/Makefile.noSahara`; In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 752 `call creades_noPHydPhos(time)`; Replace `source/combine_foam.inc` by `source/templates/combine_foam_LIPOAE.inc` |
+      | Code modification (Clarkson degassing scenario)       | Replace `source/Makefile` by `source/templates/Makefile.noSahara`; In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 761 `call creades_noPHydPhos(time)`; Replace `source/combine_foam.inc` by `source/templates/combine_foam_LIPOAE.inc` |
       | GEOCLIM run name (Papadomanolaki degassing scenario)  | .90Ma-HR-APTx0.25-AveOrb.noSah.noPHydPhos.LIPNina                                                                   |
       | Code modification (Papadomanolaki degassing scenario) | Same as "Clarkson" scenario, but replace `source/combine_foam.inc` by `source/templates/combine_foam_LIPNina.inc`   |
       | Compilation command | *same as previous case*                                                                                                                               |
@@ -625,7 +625,7 @@ Here follows a summarized description of all the simulations corresponding to th
       | Used in version     | v2.0                                                                                                                                                  |
       | Config name in Maffre et al. (submitted) [Tab. 1] | CT 46bx-TSS P-fbk                                                                                                       |
       | GEOCLIM run name (Clarkson degassing scenario)    | .90Ma-HR-APTx0.25-AveOrb.noSah.noPHydPhos.LIPOAE_-5pm                                                                   |
-      | Code modification (Clarkson degassing scenario)   | Replace `source/Makefile` by `source/templates/Makefile.noSahara`; In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 752 `call creades_noPHydPhos(time)`; Replace `source/combine_foam.inc` by `source/templates/combine_foam_LIPOAE_-5pm.inc` |
+      | Code modification (Clarkson degassing scenario)   | Replace `source/Makefile` by `source/templates/Makefile.noSahara`; In `source/geoclim_mainprog.f`: comment line 751 `call creades(time)` and uncomment line 761 `call creades_noPHydPhos(time)`; Replace `source/combine_foam.inc` by `source/templates/combine_foam_LIPOAE_-5pm.inc` |
       | Compilation command | *same as previous case*                                                                                                                               |
       | COMBINE input dir   | *same as previous case*                                                                                                                               |
   * "cond\_p20-warmer.dat" file
