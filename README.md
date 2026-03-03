@@ -18,7 +18,7 @@ and 2 CO2 levels) and pre-insudrial "no ice" simulations are stored in the Zenod
 ### Restart files
 The COMBINE restart files for all simulations are present in `restart/geoclim/`.
 The DynSoil restart files require too much memory, and are stored in the Zenodo archive https://doi.org/10.5281/zenodo.14228131
-(updated since first publication).
+(separated in Maffre et al. (2025) files and Maffre et al. (submitted) "OAEexp" files).
 
 ### COMBINE boundary condition files
 The COMBINE boundary condition files are generated using `preproc/BC/BC_generator.py`, from IPSL-CMA2 simulation outputs.
@@ -26,7 +26,8 @@ The script `preproc/BC/IPSL_90Ma_all.py` was specifically written to generate al
 published in v1.0, and still used for v2.0. The script `preproc/BC/IPSL_90Ma_HR.py` was written for the new configuration (46 boxes)
 added in v2.0.
 Those boundary condition files are all stored in `INPUT/COMBINE/` (one subdirectory per case). However, the IPSL outputs needed to
-generate them are stored in the Zenodo archive https://doi.org/10.5281/zenodo.14228131 (updated since first publication)
+generate them are stored in the Zenodo archive https://doi.org/10.5281/zenodo.14228131 (separated in Maffre et al. (2025) files
+and Maffre et al. (submitted) "OAEexp" files).
 
 ### Configuration files
 The configuration files for all GEOCLIM simulations presented in Maffre et al. (2025) (doi: 10.5194/gmd-18-6367-2025) and Maffre et
@@ -36,7 +37,8 @@ Only two configuration files are needed to replicate the simulation: "IO\_CONDIT
 
 ### GEOCLIM simulation outputs
 The outputs of all GEOCLIM simulations are not stored in this repository because of they require too much memory.
-They are available on the Zenodo archive https://doi.org/10.5281/zenodo.14228131 (updated since first publication).
+They are available on the Zenodo archive https://doi.org/10.5281/zenodo.14228131 (separated in Maffre et al. (2025) files and
+Maffre et al. (submitted) "OAEexp" files).
 
 
 ## GEOCLIM simulations
@@ -73,11 +75,14 @@ the "v2.0" simulations presented in Maffre et al. (submitted to NatureGeosience)
 
 1. Gather the needed inputs from the Zenodo archive https://doi.org/10.5281/zenodo.14228131
 
-    * IPSL-CM5A2 netCDF inputs: the directory`"90Ma_Laugie/` from Zenodo archive must be put in `INPUT/IPSL/`
+    * IPSL-CM5A2 netCDF inputs: the archive 90Ma_Laugie.tar.gz contains three directories:
+      * the directory `90Ma_Laugie/` that must be put in `INPUT/IPSL/`
+      * the directories `CPL-piControl-NOICE-1X/` and  `CPL-piControl-NOICE-4X/` `CTRL_CM5A2/` that must be put in `INPUT/IPSL/CTRL_CM5A2/`
     * DynSoil restarts: all DynSoil restart files (`dynsoil_restart.*.nc`) from Zenodo archive must be put in `restart/dynsoil/`
 
     One can re-generate all boundary conditions files from the raw climate netCDF ouputs, with the following scripts:
     * `preproc/BC/IPSL_90Ma_all.py` and `preproc/BC/IPSL_90Ma_HR.py` for COMBINE boundary condition files (toolkit #1)
+    * `preproc/BC/compute_orbital_average.py` (see self-description in file) to generate the average of all orbital configurations
     * `preproc/BC/basinmap/IPSL_90Ma_allroutingmaps.py` and `preproc/BC/basinmap/IPSL_90Ma_HR_basinmap.py` for the land-to-ocean routing
        map (toolkit #2). Warning: the scripts in preproc/BC/ must be called first.
     * `preproc/generate_slope_field.py` for the non-parametric slope field reconstruction (toolkit #3)
@@ -112,7 +117,7 @@ the "v2.0" simulations presented in Maffre et al. (submitted to NatureGeosience)
     indicated in following section "List of all GEOCLIM simulations").
 
     The calculation performance ranges from ~15 minutes per million years of simulation for the smallest configurations (10 boxes) to ~6 hours
-    per million yeras of simulation forthe largest configurations (46 boxes).
+    per million years of simulation forthe largest configurations (46 boxes).
 
 
 ### List of all GEOCLIM simulations
