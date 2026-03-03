@@ -1,3 +1,14 @@
+'''
+Computes the average of the 16 orbital configurations in the files
+"GCM_oceanic_temp.dat" and "exchange_2.dat" in given COMBINE input directories.
+Creates output files "Orb-Mean_GCM_oce_temp.dat", "Orb-Mean_exchange.dat" and
+"Orb-Mean_exchange_human-friendly.dat" in all given input directories.
+
+USAGE:
+    `python compute_orbital_average.py INPUT/COMBINE/DIR1 INPUT/COMBINE/DIR2`
+    (as many "DIR" as you wish)
+'''
+
 import numpy as np
 import sys
 
