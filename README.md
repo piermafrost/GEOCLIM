@@ -77,7 +77,7 @@ the "v2.0" simulations presented in Maffre et al. (submitted to NatureGeosience)
 
     * IPSL-CM5A2 netCDF inputs: the archive 90Ma_Laugie.tar.gz contains three directories:
       * the directory `90Ma_Laugie/` that must be put in `INPUT/IPSL/`
-      * the directories `CPL-piControl-NOICE-1X/` and  `CPL-piControl-NOICE-4X/` `CTRL_CM5A2/` that must be put in `INPUT/IPSL/CTRL_CM5A2/`
+      * the directories `CPL-piControl-NOICE-1X/` and  `CPL-piControl-NOICE-4X/` that must be put in `INPUT/IPSL/CTRL_CM5A2/`
     * DynSoil restarts: all DynSoil restart files (`dynsoil_restart.*.nc`) from Zenodo archive must be put in `restart/dynsoil/`
 
     One can re-generate all boundary conditions files from the raw climate netCDF ouputs, with the following scripts:
