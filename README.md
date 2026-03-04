@@ -12,12 +12,12 @@ This branch originally forked from GEOCLIM7 main branch (release "7.0").
 The only inputs stored in the current repository are the IPSL-CM5A2 pre-industrial control IPSL-CM5A2, the slope fields (both modern
 and 90Ma) and the modern lithology field.
 Because they require too much memory, the climate fields of the 90Ma IPSL-CM5A2 simulations (conducted for all orbital configurations
-and 2 CO2 levels) and pre-insudrial "no ice" simulations are stored in the Zenodo archive https://doi.org/10.5281/zenodo.14228131
+and 2 CO2 levels) and pre-insudrial "no ice" simulations are stored in the Zenodo archive https://doi.org/10.5281/zenodo.18864904
 (updated since first publication).
 
 ### Restart files
 The COMBINE restart files for all simulations are present in `restart/geoclim/`.
-The DynSoil restart files require too much memory, and are stored in the Zenodo archive https://doi.org/10.5281/zenodo.14228131
+The DynSoil restart files require too much memory, and are stored in the Zenodo archive https://doi.org/10.5281/zenodo.18864904
 (separated in Maffre et al. (2025) files and Maffre et al. (submitted) "OAEexp" files).
 
 ### COMBINE boundary condition files
@@ -26,7 +26,7 @@ The script `preproc/BC/IPSL_90Ma_all.py` was specifically written to generate al
 published in v1.0, and still used for v2.0. The script `preproc/BC/IPSL_90Ma_HR.py` was written for the new configuration (46 boxes)
 added in v2.0.
 Those boundary condition files are all stored in `INPUT/COMBINE/` (one subdirectory per case). However, the IPSL outputs needed to
-generate them are stored in the Zenodo archive https://doi.org/10.5281/zenodo.14228131 (separated in Maffre et al. (2025) files
+generate them are stored in the Zenodo archive https://doi.org/10.5281/zenodo.18864904 (separated in Maffre et al. (2025) files
 and Maffre et al. (submitted) "OAEexp" files).
 
 ### Configuration files
@@ -37,7 +37,7 @@ Only two configuration files are needed to replicate the simulation: "IO\_CONDIT
 
 ### GEOCLIM simulation outputs
 The outputs of all GEOCLIM simulations are not stored in this repository because of they require too much memory.
-They are available on the Zenodo archive https://doi.org/10.5281/zenodo.14228131 (separated in Maffre et al. (2025) files and
+They are available on the Zenodo archive https://doi.org/10.5281/zenodo.18864904 (separated in Maffre et al. (2025) files and
 Maffre et al. (submitted) "OAEexp" files).
 
 
@@ -73,7 +73,7 @@ the "v2.0" simulations presented in Maffre et al. (submitted to NatureGeosience)
 
     For this purpose, the bash script `make_test`, generating test-runs, is available on the branch "main" of current GitHub repository.
 
-1. Gather the needed inputs from the Zenodo archive https://doi.org/10.5281/zenodo.14228131
+1. Gather the needed inputs from the Zenodo archive https://doi.org/10.5281/zenodo.18864904
 
     * IPSL-CM5A2 netCDF inputs: the archive 90Ma_Laugie.tar.gz contains three directories:
       * the directory `90Ma_Laugie/` that must be put in `INPUT/IPSL/`
